@@ -2,6 +2,8 @@ import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getWhopUserId } from "@/lib/whop/getUserId";
 import { getDevRole } from "@/lib/auth/role";
+import { headers } from "next/headers";
+
 
 export default async function JobDetailPage({
 	params,
@@ -53,11 +55,19 @@ const showSubmitted = sp.submitted === "1";
     );
   }
 
+  const h = await headers();
+const referer = h.get("referer");
+
+const backHref =
+  referer?.includes("/my-jobs") ? "/my-jobs" : "/jobs";
+
+
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
-      <Link href="/jobs" className="text-sm underline">
-        ← Back
-      </Link>
+      <Link href={backHref} className="text-sm underline">
+  ← Back
+</Link>
+
 
 		{showSubmitted && (
   <div className="rounded-lg border px-4 py-3 text-sm">
