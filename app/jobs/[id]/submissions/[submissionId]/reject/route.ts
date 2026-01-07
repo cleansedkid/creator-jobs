@@ -8,7 +8,20 @@ export async function POST(
 ) {
   const { id: jobId, submissionId } = await params;
 
-  const userId = await getWhopUserId();
+  let userId = await getWhopUserId();
+
+  // 🧪 Local dev override (MATCHES APPROVE ROUTE)
+  if (process.env.NODE_ENV !== "production") {
+    const { data: job } = await supabaseServer
+      .from("jobs")
+      .select("creator_whop_user_id")
+      .eq("id", jobId)
+      .single();
+
+    if (job?.creator_whop_user_id) {
+      userId = job.creator_whop_user_id;
+    }
+  }
 
   const { data: job } = await supabaseServer
     .from("jobs")
@@ -34,5 +47,7 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.redirect(new URL(`/jobs/${jobId}`, req.url), 303);
+  // ✅ Redirect creator back to their jobs hub
+  return NextResponse.redirect(new URL(`/my-jobs`, req.url), 303);
 }
+

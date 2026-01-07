@@ -20,7 +20,17 @@ export default async function JobsPage() {
 	
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Creator Jobs</h1>
+      <div className="flex items-center justify-between">
+  <h1 className="text-2xl font-semibold">Creator Jobs</h1>
+
+  <Link
+    href="/my-submissions"
+    className="text-sm underline"
+  >
+    My Submissions
+  </Link>
+</div>
+
 
       {jobs?.length === 0 && (
         <p className="text-muted-foreground">No jobs yet.</p>

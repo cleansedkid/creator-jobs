@@ -87,5 +87,6 @@ const { error: jobErr } = await supabaseServer
     .neq("id", submissionId)
     .eq("status", "pending");
 
-  return NextResponse.redirect(new URL(`/jobs/${jobId}`, req.url), 303);
+	 return NextResponse.redirect(new URL(`/my-jobs`, req.url), 303);
+
 }
