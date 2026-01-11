@@ -100,7 +100,8 @@ if (process.env.NODE_ENV !== "production") {
 		  plan_type: "one_time",
 		  initial_price: totalChargeUsd,
 		},
-	 });
+	 } as any);
+	 
   
 	 // Store pending payment state on the job
 	 const { error: jobErr } = await supabaseServer
