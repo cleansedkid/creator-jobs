@@ -20,7 +20,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 	return new Response("OK", { status: 200 });
 }
 
-async function handlePaymentSucceeded(payment: Payment) {
+async function handlePaymentSucceeded(payment: Payment & { metadata?: Record<string, any> }) {
 	try {
 		const md = (payment.metadata || {}) as any;
 
@@ -96,11 +96,12 @@ async function handlePaymentSucceeded(payment: Payment) {
 			origin_id: process.env.WHOP_COMPANY_ID!,
 			idempotence_key: payment.id,
 			metadata: {
-				jobId,
-				submissionId,
+				jobId: String(jobId),
+				submissionId: String(submissionId),
 				whopPaymentId: payment.id,
 			},
-		});
+		} as any);
+		
 
 		console.log("[FULFILLED JOB]", {
 			jobId,
