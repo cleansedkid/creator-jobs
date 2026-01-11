@@ -58,7 +58,7 @@ export default async function MySubmissionsPage() {
           className="rounded-lg border p-4 space-y-2"
         >
           <div className="font-medium">
-            {sub.jobs?.title}
+			 {sub.jobs?.[0]?.title}
           </div>
 
           <div className="text-sm text-muted-foreground">
@@ -66,7 +66,7 @@ export default async function MySubmissionsPage() {
           </div>
 
           <div className="text-sm">
-            💰 ${(sub.jobs?.payout_cents / 100).toFixed(2)}
+			 💰 {((sub.jobs?.[0]?.payout_cents ?? 0) / 100).toFixed(2)}
           </div>
 
           <Link
