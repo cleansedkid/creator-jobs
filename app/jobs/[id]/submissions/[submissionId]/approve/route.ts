@@ -78,8 +78,9 @@ if (process.env.NODE_ENV !== "production") {
 	 // After payment, send creator back here
 	 const returnUrl =
   process.env.NODE_ENV === "production"
-    ? "https://your-app-domain.com/my-jobs?payment=success"
+    ? "https://creator-jobs.vercel.app/my-jobs?payment=success"
     : "https://example.com/payment-complete";
+
 
 	 // ✅ Create Whop checkout
 	 const checkout = await whopsdk.checkoutConfigurations.create({
