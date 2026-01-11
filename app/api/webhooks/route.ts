@@ -2,6 +2,8 @@ import { waitUntil } from "@vercel/functions";
 import type { Payment } from "@whop/sdk/resources.js";
 import type { NextRequest } from "next/server";
 import { whopsdk } from "@/lib/whop-sdk";
+import { supabaseServer } from "@/lib/supabase/server";
+
 
 export async function POST(request: NextRequest): Promise<Response> {
 	// Validate the webhook to ensure it's from Whop
@@ -19,7 +21,92 @@ export async function POST(request: NextRequest): Promise<Response> {
 }
 
 async function handlePaymentSucceeded(payment: Payment) {
-	// This is a placeholder for a potentially long running operation
-	// In a real scenario, you might need to fetch user data, update a database, etc.
-	console.log("[PAYMENT SUCCEEDED]", payment);
+	try {
+		const md = (payment.metadata || {}) as any;
+
+		const jobId = md.jobId as string | undefined;
+		const submissionId = md.submissionId as string | undefined;
+		const workerWhopUserId = md.workerWhopUserId as string | undefined;
+		const payoutCents = Number(md.payoutCents ?? 0);
+
+		if (!jobId || !submissionId || !workerWhopUserId) {
+			console.error("[PAYMENT SUCCEEDED] Missing metadata", md);
+			return;
+		}
+
+		// ✅ Idempotency: prevent double fulfillment
+		const { data: existingJob } = await supabaseServer
+			.from("jobs")
+			.select("id, whop_payment_id, payment_status")
+			.eq("id", jobId)
+			.single();
+
+		if (
+			existingJob?.whop_payment_id === payment.id ||
+			existingJob?.payment_status === "paid"
+		) {
+			console.log("[PAYMENT SUCCEEDED] already fulfilled", jobId);
+			return;
+		}
+
+		// 1️⃣ Mark job as paid + closed
+		const { error: jobErr } = await supabaseServer
+			.from("jobs")
+			.update({
+				payment_status: "paid",
+				whop_payment_id: payment.id,
+				paid_at: new Date().toISOString(),
+				status: "closed",
+				closed_at: new Date().toISOString(),
+			})
+			.eq("id", jobId);
+
+		if (jobErr) {
+			console.error("[PAYMENT SUCCEEDED] job update failed", jobErr);
+			return;
+		}
+
+		// 2️⃣ Approve the winning submission
+		const { error: subErr } = await supabaseServer
+			.from("submissions")
+			.update({ status: "approved" })
+			.eq("id", submissionId)
+			.eq("job_id", jobId);
+
+		if (subErr) {
+			console.error("[PAYMENT SUCCEEDED] submission update failed", subErr);
+			return;
+		}
+
+		// 3️⃣ Reject all other pending submissions
+		await supabaseServer
+			.from("submissions")
+			.update({ status: "rejected" })
+			.eq("job_id", jobId)
+			.neq("id", submissionId)
+			.eq("status", "pending");
+
+		// 4️⃣ Pay the worker via Whop transfer
+		const payoutUsd = Number((payoutCents / 100).toFixed(2));
+
+		const transfer = await whopsdk.transfers.create({
+			amount: payoutUsd,
+			currency: "usd",
+			destination_id: workerWhopUserId,
+			origin_id: process.env.WHOP_COMPANY_ID!,
+			idempotence_key: payment.id,
+			metadata: {
+				jobId,
+				submissionId,
+				whopPaymentId: payment.id,
+			},
+		});
+
+		console.log("[FULFILLED JOB]", {
+			jobId,
+			transferId: transfer.id,
+		});
+	} catch (err) {
+		console.error("[PAYMENT SUCCEEDED] handler error", err);
+	}
 }

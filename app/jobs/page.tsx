@@ -21,7 +21,7 @@ export default async function JobsPage() {
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-  <h1 className="text-2xl font-semibold">Creator Jobs</h1>
+  <h1 className="text-2xl font-semibold"> Jobs</h1>
 
   <Link
     href="/my-submissions"
