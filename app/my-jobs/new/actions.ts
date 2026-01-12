@@ -17,28 +17,37 @@ async function getCommunityId() {
  }
  
  async function isCommunityOwner() {
-	// Local dev: allow
+	// Local dev: allow everything
 	if (process.env.NODE_ENV !== "production") {
 	  return true;
 	}
  
 	const h = await headers();
  
-	// 1) Get the real Whop user id from the verified token
+	// Get the current Whop user (secure, verified)
 	const { userId } = await whopsdk.verifyUserToken(h);
  
-	// 2) Get the community/experience id from headers
+	// Get the community / experience ID
 	const communityId =
 	  h.get("x-whop-community") ||
 	  h.get("X-Whop-Community");
  
 	if (!communityId) return false;
  
-	// 3) Check access level in this community
+	// Fetch experience to determine installer
+	const experience = await whopsdk.experiences.get(communityId);
+ 
+	// Check Whop access level (admin)
 	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
  
-	// Admin-only posting (MVP)
-	return access.has_access && access.access_level === "admin";
+	const isAdmin =
+	  access.has_access && access.access_level === "admin";
+ 
+	const isInstaller =
+	  experience.installed_by_user_id === userId;
+ 
+	// MVP rule: installer OR admin can post jobs
+	return isAdmin || isInstaller;
  }
  
  

@@ -10,25 +10,34 @@ import { whopsdk } from "@/lib/whop-sdk";
 export default async function NewJobPage() {
 	  
 	// 🔒 UI gate: only community admins can post jobs
-	  if (process.env.NODE_ENV === "production") {
-		const h = await headers();
-  
-		const { userId } = await whopsdk.verifyUserToken(h);
-  
-		const communityId =
-		  h.get("x-whop-community") ||
-		  h.get("X-Whop-Community");
-  
-		if (!communityId) {
-		  redirect("/my-jobs/not-allowed");
-		}
-  
-		const access = await whopsdk.users.checkAccess(communityId, { id: userId });
-  
-		if (!(access.has_access && access.access_level === "admin")) {
-		  redirect("/my-jobs/not-allowed");
-		}
-	 }
+	    // 🔒 UI gate: installer OR admin can post jobs
+  if (process.env.NODE_ENV === "production") {
+	const h = await headers();
+
+	const { userId } = await whopsdk.verifyUserToken(h);
+
+	const communityId =
+	  h.get("x-whop-community") ||
+	  h.get("X-Whop-Community");
+
+	if (!communityId) {
+	  redirect("/my-jobs/not-allowed");
+	}
+
+	const experience = await whopsdk.experiences.get(communityId);
+	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
+
+	const isAdmin =
+	  access.has_access && access.access_level === "admin";
+
+	const isInstaller =
+	  experience.installed_by_user_id === userId;
+
+	if (!(isAdmin || isInstaller)) {
+	  redirect("/my-jobs/not-allowed");
+	}
+ }
+
   
 
 	return (
