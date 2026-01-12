@@ -35,7 +35,8 @@ async function getCommunityId() {
 	if (!communityId) return false;
  
 	// Fetch experience to determine installer
-	const experience = await whopsdk.experiences.get(communityId);
+	const experience = await (whopsdk.experiences as any).get(communityId);
+
  
 	// Check Whop access level (admin)
 	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
