@@ -94,12 +94,13 @@ export async function createJob(formData: FormData) {
 		 h.get("X-Whop-Community");
  
 	  let access = null;
-	  let experience = null;
- 
-	  if (communityId) {
-		 access = await whopsdk.users.checkAccess(communityId, { id: userId });
-		 experience = await whopsdk.experiences.retrieve(communityId);
-	  }
+	  let experience: any = null;
+
+if (communityId) {
+  access = await whopsdk.users.checkAccess(communityId, { id: userId });
+  experience = await (whopsdk.experiences as any).retrieve(communityId);
+}
+
  
 	  debug = {
 		 userId,
