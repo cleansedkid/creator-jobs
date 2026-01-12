@@ -16,56 +16,6 @@ async function getCommunityId() {
 	);
  }
  
- async function isCommunityOwner() {
-	// Local dev: allow everything
-	if (process.env.NODE_ENV !== "production") {
-	  console.log("[POST JOB PERMISSION CHECK][DEV MODE] allowed");
-	  return true;
-	}
- 
-	const h = await headers();
- 
-	// Get the current Whop user (secure, verified)
-	const { userId } = await whopsdk.verifyUserToken(h);
- 
-	// Get the community / experience ID
-	const communityId =
-	  h.get("x-whop-community") ||
-	  h.get("X-Whop-Community");
- 
-	if (!communityId) {
-	  console.log("[POST JOB PERMISSION CHECK][FAIL] No communityId", {
-		 userId,
-	  });
-	  return false;
-	}
- 
-	// Fetch experience to determine installer
-	const experience = await (whopsdk.experiences as any).get(communityId);
- 
-	// Check Whop access level (admin)
-	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
- 
-	const isAdmin =
-	  access?.has_access === true &&
-	  access?.access_level === "admin";
- 
-	const isInstaller =
-	  experience?.installed_by_user_id === userId;
- 
-	// 🔍 TEMP DEBUG LOG — THIS IS THE KEY
-	console.log("[POST JOB PERMISSION CHECK]", {
-	  userId,
-	  communityId,
-	  access,
-	  experienceInstaller: experience?.installed_by_user_id,
-	  isAdmin,
-	  isInstaller,
-	});
- 
-	// MVP rule: installer OR admin can post jobs
-	return isAdmin || isInstaller;
- }
  
  
  
@@ -82,46 +32,7 @@ async function getCommunityId() {
  
 
 export async function createJob(formData: FormData) {
-	const h = await headers();
-
-	let debug: any = {};
- 
-	try {
-	  const { userId } = await whopsdk.verifyUserToken(h);
- 
-	  const communityId =
-		 h.get("x-whop-community") ||
-		 h.get("X-Whop-Community");
- 
-	  let access = null;
-	  let experience: any = null;
-
-if (communityId) {
-  access = await whopsdk.users.checkAccess(communityId, { id: userId });
-  experience = await (whopsdk.experiences as any).retrieve(communityId);
-}
-
- 
-	  debug = {
-		 userId,
-		 communityId,
-		 access,
-		 experienceInstaller: experience?.installed_by_user_id,
-		 isAdmin: access?.access_level === "admin",
-		 isInstaller: experience?.installed_by_user_id === userId,
-	  };
-	} catch (err) {
-	  debug.error = String(err);
-	}
- 
-	console.log("[CREATE JOB PERMISSION DEBUG]", debug);
- 
 	
-	const allowed = await isCommunityOwner();
-
-	if (!allowed) {
-	  redirect("/my-jobs/not-allowed");
-	}
  
 
   const title = String(formData.get("title") || "").trim();

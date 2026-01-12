@@ -1,42 +1,11 @@
 import { createJob } from "./actions";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { whopsdk } from "@/lib/whop-sdk";
 
 
 
 
 export default async function NewJobPage() {
 	  
-	// 🔒 UI gate: only community admins can post jobs
-	    // 🔒 UI gate: installer OR admin can post jobs
-  if (process.env.NODE_ENV === "production") {
-	const h = await headers();
-
-	const { userId } = await whopsdk.verifyUserToken(h);
-
-	const communityId =
-	  h.get("x-whop-community") ||
-	  h.get("X-Whop-Community");
-
-	if (!communityId) {
-	  redirect("/my-jobs/not-allowed");
-	}
-
-	const experience = await (whopsdk.experiences as any).get(communityId);
-	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
-
-	const isAdmin =
-	  access.has_access && access.access_level === "admin";
-
-	const isInstaller =
-	  experience.installed_by_user_id === userId;
-
-	if (!(isAdmin || isInstaller)) {
-	  redirect("/my-jobs/not-allowed");
-	}
- }
 
   
 
@@ -50,6 +19,19 @@ export default async function NewJobPage() {
 		  </Link>
 	 
 		  <h1 className="text-2xl font-semibold">Post a Job</h1>
+		  
+		  {/* 🟡 Posting responsibility banner */}
+<div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+  <div className="font-medium mb-1">Posting responsibly</div>
+  <p>
+    Jobs posted here are visible to everyone in this community.
+    Please only post legitimate paid work and follow community guidelines.
+  </p>
+  <p className="mt-1 opacity-80">
+    Abuse or spam may result in restricted access.
+  </p>
+</div>
+
 	 
 		  <form action={createJob} className="space-y-4">
 			 <div className="space-y-1">
