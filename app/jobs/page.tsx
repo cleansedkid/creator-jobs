@@ -7,9 +7,17 @@ import { headers } from "next/headers";
 export default async function JobsPage() {
 	const h = await headers();
 	const community_id =
-	  h.get("x-whop-community") ||
-	  h.get("X-Whop-Community") ||
-	  "local-dev-community";
+  h.get("x-whop-community") ||
+  h.get("X-Whop-Community");
+
+if (!community_id) {
+  return (
+    <div className="p-6 text-sm text-muted-foreground">
+      Missing community context.
+    </div>
+  );
+}
+
 	
 	const { data: jobs } = await supabaseServer
 	  .from("jobs")

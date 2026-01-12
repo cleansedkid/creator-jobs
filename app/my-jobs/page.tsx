@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getWhopUserId } from "@/lib/whop/getUserId";
+import { headers } from "next/headers";
+
 
 export default async function MyJobsPage() {
 	let userId = await getWhopUserId();
@@ -10,6 +12,20 @@ export default async function MyJobsPage() {
 	  userId = "local-dev-user";
 	}
 	
+	const h = await headers();
+
+const communityId =
+  h.get("x-whop-community") ||
+  h.get("X-Whop-Community");
+
+if (!communityId) {
+  return (
+    <div className="mx-auto max-w-xl px-4 py-6 text-sm">
+      Missing community context
+    </div>
+  );
+}
+
 
   if (!userId) {
     return (
@@ -20,12 +36,14 @@ export default async function MyJobsPage() {
   }
 
   const { data: jobs, error } = await supabaseServer
-    .from("jobs")
-    .select(
-      "id, title, status, payout_cents, platform_fee_cents"
-    )
-    .eq("creator_whop_user_id", userId)
-    .order("created_at", { ascending: false });
+  .from("jobs")
+  .select(
+    "id, title, status, payout_cents, platform_fee_cents"
+  )
+  .eq("creator_whop_user_id", userId)
+  .eq("community_id", communityId)
+  .order("created_at", { ascending: false });
+
 
   if (error) {
     return (
