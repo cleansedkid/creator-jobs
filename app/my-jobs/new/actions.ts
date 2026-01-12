@@ -82,6 +82,39 @@ async function getCommunityId() {
  
 
 export async function createJob(formData: FormData) {
+	const h = await headers();
+
+	let debug: any = {};
+ 
+	try {
+	  const { userId } = await whopsdk.verifyUserToken(h);
+ 
+	  const communityId =
+		 h.get("x-whop-community") ||
+		 h.get("X-Whop-Community");
+ 
+	  let access = null;
+	  let experience = null;
+ 
+	  if (communityId) {
+		 access = await whopsdk.users.checkAccess(communityId, { id: userId });
+		 experience = await whopsdk.experiences.retrieve(communityId);
+	  }
+ 
+	  debug = {
+		 userId,
+		 communityId,
+		 access,
+		 experienceInstaller: experience?.installed_by_user_id,
+		 isAdmin: access?.access_level === "admin",
+		 isInstaller: experience?.installed_by_user_id === userId,
+	  };
+	} catch (err) {
+	  debug.error = String(err);
+	}
+ 
+	console.log("[CREATE JOB PERMISSION DEBUG]", debug);
+ 
 	
 	const allowed = await isCommunityOwner();
 
