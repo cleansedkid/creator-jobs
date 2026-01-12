@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
+import { whopsdk } from "@/lib/whop-sdk";
+
 
 async function getCommunityId() {
 	const h = await headers();
@@ -15,51 +17,42 @@ async function getCommunityId() {
  }
  
  async function isCommunityOwner() {
-	const h = await headers();
- 
-	const raw =
-	  h.get("x-whop-user") ||
-	  h.get("X-Whop-User");
- 
 	// Local dev: allow
 	if (process.env.NODE_ENV !== "production") {
 	  return true;
 	}
  
-	if (!raw) return false;
- 
-	try {
-	  const user = JSON.parse(raw);
- 
-	  // MVP assumption: owner flag exists
-	  return user?.is_owner === true;
-	} catch {
-	  return false;
-	}
- }
- 
-async function getCreatorWhopId() {
 	const h = await headers();
  
-	const raw =
-	  h.get("x-whop-user") ||
-	  h.get("X-Whop-User");
+	// 1) Get the real Whop user id from the verified token
+	const { userId } = await whopsdk.verifyUserToken(h);
  
-	if (raw) {
-	  try {
-		 const user = JSON.parse(raw);
-		 return user?.id || user?.username || "unknown";
-	  } catch {
-		 return "unknown";
-	  }
-	}
-
-	 
+	// 2) Get the community/experience id from headers
+	const communityId =
+	  h.get("x-whop-community") ||
+	  h.get("X-Whop-Community");
  
-	// Local dev fallback
-return "local-dev-user";
-
+	if (!communityId) return false;
+ 
+	// 3) Check access level in this community
+	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
+ 
+	// Admin-only posting (MVP)
+	return access.has_access && access.access_level === "admin";
  }
+ 
+ 
+ async function getCreatorWhopId() {
+	// Local dev fallback
+	if (process.env.NODE_ENV !== "production") {
+	  return "local-dev-user";
+	}
+ 
+	const h = await headers();
+	const { userId } = await whopsdk.verifyUserToken(h);
+	return userId;
+ }
+ 
 
 export async function createJob(formData: FormData) {
 	

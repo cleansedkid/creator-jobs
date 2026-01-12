@@ -1,9 +1,36 @@
 import { createJob } from "./actions";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { whopsdk } from "@/lib/whop-sdk";
 
 
 
-export default function NewJobPage() {
+
+export default async function NewJobPage() {
+	  
+	// 🔒 UI gate: only community admins can post jobs
+	  if (process.env.NODE_ENV === "production") {
+		const h = await headers();
+  
+		const { userId } = await whopsdk.verifyUserToken(h);
+  
+		const communityId =
+		  h.get("x-whop-community") ||
+		  h.get("X-Whop-Community");
+  
+		if (!communityId) {
+		  redirect("/my-jobs/not-allowed");
+		}
+  
+		const access = await whopsdk.users.checkAccess(communityId, { id: userId });
+  
+		if (!(access.has_access && access.access_level === "admin")) {
+		  redirect("/my-jobs/not-allowed");
+		}
+	 }
+  
+
 	return (
 		<div className="mx-auto max-w-xl px-4 py-6 space-y-6">
 		  <Link
