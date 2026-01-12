@@ -19,6 +19,7 @@ async function getCommunityId() {
  async function isCommunityOwner() {
 	// Local dev: allow everything
 	if (process.env.NODE_ENV !== "production") {
+	  console.log("[POST JOB PERMISSION CHECK][DEV MODE] allowed");
 	  return true;
 	}
  
@@ -32,24 +33,40 @@ async function getCommunityId() {
 	  h.get("x-whop-community") ||
 	  h.get("X-Whop-Community");
  
-	if (!communityId) return false;
+	if (!communityId) {
+	  console.log("[POST JOB PERMISSION CHECK][FAIL] No communityId", {
+		 userId,
+	  });
+	  return false;
+	}
  
 	// Fetch experience to determine installer
 	const experience = await (whopsdk.experiences as any).get(communityId);
-
  
 	// Check Whop access level (admin)
 	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
  
 	const isAdmin =
-	  access.has_access && access.access_level === "admin";
+	  access?.has_access === true &&
+	  access?.access_level === "admin";
  
 	const isInstaller =
-	  experience.installed_by_user_id === userId;
+	  experience?.installed_by_user_id === userId;
+ 
+	// 🔍 TEMP DEBUG LOG — THIS IS THE KEY
+	console.log("[POST JOB PERMISSION CHECK]", {
+	  userId,
+	  communityId,
+	  access,
+	  experienceInstaller: experience?.installed_by_user_id,
+	  isAdmin,
+	  isInstaller,
+	});
  
 	// MVP rule: installer OR admin can post jobs
 	return isAdmin || isInstaller;
  }
+ 
  
  
  async function getCreatorWhopId() {
