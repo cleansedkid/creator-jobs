@@ -6,15 +6,6 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
 
 
-async function getCommunityId() {
-	const h = await headers();
- 
-	return (
-	  h.get("x-whop-community") ||
-	  h.get("X-Whop-Community") ||
-	  "local-dev-community"
-	);
- }
  
  
  
@@ -47,8 +38,17 @@ export async function createJob(formData: FormData) {
     throw new Error("Invalid payout");
 
   const payout_cents = Math.round(payoutUsd * 100);
-  const creator_whop_user_id = await getCreatorWhopId();
-  const community_id = await getCommunityId();
+const creator_whop_user_id = await getCreatorWhopId();
+
+const community_id = String(
+  formData.get("community_id") || ""
+).trim();
+
+if (!community_id) {
+  throw new Error("Missing community_id");
+}
+
+  
 
 
 

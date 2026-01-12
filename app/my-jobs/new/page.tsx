@@ -1,10 +1,23 @@
 import { createJob } from "./actions";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 
 
 
 export default async function NewJobPage() {
+
+	const h = await headers();
+
+	const communityId =
+	  h.get("x-whop-community") ||
+	  h.get("X-Whop-Community");
+
+	if (!communityId) {
+	  redirect("/my-jobs/not-allowed");
+	}
+
 	  
 
   
@@ -34,6 +47,12 @@ export default async function NewJobPage() {
 
 	 
 		  <form action={createJob} className="space-y-4">
+		  <input
+    type="hidden"
+    name="community_id"
+    value={communityId}
+  />
+
 			 <div className="space-y-1">
 				<label className="text-sm">Title</label>
 				<input
