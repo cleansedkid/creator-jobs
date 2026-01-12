@@ -24,7 +24,7 @@ export default async function NewJobPage() {
 	  redirect("/my-jobs/not-allowed");
 	}
 
-	const experience = await whopsdk.experiences.get(communityId);
+	const experience = await (whopsdk.experiences as any).get(communityId);
 	const access = await whopsdk.users.checkAccess(communityId, { id: userId });
 
 	const isAdmin =
