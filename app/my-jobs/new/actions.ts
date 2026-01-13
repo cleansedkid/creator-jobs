@@ -20,7 +20,7 @@ async function getCreatorWhopId() {
 
 export async function createJob(formData: FormData) {
 	
-	const deployment_id = getDeploymentId();
+	const deployment_id = await getDeploymentId();
 	if (!deployment_id) {
 	  throw new Error("Missing deployment context");
 	}

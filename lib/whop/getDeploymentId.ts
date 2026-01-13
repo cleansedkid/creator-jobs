@@ -17,9 +17,10 @@ function base64UrlDecode(input: string) {
  * Reads the Whop app deployment ID from the whop.app-config cookie.
  * This is the ONLY reliable installation identifier.
  */
-export function getDeploymentId(): string | null {
-  const cookieStore = cookies();
-  const token = cookieStore.get("whop.app-config")?.value;
+export async function getDeploymentId(): Promise<string | null> {
+	const cookieStore = await cookies();
+	const token = cookieStore.get("whop.app-config")?.value;
+ 
 
   if (!token) return null;
 

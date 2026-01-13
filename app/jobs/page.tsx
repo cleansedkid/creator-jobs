@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 
 
 export default async function JobsPage() {
-	const deployment_id = getDeploymentId();
+	const deployment_id = await getDeploymentId();
+
 
 	if (!deployment_id) {
 	  return (

@@ -15,7 +15,8 @@ export default async function MyJobsPage() {
     userId = "local-dev-user";
   }
 
-  const deployment_id = getDeploymentId();
+  const deployment_id = await getDeploymentId();
+
 
 
   if (!userId) {
