@@ -10,10 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function MyJobsPage() {
   let userId = await getWhopUserId();
 
-  // 🧪 Local dev override
-  if (process.env.NODE_ENV !== "production") {
-    userId = "local-dev-user";
-  }
+ 
 
   const deployment_id = await getDeploymentId();
 
