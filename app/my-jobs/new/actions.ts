@@ -3,20 +3,11 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
-import { whopsdk } from "@/lib/whop-sdk";
 import { getDeploymentId } from "@/lib/whop/getDeploymentId";
+import { getWhopUserId } from "@/lib/whop/getUserId";
 
 
-async function getCreatorWhopId() {
-  // Local dev fallback
-  if (process.env.NODE_ENV !== "production") {
-    return "local-dev-user";
-  }
 
-  const h = await headers();
-  const { userId } = await whopsdk.verifyUserToken(h);
-  return userId;
-}
 
 export async function createJob(formData: FormData) {
 	
@@ -42,7 +33,8 @@ export async function createJob(formData: FormData) {
   }
 
   const payout_cents = Math.round(payoutUsd * 100);
-  const creator_whop_user_id = await getCreatorWhopId();
+  const creator_whop_user_id = await getWhopUserId();
+
 
   // Insert
   const { error } = await supabaseServer.from("jobs").insert({
