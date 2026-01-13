@@ -1,46 +1,11 @@
 import Link from "next/link";
-import { headers } from "next/headers";
+import { getDeploymentId } from "@/lib/whop/getDeploymentId";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getWhopUserId } from "@/lib/whop/getUserId";
 
 export const dynamic = "force-dynamic";
 
-function extractCommunityIdFromReferer(referer: string | null) {
-  if (!referer) return null;
 
-  // Common Whop pattern: /joined/<community-slug>/<experienceId>/app
-  const m = referer.match(/\/joined\/[^/]+\/([^/]+)\/app/i);
-  if (m?.[1]) return m[1];
-
-  // Fallback: find an exp_ style id anywhere
-  const m2 = referer.match(/(exp_[A-Za-z0-9]+)/);
-  if (m2?.[1]) return m2[1];
-
-  return null;
-}
-
-async function getCommunityId() {
-  const h = await headers();
-
-  const fromHeader =
-    h.get("x-whop-community") ||
-    h.get("X-Whop-Community") ||
-    h.get("x-whop-experience") ||
-    h.get("X-Whop-Experience") ||
-    h.get("x-whop-experience-id") ||
-    h.get("X-Whop-Experience-Id");
-
-  if (fromHeader) return fromHeader;
-
-  const referer = h.get("referer") || h.get("Referer");
-  const fromReferer = extractCommunityIdFromReferer(referer);
-  if (fromReferer) return fromReferer;
-
-  // Local dev fallback
-  if (process.env.NODE_ENV !== "production") return "local-dev-community";
-
-  return null;
-}
 
 export default async function MyJobsPage() {
   let userId = await getWhopUserId();
@@ -50,7 +15,8 @@ export default async function MyJobsPage() {
     userId = "local-dev-user";
   }
 
-  const communityId = await getCommunityId();
+  const deployment_id = getDeploymentId();
+
 
   if (!userId) {
     return (
@@ -60,20 +26,21 @@ export default async function MyJobsPage() {
     );
   }
 
-  if (!communityId) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm">
-        Missing community context
-      </div>
-    );
-  }
+  if (!deployment_id) {
+	return (
+	  <div className="mx-auto max-w-xl px-4 py-6 text-sm">
+		 Missing deployment context
+	  </div>
+	);
+ }
 
-  const { data: jobs, error } = await supabaseServer
-    .from("jobs")
-    .select("id, title, status, payout_cents, platform_fee_cents")
-    .eq("creator_whop_user_id", userId)
-    .eq("community_id", communityId)
-    .order("created_at", { ascending: false });
+
+ const { data: jobs, error } = await supabaseServer
+ .from("jobs")
+ .select("id, title, status, payout_cents, platform_fee_cents")
+ .eq("creator_whop_user_id", userId)
+ .eq("deployment_id", deployment_id)
+ .order("created_at", { ascending: false });
 
   if (error) {
     return (

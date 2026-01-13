@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
+import { getDeploymentId } from "@/lib/whop/getDeploymentId";
+
 
 async function getCreatorWhopId() {
   // Local dev fallback
@@ -17,11 +19,12 @@ async function getCreatorWhopId() {
 }
 
 export async function createJob(formData: FormData) {
-  // ✅ Pull the community_id from the form (hidden input)
-  const community_id = String(formData.get("community_id") || "").trim();
-  if (!community_id) {
-    throw new Error("Missing community_id");
-  }
+	
+	const deployment_id = getDeploymentId();
+	if (!deployment_id) {
+	  throw new Error("Missing deployment context");
+	}
+ 
 
   // Form fields
   const title = String(formData.get("title") || "").trim();
@@ -43,14 +46,15 @@ export async function createJob(formData: FormData) {
 
   // Insert
   const { error } = await supabaseServer.from("jobs").insert({
-    community_id,
-    creator_whop_user_id,
-    title,
-    description,
-    job_type,
-    payout_cents,
-    status: "open",
-  });
+	deployment_id,
+	creator_whop_user_id,
+	title,
+	description,
+	job_type,
+	payout_cents,
+	status: "open",
+ });
+
 
   if (error) throw new Error(error.message);
 
