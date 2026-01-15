@@ -5,6 +5,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 
 async function getCreatorWhopUserId() {
   // In dev, Whop headers/tokens may not exist.

@@ -5,6 +5,8 @@ import { whopsdk } from "@/lib/whop-sdk";
 import { getDeploymentId } from "@/lib/whop/getDeploymentId";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 
 async function getWorkerWhopUserId() {
   // Works reliably in embedded + server components
