@@ -8,7 +8,12 @@ export const revalidate = 0;
 
 
 
-export default async function JobsPage() {
+export default async function JobsPage({
+	searchParams,
+ }: {
+	searchParams?: { deployment_id?: string };
+ }) {
+ 
 	const deployment_id = getDeploymentId(
 		searchParams?.deployment_id ?? null
 	 );
