@@ -127,9 +127,13 @@ export async function POST(
    * 7. Redirect back to job page
    * ----------------------------------------------------- */
   return NextResponse.redirect(
-	new URL(`/jobs?submitted=1`, req.url),
+	new URL(
+	  `/jobs/${jobId}?submitted=1&deployment_id=${deployment_id}`,
+	  req.url
+	),
 	303
  );
+ 
  
 }
 

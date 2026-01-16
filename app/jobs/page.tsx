@@ -9,7 +9,10 @@ export const revalidate = 0;
 
 
 export default async function JobsPage() {
-	const deployment_id = await getDeploymentId();
+	const deployment_id = getDeploymentId(
+		searchParams?.deployment_id ?? null
+	 );
+	 
 
 
 	if (!deployment_id) {

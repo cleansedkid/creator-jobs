@@ -14,18 +14,24 @@ function base64UrlDecode(input: string) {
 }
 
 /**
- * Reads the Whop app deployment ID from the whop.app-config cookie.
- * This is the ONLY reliable installation identifier.
+ * Reads the Whop app deployment ID.
+ * Primary source: whop.app-config cookie
+ * Fallback: value passed from URL (for iframe navigation edge cases)
  */
-export async function getDeploymentId(): Promise<string | null> {
-	const cookieStore = await cookies();
-	const token = cookieStore.get("whop.app-config")?.value;
- 
+export async function getDeploymentId(
+  fallback?: string | null
+): Promise<string | null> {
+  const cookieStore = cookies();
+  const token = cookieStore.get("whop.app-config")?.value;
 
-  if (!token) return null;
+  if (!token) {
+    return fallback ?? null;
+  }
 
   const parts = token.split(".");
-  if (parts.length < 2) return null;
+  if (parts.length < 2) {
+    return fallback ?? null;
+  }
 
   try {
     const payloadJson = base64UrlDecode(parts[1]);
@@ -33,12 +39,13 @@ export async function getDeploymentId(): Promise<string | null> {
 
     const deploymentId = payload?.did;
 
-    if (typeof deploymentId !== "string" || deploymentId.length === 0) {
-      return null;
+    if (typeof deploymentId === "string" && deploymentId.length > 0) {
+      return deploymentId;
     }
 
-    return deploymentId;
+    return fallback ?? null;
   } catch {
-    return null;
+    return fallback ?? null;
   }
 }
+
