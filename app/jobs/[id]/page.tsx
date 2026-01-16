@@ -28,23 +28,16 @@ export default async function JobDetailPage({
   const sp = (await searchParams) ?? {};
   const showSubmitted = sp.submitted === "1";
 
+  // ✅ Option A: deployment is a filter, not a gate
   const deployment_id = await getDeploymentId();
 
-  if (!deployment_id) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
-        Reloading context… If this persists, refresh the page.
-      </div>
-    );
+  // Load job (always by id). Only enforce deployment isolation if we have it.
+  let jobQuery = supabaseServer.from("jobs").select("*").eq("id", jobId);
+  if (deployment_id) {
+    jobQuery = jobQuery.eq("deployment_id", deployment_id);
   }
 
-  // Load job WITH deployment isolation
-  const { data: job } = await supabaseServer
-    .from("jobs")
-    .select("*")
-    .eq("id", jobId)
-    .eq("deployment_id", deployment_id)
-    .single();
+  const { data: job } = await jobQuery.single();
 
   if (!job) {
     return (
@@ -59,7 +52,8 @@ export default async function JobDetailPage({
 
   // Identity (safe: never throws)
   const currentUserId = await safeGetUserId();
-  const isCreator = job.creator_whop_user_id === currentUserId;
+  const isCreator =
+    currentUserId != null && job.creator_whop_user_id === currentUserId;
 
   // Keep your dev role behavior
   const devRole = getDevRole();
@@ -71,14 +65,20 @@ export default async function JobDetailPage({
 
   const canReview = isDevCreator || (!devRole && isCreator);
 
-  // Submissions are isolated by deployment too (extra safe)
-  const { data: submissions } = await supabaseServer
+  // Submissions: filter by job_id always. Only add deployment_id if present.
+  let submissionsQuery = supabaseServer
     .from("submissions")
     .select("*")
     .eq("job_id", jobId)
-    .eq("deployment_id", deployment_id)
     .order("created_at", { ascending: false });
 
+  if (deployment_id) {
+    submissionsQuery = submissionsQuery.eq("deployment_id", deployment_id);
+  }
+
+  const { data: submissions } = await submissionsQuery;
+
+  // Back link (keep your referer logic)
   const h = await headers();
   const referer = h.get("referer");
   const backHref = referer?.includes("/my-jobs") ? "/my-jobs" : "/jobs";
@@ -223,4 +223,6 @@ export default async function JobDetailPage({
     </div>
   );
 }
+
+
 
