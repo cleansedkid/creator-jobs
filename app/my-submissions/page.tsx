@@ -7,32 +7,46 @@ import { getDeploymentId } from "@/lib/whop/getDeploymentId";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-
-async function getWorkerWhopUserId() {
-  // Works reliably in embedded + server components
-  const h = await headers();
-  const { userId } = await whopsdk.verifyUserToken(h);
-
-  if (!userId) return null;
-  return userId;
+async function safeGetWorkerWhopUserId(): Promise<string | null> {
+  try {
+    const h = await headers();
+    const { userId } = await whopsdk.verifyUserToken(h);
+    return userId ?? null;
+  } catch {
+    // ✅ Critical: NEVER throw on render
+    return null;
+  }
 }
 
 export default async function MySubmissionsPage() {
-  const worker_whop_user_id = await getWorkerWhopUserId();
+  const worker_whop_user_id = await safeGetWorkerWhopUserId();
   const deployment_id = await getDeploymentId();
 
+  // ✅ Match behavior used elsewhere (no white screen)
   if (!worker_whop_user_id) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm">
-        Not authenticated
+      <div className="mx-auto max-w-xl px-4 py-6 space-y-4">
+        <Link href="/jobs" className="text-sm underline">
+          ← Back
+        </Link>
+
+        <div className="text-sm text-muted-foreground">
+          Reloading context… If this persists, refresh the page.
+        </div>
       </div>
     );
   }
 
   if (!deployment_id) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm">
-        Missing deployment context
+      <div className="mx-auto max-w-xl px-4 py-6 space-y-4">
+        <Link href="/jobs" className="text-sm underline">
+          ← Back
+        </Link>
+
+        <div className="text-sm text-muted-foreground">
+          Reloading context… If this persists, refresh the page.
+        </div>
       </div>
     );
   }
@@ -64,7 +78,7 @@ export default async function MySubmissionsPage() {
     );
   }
 
-  // Extra safety: filter out any rows whose job isn't in this deployment
+  // Extra safety: filter out cross-deployment rows
   const filtered = (submissions ?? []).filter(
     (sub: any) => sub.jobs?.deployment_id === deployment_id
   );
@@ -103,4 +117,5 @@ export default async function MySubmissionsPage() {
     </div>
   );
 }
+
 
