@@ -18,12 +18,12 @@ function base64UrlDecode(input: string) {
  * Primary source: whop.app-config cookie
  * Fallback: value passed from URL (iframe navigation edge cases)
  */
-export function getDeploymentId(fallback?: string | null): string | null {
-  // ✅ Handles both typings: cookies(): Store OR Promise<Store>
-  const cookieStore = cookies() as Awaited<ReturnType<typeof cookies>>;
+export async function getDeploymentId(
+  fallback?: string | null
+): Promise<string | null> {
+  const cookieStore = await cookies(); // ✅ THIS is the key fix
 
   const token = cookieStore.get("whop.app-config")?.value;
-
   if (!token) return fallback ?? null;
 
   const parts = token.split(".");
