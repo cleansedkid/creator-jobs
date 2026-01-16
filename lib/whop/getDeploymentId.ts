@@ -16,27 +16,22 @@ function base64UrlDecode(input: string) {
 /**
  * Reads the Whop app deployment ID.
  * Primary source: whop.app-config cookie
- * Fallback: value passed from URL (for iframe navigation edge cases)
+ * Fallback: value passed from URL (iframe navigation edge cases)
  */
-export async function getDeploymentId(
-  fallback?: string | null
-): Promise<string | null> {
-  const cookieStore = cookies();
+export function getDeploymentId(fallback?: string | null): string | null {
+  // ✅ Handles both typings: cookies(): Store OR Promise<Store>
+  const cookieStore = cookies() as Awaited<ReturnType<typeof cookies>>;
+
   const token = cookieStore.get("whop.app-config")?.value;
 
-  if (!token) {
-    return fallback ?? null;
-  }
+  if (!token) return fallback ?? null;
 
   const parts = token.split(".");
-  if (parts.length < 2) {
-    return fallback ?? null;
-  }
+  if (parts.length < 2) return fallback ?? null;
 
   try {
     const payloadJson = base64UrlDecode(parts[1]);
     const payload = JSON.parse(payloadJson);
-
     const deploymentId = payload?.did;
 
     if (typeof deploymentId === "string" && deploymentId.length > 0) {
@@ -48,4 +43,3 @@ export async function getDeploymentId(
     return fallback ?? null;
   }
 }
-
