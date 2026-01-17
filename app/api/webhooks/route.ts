@@ -12,12 +12,21 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     webhookData = whopsdk.webhooks.unwrap(body, { headers });
   } catch (err) {
-    console.error("[WEBHOOK] Invalid signature", err);
+    console.error("[WEBHOOK] ❌ Invalid signature", err);
     return new Response("Invalid webhook", { status: 400 });
   }
 
+  // 🔍 TEMP: Log EVERYTHING we receive
+  console.log(
+    "[WEBHOOK RECEIVED]",
+    webhookData.type,
+    JSON.stringify(webhookData.data, null, 2)
+  );
+
   if (webhookData.type === "payment.succeeded") {
     waitUntil(handlePaymentSucceeded(webhookData.data));
+  } else {
+    console.log("[WEBHOOK] Ignored event type:", webhookData.type);
   }
 
   return new Response("OK", { status: 200 });
@@ -27,7 +36,16 @@ async function handlePaymentSucceeded(
   payment: Payment & { metadata?: Record<string, any> }
 ) {
   try {
+    // 🔍 TEMP: Log raw payment object
+    console.log(
+      "[PAYMENT SUCCEEDED] Raw payment object:",
+      JSON.stringify(payment, null, 2)
+    );
+
     const md = payment.metadata ?? {};
+
+    // 🔍 TEMP: Log metadata specifically
+    console.log("[PAYMENT METADATA]", md);
 
     const jobId = md.jobId as string | undefined;
     const submissionId = md.submissionId as string | undefined;
@@ -36,7 +54,16 @@ async function handlePaymentSucceeded(
     const payoutCents = Number(md.payoutCents ?? 0);
 
     if (!jobId || !submissionId || !workerWhopUserId || !deployment_id) {
-      console.error("[PAYMENT SUCCEEDED] Missing metadata", md);
+      console.error(
+        "[PAYMENT SUCCEEDED] ❌ Missing required metadata",
+        {
+          jobId,
+          submissionId,
+          workerWhopUserId,
+          deployment_id,
+          metadata: md,
+        }
+      );
       return;
     }
 
@@ -50,7 +77,10 @@ async function handlePaymentSucceeded(
       .single();
 
     if (!job || job.deployment_id !== deployment_id) {
-      console.error("[PAYMENT] job not found or wrong deployment", jobId);
+      console.error(
+        "[PAYMENT] ❌ Job not found or wrong deployment",
+        { jobId, deployment_id }
+      );
       return;
     }
 
@@ -58,7 +88,7 @@ async function handlePaymentSucceeded(
       job.payment_status === "paid" ||
       job.whop_payment_id === payment.id
     ) {
-      console.log("[PAYMENT] already processed", jobId);
+      console.log("[PAYMENT] ⏭ Already processed", jobId);
       return;
     }
 
@@ -77,7 +107,7 @@ async function handlePaymentSucceeded(
       .eq("id", jobId);
 
     if (jobErr) {
-      console.error("[PAYMENT] job update failed", jobErr);
+      console.error("[PAYMENT] ❌ Job update failed", jobErr);
       return;
     }
 
@@ -116,18 +146,19 @@ async function handlePaymentSucceeded(
         },
       } as any);
 
-      console.log("[PAYOUT SENT]", {
+      console.log("[PAYOUT SENT] ✅", {
         jobId,
         transferId: transfer.id,
       });
     } catch (transferErr) {
       console.error(
-        "[PAYOUT FAILED] worker may not be payout-enabled",
+        "[PAYOUT FAILED] ❌ Worker may not be payout-enabled",
         transferErr
       );
     }
   } catch (err) {
-    console.error("[PAYMENT SUCCEEDED] handler crashed", err);
+    console.error("[PAYMENT SUCCEEDED] ❌ Handler crashed", err);
   }
 }
+
 
