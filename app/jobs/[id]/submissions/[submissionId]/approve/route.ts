@@ -14,8 +14,17 @@ export async function POST(
    * 1. Verify requester (ONLY reliable identity)
    * ----------------------------------------------------- */
   const h = await headers();
-  const { userId: requester_whop_user_id } =
-    await whopsdk.verifyUserToken(h);
+
+  let requester_whop_user_id: string | null = null;
+  try {
+    const verified = await whopsdk.verifyUserToken(h);
+    requester_whop_user_id = verified.userId ?? null;
+  } catch {
+    return NextResponse.json(
+      { error: "Not authenticated" },
+      { status: 401 }
+    );
+  }
 
   if (!requester_whop_user_id) {
     return NextResponse.json(
@@ -60,7 +69,6 @@ export async function POST(
     );
   }
 
-  // 🚫 Cross-deployment protection
   if (job.deployment_id !== deployment_id) {
     return NextResponse.json(
       { error: "Unauthorized job access" },
@@ -68,7 +76,6 @@ export async function POST(
     );
   }
 
-  // 🚫 Only job creator can approve
   if (job.creator_whop_user_id !== requester_whop_user_id) {
     return NextResponse.json(
       { error: "Not authorized" },
@@ -76,7 +83,6 @@ export async function POST(
     );
   }
 
-  // 🚫 Job must be open
   if (job.status !== "open") {
     return NextResponse.json(
       { error: "Job already closed" },
@@ -84,7 +90,6 @@ export async function POST(
     );
   }
 
-  // 🚫 Prevent double approval
   if (job.approved_submission_id) {
     return NextResponse.json(
       { error: "Payment already started for this job" },
@@ -109,7 +114,6 @@ export async function POST(
     );
   }
 
-  // 🚫 Cross-deployment protection
   if (submission.deployment_id !== deployment_id) {
     return NextResponse.json(
       { error: "Unauthorized submission access" },
@@ -118,7 +122,7 @@ export async function POST(
   }
 
   /* -------------------------------------------------------
-   * 5. Calculate fees (unchanged logic)
+   * 5. Calculate fees
    * ----------------------------------------------------- */
   const platformFeeBps = 800; // 8%
   const payoutCents = job.payout_cents ?? 0;
@@ -128,13 +132,16 @@ export async function POST(
   const totalChargeCents = payoutCents + platformFeeCents;
   const totalChargeUsd = Number((totalChargeCents / 100).toFixed(2));
 
+  /* -------------------------------------------------------
+   * 6. IMPORTANT: Return to Whop iframe domain
+   * ----------------------------------------------------- */
   const returnUrl =
     process.env.NODE_ENV === "production"
-      ? "https://creator-jobs.vercel.app/my-jobs?payment=success"
-      : "https://example.com/payment-complete";
+      ? `https://${deployment_id}.apps.whop.com/my-jobs?payment=success`
+      : "http://localhost:3000/my-jobs?payment=success";
 
   /* -------------------------------------------------------
-   * 6. Create Whop checkout
+   * 7. Create Whop checkout
    * ----------------------------------------------------- */
   const checkout = await whopsdk.checkoutConfigurations.create({
     mode: "payment",
@@ -147,6 +154,7 @@ export async function POST(
       platformFeeBps,
       platformFeeCents,
       totalChargeCents,
+      deployment_id,
     },
     plan: {
       company_id: process.env.WHOP_COMPANY_ID!,
@@ -157,7 +165,7 @@ export async function POST(
   } as any);
 
   /* -------------------------------------------------------
-   * 7. Store pending payment state
+   * 8. Store pending payment state
    * ----------------------------------------------------- */
   const { error: jobErr } = await supabaseServer
     .from("jobs")
@@ -179,8 +187,7 @@ export async function POST(
   }
 
   /* -------------------------------------------------------
-   * 8. Redirect to checkout
+   * 9. Redirect to checkout
    * ----------------------------------------------------- */
   return NextResponse.redirect(checkout.purchase_url, 303);
 }
-
