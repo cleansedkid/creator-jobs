@@ -25,7 +25,18 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 async function handlePaymentSucceeded(payment: Payment) {
   try {
-    const checkoutId = payment.checkout_id;
+	const p = payment as unknown as Record<string, any>;
+
+	// Whop sends a checkout identifier, but the SDK typings may not expose it.
+	// Try the common possibilities.
+	const checkoutId =
+	  p.checkout_id ||
+	  p.checkoutId ||
+	  p.checkout_configuration_id ||
+	  p.checkoutConfigurationId ||
+	  p.checkout?.id ||
+	  null;
+	
 
     if (!checkoutId) {
       console.error("[PAYMENT] ❌ Missing checkout_id", payment.id);
