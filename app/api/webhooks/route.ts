@@ -16,84 +16,80 @@ export async function POST(request: NextRequest): Promise<Response> {
     return new Response("Invalid webhook", { status: 400 });
   }
 
-  // 🔍 TEMP: Log EVERYTHING we receive
-  console.log(
-    "[WEBHOOK RECEIVED]",
-    webhookData.type,
-    JSON.stringify(webhookData.data, null, 2)
-  );
-
   if (webhookData.type === "payment.succeeded") {
     waitUntil(handlePaymentSucceeded(webhookData.data));
-  } else {
-    console.log("[WEBHOOK] Ignored event type:", webhookData.type);
   }
 
   return new Response("OK", { status: 200 });
 }
 
-async function handlePaymentSucceeded(
-  payment: Payment & { metadata?: Record<string, any> }
-) {
+async function handlePaymentSucceeded(payment: Payment) {
   try {
-    // 🔍 TEMP: Log raw payment object
-    console.log(
-      "[PAYMENT SUCCEEDED] Raw payment object:",
-      JSON.stringify(payment, null, 2)
-    );
+    const checkoutId = payment.checkout_id;
 
-    const md = payment.metadata ?? {};
-
-    // 🔍 TEMP: Log metadata specifically
-    console.log("[PAYMENT METADATA]", md);
-
-    const jobId = md.jobId as string | undefined;
-    const submissionId = md.submissionId as string | undefined;
-    const workerWhopUserId = md.workerWhopUserId as string | undefined;
-    const deployment_id = md.deployment_id as string | undefined;
-    const payoutCents = Number(md.payoutCents ?? 0);
-
-    if (!jobId || !submissionId || !workerWhopUserId || !deployment_id) {
-      console.error(
-        "[PAYMENT SUCCEEDED] ❌ Missing required metadata",
-        {
-          jobId,
-          submissionId,
-          workerWhopUserId,
-          deployment_id,
-          metadata: md,
-        }
-      );
+    if (!checkoutId) {
+      console.error("[PAYMENT] ❌ Missing checkout_id", payment.id);
       return;
     }
 
     /* -------------------------------------------------
-     * Idempotency check
+     * 1️⃣ Load job by checkout ID (SOURCE OF TRUTH)
      * ------------------------------------------------- */
     const { data: job } = await supabaseServer
       .from("jobs")
-      .select("id, payment_status, whop_payment_id, deployment_id")
-      .eq("id", jobId)
+      .select(
+        `
+        id,
+        payment_status,
+        whop_payment_id,
+        approved_submission_id,
+        payout_cents
+        `
+      )
+      .eq("whop_checkout_id", checkoutId)
       .single();
 
-    if (!job || job.deployment_id !== deployment_id) {
-      console.error(
-        "[PAYMENT] ❌ Job not found or wrong deployment",
-        { jobId, deployment_id }
-      );
+    if (!job) {
+      console.error("[PAYMENT] ❌ No job found for checkout", checkoutId);
       return;
     }
 
+    // Idempotency guard
     if (
       job.payment_status === "paid" ||
       job.whop_payment_id === payment.id
     ) {
-      console.log("[PAYMENT] ⏭ Already processed", jobId);
+      console.log("[PAYMENT] ⏭ Already processed", job.id);
+      return;
+    }
+
+    if (!job.approved_submission_id) {
+      console.error(
+        "[PAYMENT] ❌ Job missing approved_submission_id",
+        job.id
+      );
       return;
     }
 
     /* -------------------------------------------------
-     * 1️⃣ Close job + mark paid
+     * 2️⃣ Load winning submission
+     * ------------------------------------------------- */
+    const { data: submission } = await supabaseServer
+      .from("submissions")
+      .select("id, worker_whop_user_id")
+      .eq("id", job.approved_submission_id)
+      .single();
+
+    if (!submission) {
+      console.error(
+        "[PAYMENT] ❌ Approved submission not found",
+        job.approved_submission_id
+      );
+      return;
+    }
+
+    /* -------------------------------------------------
+     * 3️⃣ Mark job as paid + closed
      * ------------------------------------------------- */
     const { error: jobErr } = await supabaseServer
       .from("jobs")
@@ -104,7 +100,7 @@ async function handlePaymentSucceeded(
         status: "closed",
         closed_at: new Date().toISOString(),
       })
-      .eq("id", jobId);
+      .eq("id", job.id);
 
     if (jobErr) {
       console.error("[PAYMENT] ❌ Job update failed", jobErr);
@@ -112,42 +108,41 @@ async function handlePaymentSucceeded(
     }
 
     /* -------------------------------------------------
-     * 2️⃣ Approve winning submission
+     * 4️⃣ Approve winning submission & reject others
      * ------------------------------------------------- */
     await supabaseServer
       .from("submissions")
       .update({ status: "approved" })
-      .eq("id", submissionId)
-      .eq("job_id", jobId);
+      .eq("id", submission.id);
 
     await supabaseServer
       .from("submissions")
       .update({ status: "rejected" })
-      .eq("job_id", jobId)
-      .neq("id", submissionId)
+      .eq("job_id", job.id)
+      .neq("id", submission.id)
       .eq("status", "pending");
 
     /* -------------------------------------------------
-     * 3️⃣ Transfer payout to worker
+     * 5️⃣ Transfer payout to worker
      * ------------------------------------------------- */
-    const payoutUsd = Number((payoutCents / 100).toFixed(2));
+    const payoutUsd = Number(((job.payout_cents ?? 0) / 100).toFixed(2));
 
     try {
       const transfer = await whopsdk.transfers.create({
         amount: payoutUsd,
         currency: "usd",
-        destination_id: workerWhopUserId,
+        destination_id: submission.worker_whop_user_id,
         origin_id: process.env.WHOP_COMPANY_ID!,
         idempotence_key: payment.id,
         metadata: {
-          jobId,
-          submissionId,
+          jobId: job.id,
+          submissionId: submission.id,
           whopPaymentId: payment.id,
         },
       } as any);
 
       console.log("[PAYOUT SENT] ✅", {
-        jobId,
+        jobId: job.id,
         transferId: transfer.id,
       });
     } catch (transferErr) {
@@ -160,5 +155,6 @@ async function handlePaymentSucceeded(
     console.error("[PAYMENT SUCCEEDED] ❌ Handler crashed", err);
   }
 }
+
 
 
