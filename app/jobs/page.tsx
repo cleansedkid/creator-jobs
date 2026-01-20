@@ -2,7 +2,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
 import { getDeploymentId } from "@/lib/whop/getDeploymentId";
 import { headers } from "next/headers";
-import { debugExperience } from "@/lib/whop/debugExperience";
+
 
 
 
@@ -32,12 +32,6 @@ export default async function JobsPage({
 
   const h = await headers();
 
-
-  console.log("[EXP DEBUG][jobs_page]", {
-	headerExp:
-	  h.get("x-whop-experience-id") ||
-	  h.get("X-Whop-Experience-Id"),
- });
 
   return (
     <div className="p-6 space-y-4">
