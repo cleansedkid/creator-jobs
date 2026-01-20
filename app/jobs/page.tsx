@@ -31,10 +31,11 @@ export default async function JobsPage({
   const { data: jobs } = await query;
 
   const h = headers();
-debugExperience(
-  new Request("http://debug", { headers: h }),
-  "job_detail_page"
-);
+
+  debugExperience(
+	 new Request("http://debug", { headers: new Headers }),
+	 "jobs_page"
+  );
 
 
   return (
