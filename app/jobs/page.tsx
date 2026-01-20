@@ -30,7 +30,8 @@ export default async function JobsPage({
 
   const { data: jobs } = await query;
 
-  const h = headers();
+  const h = await headers();
+
 
   console.log("[EXP DEBUG][jobs_page]", {
 	headerExp:
