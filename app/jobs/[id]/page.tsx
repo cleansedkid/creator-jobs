@@ -4,6 +4,8 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { getDeploymentId } from "@/lib/whop/getDeploymentId";
 import { whopsdk } from "@/lib/whop-sdk";
 import { getDevRole } from "@/lib/auth/role";
+import { debugExperience } from "@/lib/whop/debugExperience";
+
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +84,13 @@ export default async function JobDetailPage({
   const h = await headers();
   const referer = h.get("referer");
   const backHref = referer?.includes("/my-jobs") ? "/my-jobs" : "/jobs";
+
+  const h = headers();
+debugExperience(
+  new Request("http://debug", { headers: h }),
+  "job_detail_page"
+);
+
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">

@@ -1,6 +1,10 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
 import { getDeploymentId } from "@/lib/whop/getDeploymentId";
+import { headers } from "next/headers";
+import { debugExperience } from "@/lib/whop/debugExperience";
+
+
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -25,6 +29,13 @@ export default async function JobsPage({
   }
 
   const { data: jobs } = await query;
+
+  const h = headers();
+debugExperience(
+  new Request("http://debug", { headers: h }),
+  "job_detail_page"
+);
+
 
   return (
     <div className="p-6 space-y-4">
