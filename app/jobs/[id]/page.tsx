@@ -85,10 +85,11 @@ export default async function JobDetailPage({
   const referer = h.get("referer");
   const backHref = referer?.includes("/my-jobs") ? "/my-jobs" : "/jobs";
 
-  debugExperience(
-	new Request("http://debug", { headers: h }),
-	"job_detail_page"
- );
+  console.log("[EXP DEBUG][jobs_page]", {
+	headerExp:
+	  h.get("x-whop-experience-id") ||
+	  h.get("X-Whop-Experience-Id"),
+ });
 
 
   return (

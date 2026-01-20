@@ -32,11 +32,11 @@ export default async function JobsPage({
 
   const h = headers();
 
-  debugExperience(
-	 new Request("http://debug", { headers: new Headers }),
-	 "jobs_page"
-  );
-
+  console.log("[EXP DEBUG][jobs_page]", {
+	headerExp:
+	  h.get("x-whop-experience-id") ||
+	  h.get("X-Whop-Experience-Id"),
+ });
 
   return (
     <div className="p-6 space-y-4">
