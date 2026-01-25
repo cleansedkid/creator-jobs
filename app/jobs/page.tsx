@@ -39,7 +39,7 @@ export default async function JobsPage({
         <h1 className="text-2xl font-semibold">Jobs</h1>
 
         <Link href="/my-submissions" className="text-sm underline">
-          My Submissions
+          My Submissionss
         </Link>
       </div>
 
