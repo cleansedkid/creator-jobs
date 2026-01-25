@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
-import { getDeploymentId } from "@/lib/whop/getDeploymentId";
 import { whopsdk } from "@/lib/whop-sdk";
 
 async function getCreatorWhopUserId() {
@@ -19,10 +18,12 @@ async function getCreatorWhopUserId() {
   return userId;
 }
 
-export async function createJob(formData: FormData) {
-  const deployment_id = await getDeploymentId();
-  if (!deployment_id) {
-    throw new Error("Missing deployment context");
+export async function createJob(
+  experienceId: string,
+  formData: FormData
+) {
+  if (!experienceId) {
+    throw new Error("Missing experience context");
   }
 
   const creator_whop_user_id = await getCreatorWhopUserId();
@@ -43,7 +44,7 @@ export async function createJob(formData: FormData) {
   const payout_cents = Math.round(payoutUsd * 100);
 
   const { error } = await supabaseServer.from("jobs").insert({
-    deployment_id,
+    experience_id: experienceId,
     creator_whop_user_id,
     title,
     description,
@@ -54,6 +55,7 @@ export async function createJob(formData: FormData) {
 
   if (error) throw new Error(error.message);
 
-  redirect("/my-jobs");
+  redirect(`/experience/${experienceId}/my-jobs`);
 }
+
 
