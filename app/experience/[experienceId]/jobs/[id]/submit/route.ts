@@ -1,17 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export async function POST(
-  req: Request,
-  {
-    params,
-  }: {
-    params: { experienceId: string; id: string };
-  }
-) {
-  const { experienceId, id: jobId } = params;
+	request: NextRequest,
+	context: {
+	  params: Promise<{
+		 experienceId: string;
+		 id: string;
+	  }>;
+	}
+ ) {
+	const { experienceId, id: jobId } = await context.params;
 
   /* -------------------------------------------------------
    * 1. Verify Whop user (ONLY reliable identity here)
@@ -54,7 +55,7 @@ export async function POST(
   /* -------------------------------------------------------
    * 3. Read form data
    * ----------------------------------------------------- */
-  const formData = await req.formData();
+  const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const note = formData.get("note") as string | null;
 
@@ -113,7 +114,7 @@ export async function POST(
   return NextResponse.redirect(
     new URL(
       `/experience/${experienceId}/jobs/${jobId}?submitted=1`,
-      req.url
+      request.url
     ),
     303
   );
