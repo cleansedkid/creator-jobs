@@ -1,18 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export async function POST(
-  req: Request,
-  {
-    params,
-  }: {
-    params: { experienceId: string; id: string; submissionId: string };
-  }
-) {
-  const { experienceId, id: jobId, submissionId } = params;
-
+	request: NextRequest,
+	context: {
+	  params: {
+		 experienceId: string;
+		 id: string;
+		 submissionId: string;
+	  };
+	}
+ ) {
+	const { experienceId, id: jobId, submissionId } = context.params;
+ 
   /* -------------------------------------------------------
    * 1. Verify requester (ONLY reliable identity)
    * ----------------------------------------------------- */
