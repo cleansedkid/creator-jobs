@@ -4,16 +4,17 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export async function POST(
-	request: NextRequest,
-	context: {
-	  params: {
-		 experienceId: string;
-		 id: string;
-		 submissionId: string;
-	  };
-	}
- ) {
-	const { experienceId, id: jobId, submissionId } = context.params;
+  request: NextRequest,
+  context: {
+    params: Promise<{
+      experienceId: string;
+      id: string;
+      submissionId: string;
+    }>;
+  }
+) {
+  const { experienceId, id: jobId, submissionId } = await context.params;
+
  
   /* -------------------------------------------------------
    * 1. Verify requester (ONLY reliable identity)
