@@ -1,4 +1,4 @@
-import { createJob } from "../../../../my-jobs/new/actions";
+import { createJob } from "./actions";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
