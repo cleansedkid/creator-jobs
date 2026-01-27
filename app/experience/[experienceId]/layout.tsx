@@ -1,14 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ExperienceLayout({
+export default async function ExperienceLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { experienceId: string };
+  params: Promise<{ experienceId: string }>;
 }) {
-  const { experienceId } = params;
+  const { experienceId } = await params;
 
   return (
     <>
