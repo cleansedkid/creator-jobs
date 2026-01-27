@@ -6,9 +6,18 @@ export const dynamic = "force-dynamic";
 export default async function NewJobPage({
   params,
 }: {
-  params: { experienceId: string };
+  params: { experienceId?: string };
 }) {
   const experienceId = params.experienceId;
+
+  // 🛡️ GUARD: do not render until experienceId exists
+  if (!experienceId) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
+        Loading experience…
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
