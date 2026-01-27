@@ -42,24 +42,25 @@ export default async function MySubmissionsPage({
   }
 
   const { data: submissions, error } = await supabaseServer
-    .from("submissions")
-    .select(
-      `
-      id,
-      status,
-      proof_url,
-      created_at,
-      jobs:job_id (
-        id,
-        title,
-        payout_cents,
-        experience_id
-      )
+  .from("submissions")
+  .select(
     `
+    id,
+    status,
+    proof_url,
+    created_at,
+    jobs:job_id!left (
+      id,
+      title,
+      payout_cents,
+      experience_id
     )
-    .eq("worker_whop_user_id", worker_whop_user_id)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
+  `
+  )
+  .eq("worker_whop_user_id", worker_whop_user_id)
+  .eq("experience_id", experienceId)
+  .order("created_at", { ascending: false });
+
 
   if (error) {
     return (
