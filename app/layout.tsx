@@ -21,10 +21,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+	children,
+	params,
+ }: {
+	children: React.ReactNode;
+	params: { experienceId: string };
+ }) {
+	const { experienceId } = params;
+ 
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -33,10 +37,11 @@ export default function RootLayout({
         <WhopApp>
           {/* ✅ CUSTOM HEADER — overrides Whop default */}
           <div className="px-6 pt-4">
-  <Link
-    href="/"
-    className="inline-flex items-center gap-2 group transition-all"
-  >
+			 <Link
+  href={`/experience/${experienceId}/onboarding`}
+  className="inline-flex items-center gap-2 group transition-all"
+>
+
     <Image
       src="/logo.png"
       alt="Creator Jobs"
