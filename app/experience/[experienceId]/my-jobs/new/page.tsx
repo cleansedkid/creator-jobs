@@ -1,16 +1,14 @@
+"use client";
+
 import { createJob } from "./actions";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export default function NewJobPage() {
+  const params = useParams();
+  const experienceId = params?.experienceId as string | undefined;
 
-export default async function NewJobPage({
-  params,
-}: {
-  params: { experienceId?: string };
-}) {
-  const experienceId = params.experienceId;
-
-  // 🛡️ GUARD: do not render until experienceId exists
+  // 🛡️ GUARD: wait until experienceId exists in the URL
   if (!experienceId) {
     return (
       <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
@@ -43,7 +41,7 @@ export default async function NewJobPage({
       </div>
 
       <form
-        action={createJob.bind(null, experienceId)}
+        action={(formData) => createJob(experienceId, formData)}
         className="space-y-4"
       >
         <div className="space-y-1">
@@ -101,3 +99,4 @@ export default async function NewJobPage({
     </div>
   );
 }
+
