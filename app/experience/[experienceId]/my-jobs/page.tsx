@@ -3,28 +3,25 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseClient } from "@/lib/supabase/client";
 
 export default function MyJobsPage() {
   const params = useParams();
   const experienceId = params?.experienceId as string | undefined;
 
-  const [jobs, setJobs] = useState<any[] | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!experienceId || experienceId === "undefined") return;
 
-    supabaseServer
-  .from("jobs")
-  .select("id, title, status, payout_cents, platform_fee_cents")
-  .eq("experience_id", experienceId)
-  .order("created_at", { ascending: false })
-  .then(({ data }) => {
-    setJobs(data ?? []);
-    setLoading(false);
-  });
-
+    supabaseClient
+      .from("jobs")
+      .select("id, title, status, payout_cents, platform_fee_cents")
+      .eq("experience_id", experienceId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setJobs(data ?? []))
+      .finally(() => setLoading(false));
   }, [experienceId]);
 
   // 🛡️ Guard
@@ -49,13 +46,13 @@ export default function MyJobsPage() {
         </Link>
       </div>
 
-      {jobs?.length === 0 && (
+      {jobs.length === 0 && (
         <div className="text-sm text-muted-foreground">
           You haven’t posted any jobs yet.
         </div>
       )}
 
-      {jobs?.map((job) => (
+      {jobs.map((job) => (
         <Link
           key={job.id}
           href={`/experience/${experienceId}/jobs/${job.id}`}
@@ -81,4 +78,3 @@ export default function MyJobsPage() {
     </div>
   );
 }
-
