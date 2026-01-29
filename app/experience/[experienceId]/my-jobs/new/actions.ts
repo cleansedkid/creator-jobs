@@ -22,9 +22,10 @@ export async function createJob(
   experienceId: string,
   formData: FormData
 ) {
-  if (!experienceId) {
-    throw new Error("Missing experience context");
-  }
+	if (!experienceId || experienceId === "undefined") {
+		throw new Error("Missing or invalid experience context");
+	 }
+	 
 
   const creator_whop_user_id = await getCreatorWhopUserId();
 

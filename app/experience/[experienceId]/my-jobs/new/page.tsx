@@ -6,7 +6,12 @@ import { useParams } from "next/navigation";
 
 export default function NewJobPage() {
   const params = useParams();
-  const experienceId = params?.experienceId as string | undefined;
+  const rawExperienceId = params?.experienceId;
+const experienceId =
+  typeof rawExperienceId === "string" && rawExperienceId !== "undefined"
+    ? rawExperienceId
+    : undefined;
+
 
   // 🛡️ GUARD: wait until experienceId exists in the URL
   if (!experienceId) {
