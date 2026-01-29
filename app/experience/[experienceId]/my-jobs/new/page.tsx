@@ -1,21 +1,14 @@
-"use client";
-
 import { createJob } from "./actions";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
-export default function NewJobPage() {
-  const params = useParams();
-  const experienceId = params?.experienceId as string | undefined;
+export const dynamic = "force-dynamic";
 
-  // 🛡️ GUARD: wait until experienceId exists in the URL
-  if (!experienceId) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
-        Loading experience…
-      </div>
-    );
-  }
+export default async function NewJobPage({
+  params,
+}: {
+  params: { experienceId: string };
+}) {
+  const { experienceId } = params;
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
@@ -28,7 +21,6 @@ export default function NewJobPage() {
 
       <h1 className="text-2xl font-semibold">Post a Job</h1>
 
-      {/* 🟡 Posting responsibility banner */}
       <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
         <div className="font-medium mb-1">Posting responsibly</div>
         <p>
@@ -41,7 +33,7 @@ export default function NewJobPage() {
       </div>
 
       <form
-        action={(formData) => createJob(experienceId, formData)}
+        action={createJob.bind(null, experienceId)}
         className="space-y-4"
       >
         <div className="space-y-1">
@@ -50,7 +42,6 @@ export default function NewJobPage() {
             name="title"
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
-            placeholder="Edit 5 TikTok clips"
           />
         </div>
 
@@ -60,7 +51,6 @@ export default function NewJobPage() {
             name="description"
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
-            placeholder="Add captions, jump cuts, and export vertical MP4s"
           />
         </div>
 
@@ -68,8 +58,8 @@ export default function NewJobPage() {
           <label className="text-sm">Job Type</label>
           <select
             name="job_type"
-            className="w-full rounded-md border px-3 py-2 bg-background"
             defaultValue="editing"
+            className="w-full rounded-md border px-3 py-2 bg-background"
           >
             <option value="editing">Editing</option>
             <option value="thumbnail">Thumbnail</option>
@@ -84,14 +74,14 @@ export default function NewJobPage() {
             name="payout"
             type="number"
             min="1"
+            required
             className="w-full rounded-md border px-3 py-2 bg-background"
-            placeholder="100"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
+          className="w-full rounded-md border px-4 py-2 font-medium hover:bg-muted transition"
         >
           Create Job
         </button>
@@ -99,3 +89,4 @@ export default function NewJobPage() {
     </div>
   );
 }
+
