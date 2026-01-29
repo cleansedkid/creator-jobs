@@ -1,50 +1,14 @@
-"use client";
-
 import { createJob } from "./actions";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
-export default function NewJobPage() {
-  const params = useParams();
-  const [experienceId, setExperienceId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    const fromParams = params?.experienceId;
-
-    if (typeof fromParams === "string" && fromParams !== "undefined") {
-      setExperienceId(fromParams);
-      setLoading(false);
-      return;
-    }
-
-    // fallback: ask Whop directly
-    fetch("/api/bootstrap-experience")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.experienceId) {
-          setExperienceId(data.experienceId);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [params]);
-
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
-        Loading experience…
-      </div>
-    );
-  }
-
-  if (!experienceId) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-red-500">
-        Failed to load experience context.
-      </div>
-    );
-  }
+export default async function NewJobPage({
+  params,
+}: {
+  params: { experienceId: string };
+}) {
+  const experienceId = params.experienceId;
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
@@ -57,11 +21,68 @@ export default function NewJobPage() {
 
       <h1 className="text-2xl font-semibold">Post a Job</h1>
 
+      {/* Posting responsibility banner */}
+      <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+        <div className="font-medium mb-1">Posting responsibly</div>
+        <p>
+          Jobs posted here are visible to everyone in this community. Please only
+          post legitimate paid work and follow community guidelines.
+        </p>
+        <p className="mt-1 opacity-80">
+          Abuse or spam may result in restricted access.
+        </p>
+      </div>
+
       <form
-        action={(formData) => createJob(experienceId, formData)}
+        action={createJob.bind(null, experienceId)}
         className="space-y-4"
       >
-        {/* form unchanged */}
+        <div className="space-y-1">
+          <label className="text-sm">Title</label>
+          <input
+            name="title"
+            required
+            className="w-full rounded-md border border-border px-3 py-2 bg-background text-foreground placeholder:text-muted-foreground"
+            placeholder="Edit 5 TikTok clips"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm">Description</label>
+          <textarea
+            name="description"
+            required
+            className="w-full rounded-md border border-border px-3 py-2 bg-background text-foreground placeholder:text-muted-foreground"
+            placeholder="Add captions, jump cuts, and export vertical MP4s"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm">Job Type</label>
+          <select
+            name="job_type"
+            defaultValue="editing"
+            className="w-full rounded-md border border-border px-3 py-2 bg-background text-foreground"
+          >
+            <option value="editing">Editing</option>
+            <option value="thumbnail">Thumbnail</option>
+            <option value="graphics">Graphics</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm">Payout (USD)</label>
+          <input
+            name="payout"
+            type="number"
+            min="1"
+            required
+            className="w-full rounded-md border border-border px-3 py-2 bg-background text-foreground placeholder:text-muted-foreground"
+            placeholder="100"
+          />
+        </div>
+
         <button
           type="submit"
           className="w-full rounded-md border px-4 py-2 font-medium hover:bg-muted transition"
@@ -72,5 +93,6 @@ export default function NewJobPage() {
     </div>
   );
 }
+
 
 
