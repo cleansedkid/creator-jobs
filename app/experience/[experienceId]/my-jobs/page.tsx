@@ -1,50 +1,34 @@
+"use client";
+
 import Link from "next/link";
-import { headers } from "next/headers";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { supabaseServer } from "@/lib/supabase/server";
-import { whopsdk } from "@/lib/whop-sdk";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export default function MyJobsPage() {
+  const params = useParams();
+  const experienceId = params?.experienceId as string | undefined;
 
-async function getCreatorWhopUserId() {
-  // Optional local dev fallback
-  if (process.env.NODE_ENV !== "production") {
-    return "local-dev-user";
-  }
+  const [jobs, setJobs] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const h = await headers();
-  const { userId } = await whopsdk.verifyUserToken(h);
+  useEffect(() => {
+    if (!experienceId || experienceId === "undefined") return;
 
-  return userId ?? null;
-}
+    supabaseServer
+      .from("jobs")
+      .select("id, title, status, payout_cents, platform_fee_cents")
+      .eq("experience_id", experienceId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setJobs(data ?? []))
+      .finally(() => setLoading(false));
+  }, [experienceId]);
 
-export default async function MyJobsPage({
-  params,
-}: {
-  params: { experienceId: string };
-}) {
-  const experienceId = params.experienceId;
-  const userId = await getCreatorWhopUserId();
-
-  if (!userId) {
+  // 🛡️ Guard
+  if (!experienceId || loading) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm">
-        Not authenticated
-      </div>
-    );
-  }
-
-  const { data: jobs, error } = await supabaseServer
-    .from("jobs")
-    .select("id, title, status, payout_cents, platform_fee_cents")
-    .eq("creator_whop_user_id", userId)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm">
-        Failed to load jobs
+      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
+        Loading experience…
       </div>
     );
   }
@@ -56,7 +40,7 @@ export default async function MyJobsPage({
 
         <Link
           href={`/experience/${experienceId}/my-jobs/new`}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted transition"
+          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted transition cursor-pointer"
         >
           + New Job
         </Link>
@@ -72,7 +56,7 @@ export default async function MyJobsPage({
         <Link
           key={job.id}
           href={`/experience/${experienceId}/jobs/${job.id}`}
-          className="block rounded-lg border p-4 space-y-1 hover:bg-muted transition"
+          className="block rounded-lg border p-4 space-y-1 hover:bg-muted transition cursor-pointer"
         >
           <div className="font-medium">{job.title}</div>
 
@@ -94,3 +78,4 @@ export default async function MyJobsPage({
     </div>
   );
 }
+

@@ -1,22 +1,36 @@
+"use client";
+
 import { supabaseServer } from "@/lib/supabase/server";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export default function JobsPage() {
+  const params = useParams();
+  const experienceId = params?.experienceId as string | undefined;
 
-export default async function JobsPage({
-  params,
-}: {
-  params: { experienceId: string };
-}) {
-  const experienceId = params.experienceId;
+  const [jobs, setJobs] = useState<any[] | null>(null);
 
-  const { data: jobs } = await supabaseServer
-    .from("jobs")
-    .select("*")
-    .eq("status", "open")
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
+  useEffect(() => {
+    if (!experienceId || experienceId === "undefined") return;
+
+    supabaseServer
+      .from("jobs")
+      .select("*")
+      .eq("status", "open")
+      .eq("experience_id", experienceId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => setJobs(data ?? []));
+  }, [experienceId]);
+
+  // 🛡️ Guard
+  if (!experienceId) {
+    return (
+      <div className="p-6 text-sm text-muted-foreground">
+        Loading experience…
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-4">
@@ -58,4 +72,5 @@ export default async function JobsPage({
     </div>
   );
 }
+
 
