@@ -16,12 +16,15 @@ export default function MyJobsPage() {
     if (!experienceId || experienceId === "undefined") return;
 
     supabaseServer
-      .from("jobs")
-      .select("id, title, status, payout_cents, platform_fee_cents")
-      .eq("experience_id", experienceId)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setJobs(data ?? []))
-      .finally(() => setLoading(false));
+  .from("jobs")
+  .select("id, title, status, payout_cents, platform_fee_cents")
+  .eq("experience_id", experienceId)
+  .order("created_at", { ascending: false })
+  .then(({ data }) => {
+    setJobs(data ?? []);
+    setLoading(false);
+  });
+
   }, [experienceId]);
 
   // 🛡️ Guard
