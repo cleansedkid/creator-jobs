@@ -6,9 +6,19 @@ export const dynamic = "force-dynamic";
 export default async function NewJobPage({
   params,
 }: {
-  params: { experienceId: string };
+  params: Promise<{ experienceId: string }>;
 }) {
-  const { experienceId } = params;
+  const { experienceId } = await params;
+
+  // 🛡️ CRITICAL: Whop sometimes renders with the literal string "undefined"
+  // Never bind a server action with a bad experienceId.
+  if (!experienceId || experienceId === "undefined") {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
+        Loading experience…
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
@@ -21,6 +31,7 @@ export default async function NewJobPage({
 
       <h1 className="text-2xl font-semibold">Post a Job</h1>
 
+      {/* 🟡 Posting responsibility banner */}
       <div className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
         <div className="font-medium mb-1">Posting responsibly</div>
         <p>
@@ -32,16 +43,14 @@ export default async function NewJobPage({
         </p>
       </div>
 
-      <form
-        action={createJob.bind(null, experienceId)}
-        className="space-y-4"
-      >
+      <form action={createJob.bind(null, experienceId)} className="space-y-4">
         <div className="space-y-1">
           <label className="text-sm">Title</label>
           <input
             name="title"
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="Edit 5 TikTok clips"
           />
         </div>
 
@@ -51,6 +60,7 @@ export default async function NewJobPage({
             name="description"
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="Add captions, jump cuts, and export vertical MP4s"
           />
         </div>
 
@@ -58,8 +68,8 @@ export default async function NewJobPage({
           <label className="text-sm">Job Type</label>
           <select
             name="job_type"
-            defaultValue="editing"
             className="w-full rounded-md border px-3 py-2 bg-background"
+            defaultValue="editing"
           >
             <option value="editing">Editing</option>
             <option value="thumbnail">Thumbnail</option>
@@ -76,12 +86,13 @@ export default async function NewJobPage({
             min="1"
             required
             className="w-full rounded-md border px-3 py-2 bg-background"
+            placeholder="100"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full rounded-md border px-4 py-2 font-medium hover:bg-muted transition"
+          className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
         >
           Create Job
         </button>
@@ -89,4 +100,5 @@ export default async function NewJobPage({
     </div>
   );
 }
+
 
