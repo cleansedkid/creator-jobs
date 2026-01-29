@@ -16,13 +16,16 @@ export default function JobsPage() {
     if (!experienceId || experienceId === "undefined") return;
 
     supabaseClient
-      .from("jobs")
-      .select("*")
-      .eq("status", "open")
-      .eq("experience_id", experienceId)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setJobs(data ?? []))
-      .finally(() => setLoading(false));
+  .from("jobs")
+  .select("*")
+  .eq("status", "open")
+  .eq("experience_id", experienceId)
+  .order("created_at", { ascending: false })
+  .then(({ data }) => {
+    setJobs(data ?? []);
+    setLoading(false);
+  });
+
   }, [experienceId]);
 
   // 🛡️ Guards
