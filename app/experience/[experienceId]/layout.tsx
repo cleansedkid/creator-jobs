@@ -11,14 +11,8 @@ export default async function ExperienceLayout({
 }) {
   const { experienceId } = await params;
 
-  // 🛡️ HARD BLOCK — never render children with an invalid experienceId
-  if (!experienceId || experienceId === "undefined") {
-    return (
-      <div className="p-6 text-sm text-muted-foreground">
-        Loading experience…
-      </div>
-    );
-  }
+  // 🚨 DO NOT BLOCK RENDERING HERE
+  // ExperienceGuard must always mount, even if experienceId is undefined
 
   return (
     <ExperienceGuard>
@@ -26,7 +20,11 @@ export default async function ExperienceLayout({
         {/* Header */}
         <div className="px-6 pt-4">
           <Link
-            href={`/experience/${experienceId}/onboarding`}
+            href={
+              experienceId && experienceId !== "undefined"
+                ? `/experience/${experienceId}/onboarding`
+                : "#"
+            }
             className="inline-flex items-center gap-2 group transition-all"
           >
             <Image
@@ -60,6 +58,7 @@ export default async function ExperienceLayout({
     </ExperienceGuard>
   );
 }
+
 
 
 
