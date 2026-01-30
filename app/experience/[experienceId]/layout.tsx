@@ -2,21 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import ExperienceGuard from "./ExperienceGuard";
 
-export default function ExperienceLayout({
+export default async function ExperienceLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { experienceId?: string };
+  params: Promise<{ experienceId: string }>;
 }) {
-  const experienceId =
-    typeof params.experienceId === "string" &&
-    params.experienceId !== "undefined"
-      ? params.experienceId
-      : null;
+  const { experienceId } = await params;
 
-  // 🛡️ HARD BLOCK — never render children without a valid experienceId
-  if (!experienceId) {
+  // 🛡️ HARD BLOCK — never render children with an invalid experienceId
+  if (!experienceId || experienceId === "undefined") {
     return (
       <div className="p-6 text-sm text-muted-foreground">
         Loading experience…
@@ -64,5 +60,6 @@ export default function ExperienceLayout({
     </ExperienceGuard>
   );
 }
+
 
 
