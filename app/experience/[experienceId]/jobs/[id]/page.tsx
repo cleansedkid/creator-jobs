@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { whopsdk } from "@/lib/whop-sdk";
 import { getDevRole } from "@/lib/auth/role";
 
@@ -26,13 +26,17 @@ export default async function JobDetailPage({
   const { experienceId, id: jobId } = params;
   const showSubmitted = searchParams?.submitted === "1";
 
-  // 🔒 Load job — HARD scoped to experience
-  const { data: job } = await supabaseServer
-    .from("jobs")
-    .select("*")
-    .eq("id", jobId)
-    .eq("experience_id", experienceId)
-    .single();
+  const { data: job, error: jobError } = await supabaseAdmin
+  .from("jobs")
+  .select("*")
+  .eq("id", jobId)
+  .eq("experience_id", experienceId)
+  .single();
+
+if (jobError) {
+  console.error("[JOB DETAIL] job query error", jobError);
+}
+
 
   if (!job) {
     return (
@@ -64,12 +68,17 @@ export default async function JobDetailPage({
   const canReview = isDevCreator || (!devRole && isCreator);
 
   // 🔒 Submissions — HARD scoped to experience + job
-  const { data: submissions } = await supabaseServer
-    .from("submissions")
-    .select("*")
-    .eq("job_id", jobId)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
+  const { data: submissions, error: subError } = await supabaseAdmin
+  .from("submissions")
+  .select("*")
+  .eq("job_id", jobId)
+  .eq("experience_id", experienceId)
+  .order("created_at", { ascending: false });
+
+if (subError) {
+  console.error("[JOB DETAIL] submissions query error", subError);
+}
+
 
   // Back link (experience-aware)
   const h = await headers();
