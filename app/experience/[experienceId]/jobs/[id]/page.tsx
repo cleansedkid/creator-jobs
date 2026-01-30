@@ -26,17 +26,36 @@ export default async function JobDetailPage({
   const { experienceId, id: jobId } = params;
   const showSubmitted = searchParams?.submitted === "1";
 
+  // 🛡️ HARD GUARD — NEVER allow "undefined" to hit Supabase
+  if (
+    !experienceId ||
+    !jobId ||
+    experienceId === "undefined" ||
+    jobId === "undefined"
+  ) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6">
+        <p className="text-muted-foreground">Invalid job link.</p>
+        <Link
+          href={`/experience/${experienceId || ""}/jobs`}
+          className="underline text-sm"
+        >
+          Back to jobs
+        </Link>
+      </div>
+    );
+  }
+
   const { data: job, error: jobError } = await supabaseAdmin
-  .from("jobs")
-  .select("*")
-  .eq("id", jobId)
-  .eq("experience_id", experienceId)
-  .single();
+    .from("jobs")
+    .select("*")
+    .eq("id", jobId)
+    .eq("experience_id", experienceId)
+    .single();
 
-if (jobError) {
-  console.error("[JOB DETAIL] job query error", jobError);
-}
-
+  if (jobError) {
+    console.error("[JOB DETAIL] job query error", jobError);
+  }
 
   if (!job) {
     return (
@@ -69,16 +88,15 @@ if (jobError) {
 
   // 🔒 Submissions — HARD scoped to experience + job
   const { data: submissions, error: subError } = await supabaseAdmin
-  .from("submissions")
-  .select("*")
-  .eq("job_id", jobId)
-  .eq("experience_id", experienceId)
-  .order("created_at", { ascending: false });
+    .from("submissions")
+    .select("*")
+    .eq("job_id", jobId)
+    .eq("experience_id", experienceId)
+    .order("created_at", { ascending: false });
 
-if (subError) {
-  console.error("[JOB DETAIL] submissions query error", subError);
-}
-
+  if (subError) {
+    console.error("[JOB DETAIL] submissions query error", subError);
+  }
 
   // Back link (experience-aware)
   const h = await headers();
@@ -105,7 +123,9 @@ if (subError) {
       {/* Job info */}
       <div className="rounded-lg border p-4 space-y-2">
         <div className="text-lg font-semibold">{job.title}</div>
-        <div className="text-sm text-muted-foreground">{job.description}</div>
+        <div className="text-sm text-muted-foreground">
+          {job.description}
+        </div>
         <div className="text-sm">
           💰 ${(job.payout_cents / 100).toFixed(2)} • {job.job_type}
         </div>
@@ -126,7 +146,9 @@ if (subError) {
             className="space-y-3"
           >
             <label className="block">
-              <span className="text-sm text-muted-foreground">Upload file</span>
+              <span className="text-sm text-muted-foreground">
+                Upload file
+              </span>
 
               <input
                 type="file"
@@ -173,7 +195,9 @@ if (subError) {
           <div className="font-medium">Submissions</div>
 
           {(!submissions || submissions.length === 0) && (
-            <p className="text-sm text-muted-foreground">No submissions yet.</p>
+            <p className="text-sm text-muted-foreground">
+              No submissions yet.
+            </p>
           )}
 
           {submissions?.map((s: any) => (
@@ -193,7 +217,9 @@ if (subError) {
               </a>
 
               {s.note && (
-                <div className="text-sm text-muted-foreground">{s.note}</div>
+                <div className="text-sm text-muted-foreground">
+                  {s.note}
+                </div>
               )}
 
               {job.status === "open" && (
@@ -230,3 +256,4 @@ if (subError) {
     </div>
   );
 }
+

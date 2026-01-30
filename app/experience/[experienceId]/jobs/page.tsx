@@ -7,28 +7,41 @@ import { useEffect, useState } from "react";
 
 export default function JobsPage() {
   const params = useParams();
-  const experienceId = params?.experienceId as string | undefined;
+
+  // 🚨 normalize + hard-guard experienceId
+  const rawExperienceId = params?.experienceId;
+  const experienceId =
+    typeof rawExperienceId === "string" &&
+    rawExperienceId !== "undefined"
+      ? rawExperienceId
+      : null;
 
   const [jobs, setJobs] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!experienceId || experienceId === "undefined") return;
+    if (!experienceId) return;
+
+    setLoading(true);
 
     supabaseClient
-  .from("jobs")
-  .select("*")
-  .eq("status", "open")
-  .eq("experience_id", experienceId)
-  .order("created_at", { ascending: false })
-  .then(({ data }) => {
-    setJobs(data ?? []);
-    setLoading(false);
-  });
-
+      .from("jobs")
+      .select("*")
+      .eq("status", "open")
+      .eq("experience_id", experienceId)
+      .order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("[JOBS PAGE] query error", error);
+          setJobs([]);
+        } else {
+          setJobs(data ?? []);
+        }
+        setLoading(false);
+      });
   }, [experienceId]);
 
-  // 🛡️ Guards
+  // 🛡️ ABSOLUTE GUARD — never render links with bad IDs
   if (!experienceId || loading) {
     return (
       <div className="p-6 text-sm text-muted-foreground">
@@ -77,6 +90,3 @@ export default function JobsPage() {
     </div>
   );
 }
-
-
-
