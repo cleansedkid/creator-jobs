@@ -1,70 +1,98 @@
+"use client";
+
 import Link from "next/link";
-import { headers } from "next/headers";
-import { supabaseAdmin } from "@/lib/supabase/admin";
-import { whopsdk } from "@/lib/whop-sdk";
+import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabaseClient } from "@/lib/supabase/client";
 import { getDevRole } from "@/lib/auth/role";
 
-export const dynamic = "force-dynamic";
+type Job = {
+  id: string;
+  title: string;
+  description: string;
+  payout_cents: number;
+  job_type: string;
+  status: string;
+  creator_whop_user_id: string;
+};
 
-async function safeGetUserId() {
-  try {
-    const h = await headers();
-    const { userId } = await whopsdk.verifyUserToken(h);
-    return userId ?? null;
-  } catch {
-    return null;
-  }
-}
+type Submission = {
+  id: string;
+  proof_url: string;
+  note: string | null;
+  status: string;
+};
 
-function isValidExperienceId(value: unknown): value is string {
-  return typeof value === "string" && value.startsWith("exp_");
-}
+export default function JobDetailPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
 
-export default async function JobDetailPage({
-  params,
-  searchParams,
-}: {
-  params: { experienceId: string; id: string };
-  searchParams?: { submitted?: string };
-}) {
-  const { experienceId, id: jobId } = params;
-  const showSubmitted = searchParams?.submitted === "1";
+  const experienceId = params?.experienceId as string | undefined;
+  const jobId = params?.id as string | undefined;
 
-  const validExperience = isValidExperienceId(experienceId);
+  const showSubmitted = searchParams?.get("submitted") === "1";
+
+  const [job, setJob] = useState<Job | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const validExperience =
+    typeof experienceId === "string" && experienceId.startsWith("exp_");
   const validJobId = typeof jobId === "string" && jobId.length > 0;
 
-  // 🛡️ HARD GUARD — block ALL invalid navigation
+  useEffect(() => {
+    if (!validExperience || !validJobId) return;
+
+    let cancelled = false;
+
+    async function load() {
+      const { data: jobData, error: jobError } = await supabaseClient
+        .from("jobs")
+        .select("*")
+        .eq("id", jobId)
+        .eq("experience_id", experienceId)
+        .single();
+
+      if (jobError || !jobData) {
+        if (!cancelled) setJob(null);
+        setLoading(false);
+        return;
+      }
+
+      const { data: submissionData } = await supabaseClient
+        .from("submissions")
+        .select("*")
+        .eq("job_id", jobId)
+        .eq("experience_id", experienceId)
+        .order("created_at", { ascending: false });
+
+      if (!cancelled) {
+        setJob(jobData);
+        setSubmissions(submissionData ?? []);
+        setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [experienceId, jobId, validExperience, validJobId]);
+
   if (!validExperience || !validJobId) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-6">
-        <p className="text-muted-foreground">Restoring experience…</p>
-
-        {/* 🔍 DEBUG — show exactly what the server received */}
-        <pre className="mt-4 text-xs text-muted-foreground whitespace-pre-wrap">
-          {JSON.stringify({ experienceId, jobId }, null, 2)}
-        </pre>
-
-        {validExperience && (
-          <Link
-            href={`/experience/${experienceId}/jobs`}
-            className="underline text-sm"
-          >
-            Back to jobs
-          </Link>
-        )}
+      <div className="mx-auto max-w-xl px-4 py-6 text-muted-foreground">
+        Restoring experience…
       </div>
     );
   }
 
-  const { data: job, error: jobError } = await supabaseAdmin
-    .from("jobs")
-    .select("*")
-    .eq("id", jobId)
-    .eq("experience_id", experienceId)
-    .single();
-
-  if (jobError) {
-    console.error("[JOB DETAIL] job query error", jobError);
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6 text-muted-foreground">
+        Loading job…
+      </div>
+    );
   }
 
   if (!job) {
@@ -81,41 +109,19 @@ export default async function JobDetailPage({
     );
   }
 
-  const currentUserId = await safeGetUserId();
-  const isCreator =
-    currentUserId != null && job.creator_whop_user_id === currentUserId;
-
   const devRole = getDevRole();
   const isDevCreator = devRole === "creator";
   const isDevWorker = devRole === "worker";
 
-  const canSubmit =
-    (isDevWorker || (!devRole && !isCreator)) && job.status === "open";
-
-  const canReview = isDevCreator || (!devRole && isCreator);
-
-  const { data: submissions, error: subError } = await supabaseAdmin
-    .from("submissions")
-    .select("*")
-    .eq("job_id", jobId)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
-
-  if (subError) {
-    console.error("[JOB DETAIL] submissions query error", subError);
-  }
-
-  const h = await headers();
-  const referer = h.get("referer");
-
-  const backHref =
-    referer?.includes("/my-jobs") && validExperience
-      ? `/experience/${experienceId}/my-jobs`
-      : `/experience/${experienceId}/jobs`;
+  const canSubmit = isDevWorker && job.status === "open";
+  const canReview = isDevCreator;
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
-      <Link href={backHref} className="text-sm underline">
+      <Link
+        href={`/experience/${experienceId}/jobs`}
+        className="text-sm underline"
+      >
         ← Back
       </Link>
 
@@ -162,11 +168,31 @@ export default async function JobDetailPage({
         <div className="space-y-3">
           <div className="font-medium">Submissions</div>
 
-          {submissions?.map((s: any) => (
+          {submissions.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No submissions yet.
+            </p>
+          )}
+
+          {submissions.map((s) => (
             <div key={s.id} className="rounded-lg border p-4">
-              <a href={s.proof_url} target="_blank" rel="noreferrer">
+              <div className="text-sm mb-1">
+                <span className="text-muted-foreground">Status:</span>{" "}
+                {s.status}
+              </div>
+              <a
+                href={s.proof_url}
+                target="_blank"
+                rel="noreferrer"
+                className="underline text-sm break-all"
+              >
                 {s.proof_url}
               </a>
+              {s.note && (
+                <div className="text-sm text-muted-foreground mt-1">
+                  {s.note}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -174,6 +200,3 @@ export default async function JobDetailPage({
     </div>
   );
 }
-
-
-
