@@ -29,7 +29,6 @@ export default function JobDetailPage() {
 
   const experienceId = params?.experienceId as string | undefined;
   const jobId = params?.id as string | undefined;
-
   const showSubmitted = searchParams?.get("submitted") === "1";
 
   const [job, setJob] = useState<Job | null>(null);
@@ -54,7 +53,10 @@ export default function JobDetailPage() {
         .single();
 
       if (!jobData) {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setJob(null);
+          setLoading(false);
+        }
         return;
       }
 
@@ -108,16 +110,13 @@ export default function JobDetailPage() {
     );
   }
 
-  // 🔐 Permissions
   const devRole = getDevRole();
   const isDevCreator = devRole === "creator";
   const isDevWorker = devRole === "worker";
 
   const canSubmit =
-    (isDevWorker || (!devRole && job.status === "open")) &&
-    job.status === "open";
-
-  const canReview = isDevCreator;
+    (isDevWorker || (!devRole && !isDevCreator)) && job.status === "open";
+  const canReview = isDevCreator || !devRole;
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
@@ -140,9 +139,7 @@ export default function JobDetailPage() {
       {/* Job info */}
       <div className="rounded-lg border p-4 space-y-2">
         <div className="text-lg font-semibold">{job.title}</div>
-        <div className="text-sm text-muted-foreground">
-          {job.description}
-        </div>
+        <div className="text-sm text-muted-foreground">{job.description}</div>
         <div className="text-sm">
           💰 ${(job.payout_cents / 100).toFixed(2)} • {job.job_type}
         </div>
@@ -188,18 +185,16 @@ export default function JobDetailPage() {
               </div>
 
               <a
+                className="text-sm underline break-all"
                 href={s.proof_url}
                 target="_blank"
                 rel="noreferrer"
-                className="underline text-sm break-all"
               >
                 {s.proof_url}
               </a>
 
               {s.note && (
-                <div className="text-sm text-muted-foreground">
-                  {s.note}
-                </div>
+                <div className="text-sm text-muted-foreground">{s.note}</div>
               )}
 
               {job.status === "open" && (
@@ -208,14 +203,18 @@ export default function JobDetailPage() {
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
                     method="post"
                   >
-                    <button type="submit">Approve</button>
+                    <button className="rounded-md border px-3 py-2 text-sm">
+                      Approve
+                    </button>
                   </form>
 
                   <form
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/reject`}
                     method="post"
                   >
-                    <button type="submit">Reject</button>
+                    <button className="rounded-md border px-3 py-2 text-sm">
+                      Reject
+                    </button>
                   </form>
                 </div>
               )}
