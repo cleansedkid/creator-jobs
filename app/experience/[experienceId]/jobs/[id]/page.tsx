@@ -1,60 +1,98 @@
+"use client";
+
 import Link from "next/link";
-import { headers } from "next/headers";
-import { supabaseServer } from "@/lib/supabase/server"; // ✅ FIXED
-import { whopsdk } from "@/lib/whop-sdk";
+import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabaseClient } from "@/lib/supabase/client";
 import { getDevRole } from "@/lib/auth/role";
 
-export const dynamic = "force-dynamic";
+type Job = {
+  id: string;
+  title: string;
+  description: string;
+  payout_cents: number;
+  job_type: string;
+  status: string;
+  creator_whop_user_id: string;
+};
 
-async function safeGetUserId() {
-  try {
-    const h = await headers();
-    const { userId } = await whopsdk.verifyUserToken(h);
-    return userId ?? null;
-  } catch {
-    return null;
-  }
-}
+type Submission = {
+  id: string;
+  proof_url: string;
+  note: string | null;
+  status: string;
+};
 
-export default async function JobDetailPage({
-  params,
-  searchParams,
-}: {
-  params: { experienceId: string; id: string };
-  searchParams?: { submitted?: string };
-}) {
-  const { experienceId, id: jobId } = params;
-  const showSubmitted = searchParams?.submitted === "1";
+export default function JobDetailPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
 
-  // 🛑 HARD GUARD — NEVER let invalid values hit Supabase
-  if (
-    !experienceId ||
-    !jobId ||
-    experienceId === "undefined" ||
-    jobId === "undefined"
-  ) {
+  const experienceId = params?.experienceId as string | undefined;
+  const jobId = params?.id as string | undefined;
+
+  const showSubmitted = searchParams?.get("submitted") === "1";
+
+  const [job, setJob] = useState<Job | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const validExperience =
+    typeof experienceId === "string" && experienceId.startsWith("exp_");
+  const validJobId = typeof jobId === "string" && jobId.length > 0;
+
+  useEffect(() => {
+    if (!validExperience || !validJobId) return;
+
+    let cancelled = false;
+
+    async function load() {
+      const { data: jobData } = await supabaseClient
+        .from("jobs")
+        .select("*")
+        .eq("id", jobId)
+        .eq("experience_id", experienceId)
+        .single();
+
+      if (!jobData) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      const { data: submissionData } = await supabaseClient
+        .from("submissions")
+        .select("*")
+        .eq("job_id", jobId)
+        .eq("experience_id", experienceId)
+        .order("created_at", { ascending: false });
+
+      if (!cancelled) {
+        setJob(jobData);
+        setSubmissions(submissionData ?? []);
+        setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [experienceId, jobId, validExperience, validJobId]);
+
+  if (!validExperience || !validJobId) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-6">
-        <p className="text-muted-foreground">Invalid job link.</p>
-        {experienceId?.startsWith("exp_") && (
-          <Link
-            href={`/experience/${experienceId}/jobs`}
-            className="underline text-sm"
-          >
-            Back to jobs
-          </Link>
-        )}
+      <div className="mx-auto max-w-xl px-4 py-6 text-muted-foreground">
+        Restoring experience…
       </div>
     );
   }
 
-  // 🔒 Load job — HARD scoped to experience
-  const { data: job } = await supabaseServer
-    .from("jobs")
-    .select("*")
-    .eq("id", jobId)
-    .eq("experience_id", experienceId)
-    .single();
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6 text-muted-foreground">
+        Loading job…
+      </div>
+    );
+  }
 
   if (!job) {
     return (
@@ -70,39 +108,23 @@ export default async function JobDetailPage({
     );
   }
 
-  // Identity (safe: never throws)
-  const currentUserId = await safeGetUserId();
-  const isCreator =
-    currentUserId != null && job.creator_whop_user_id === currentUserId;
-
-  // Keep dev role behavior
+  // 🔐 Permissions
   const devRole = getDevRole();
   const isDevCreator = devRole === "creator";
   const isDevWorker = devRole === "worker";
 
   const canSubmit =
-    (isDevWorker || (!devRole && !isCreator)) && job.status === "open";
+    (isDevWorker || (!devRole && job.status === "open")) &&
+    job.status === "open";
 
-  const canReview = isDevCreator || (!devRole && isCreator);
-
-  // 🔒 Submissions — HARD scoped to experience + job
-  const { data: submissions } = await supabaseServer
-    .from("submissions")
-    .select("*")
-    .eq("job_id", jobId)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
-
-  // Back link (experience-aware)
-  const h = await headers();
-  const referer = h.get("referer");
-  const backHref = referer?.includes("/my-jobs")
-    ? `/experience/${experienceId}/my-jobs`
-    : `/experience/${experienceId}/jobs`;
+  const canReview = isDevCreator;
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
-      <Link href={backHref} className="text-sm underline">
+      <Link
+        href={`/experience/${experienceId}/jobs`}
+        className="text-sm underline"
+      >
         ← Back
       </Link>
 
@@ -130,7 +152,7 @@ export default async function JobDetailPage({
       </div>
 
       {/* Submit (worker view) */}
-      {canSubmit ? (
+      {canSubmit && (
         <div className="rounded-lg border p-4 space-y-3">
           <div className="font-medium">Submit work</div>
 
@@ -140,62 +162,25 @@ export default async function JobDetailPage({
             encType="multipart/form-data"
             className="space-y-3"
           >
-            <label className="block">
-              <span className="text-sm text-muted-foreground">
-                Upload file
-              </span>
-
-              <input
-                type="file"
-                name="file"
-                required
-                className="mt-2 block w-full text-sm
-                  file:mr-4
-                  file:rounded-md
-                  file:border
-                  file:bg-muted
-                  file:px-4
-                  file:py-2
-                  file:text-sm
-                  file:font-medium
-                  file:cursor-pointer
-                  file:hover:bg-muted/80
-                  cursor-pointer"
-              />
-            </label>
-
-            <textarea
-              name="note"
-              placeholder="Optional note"
-              className="w-full rounded-md border px-3 py-2 bg-background"
-            />
-
-            <button
-              type="submit"
-              className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
-            >
-              Submit
-            </button>
+            <input type="file" name="file" required />
+            <textarea name="note" placeholder="Optional note" />
+            <button type="submit">Submit</button>
           </form>
         </div>
-      ) : job.status !== "open" && !canReview ? (
-        <div className="rounded-lg border px-4 py-3 text-sm text-muted-foreground">
-          This job is closed. Submissions are no longer accepted.
-        </div>
-      ) : null}
+      )}
 
       {/* Submissions (creator view) */}
       {canReview && (
         <div className="space-y-3">
           <div className="font-medium">Submissions</div>
 
-          {(!submissions || submissions.length === 0) && (
+          {submissions.length === 0 && (
             <p className="text-sm text-muted-foreground">
               No submissions yet.
             </p>
           )}
 
-          {submissions?.map((s: any) => (
+          {submissions.map((s) => (
             <div key={s.id} className="rounded-lg border p-4 space-y-2">
               <div className="text-sm">
                 <span className="text-muted-foreground">Status:</span>{" "}
@@ -203,10 +188,10 @@ export default async function JobDetailPage({
               </div>
 
               <a
-                className="text-sm underline break-all"
                 href={s.proof_url}
                 target="_blank"
                 rel="noreferrer"
+                className="underline text-sm break-all"
               >
                 {s.proof_url}
               </a>
@@ -223,24 +208,14 @@ export default async function JobDetailPage({
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
                     method="post"
                   >
-                    <button
-                      type="submit"
-                      className="rounded-md border px-3 py-2 text-sm font-medium cursor-pointer hover:bg-muted"
-                    >
-                      Approve
-                    </button>
+                    <button type="submit">Approve</button>
                   </form>
 
                   <form
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/reject`}
                     method="post"
                   >
-                    <button
-                      type="submit"
-                      className="rounded-md border px-3 py-2 text-sm font-medium cursor-pointer hover:bg-muted"
-                    >
-                      Reject
-                    </button>
+                    <button type="submit">Reject</button>
                   </form>
                 </div>
               )}
@@ -251,3 +226,4 @@ export default async function JobDetailPage({
     </div>
   );
 }
+
