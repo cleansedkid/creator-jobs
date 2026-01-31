@@ -16,6 +16,10 @@ async function safeGetUserId() {
   }
 }
 
+function isValidExperienceId(value: unknown): value is string {
+  return typeof value === "string" && value.startsWith("exp_");
+}
+
 export default async function JobDetailPage({
   params,
   searchParams,
@@ -26,22 +30,23 @@ export default async function JobDetailPage({
   const { experienceId, id: jobId } = params;
   const showSubmitted = searchParams?.submitted === "1";
 
-  // 🛡️ HARD GUARD — NEVER allow "undefined" to hit Supabase
-  if (
-    !experienceId ||
-    !jobId ||
-    experienceId === "undefined" ||
-    jobId === "undefined"
-  ) {
+  const validExperience = isValidExperienceId(experienceId);
+  const validJobId = typeof jobId === "string" && jobId.length > 0;
+
+  // 🛡️ HARD GUARD — block ALL invalid navigation
+  if (!validExperience || !validJobId) {
     return (
       <div className="mx-auto max-w-xl px-4 py-6">
-        <p className="text-muted-foreground">Invalid job link.</p>
-        <Link
-          href={`/experience/${experienceId || ""}/jobs`}
-          className="underline text-sm"
-        >
-          Back to jobs
-        </Link>
+        <p className="text-muted-foreground">Restoring experience…</p>
+
+        {validExperience && (
+          <Link
+            href={`/experience/${experienceId}/jobs`}
+            className="underline text-sm"
+          >
+            Back to jobs
+          </Link>
+        )}
       </div>
     );
   }
@@ -71,12 +76,10 @@ export default async function JobDetailPage({
     );
   }
 
-  // Identity (safe: never throws)
   const currentUserId = await safeGetUserId();
   const isCreator =
     currentUserId != null && job.creator_whop_user_id === currentUserId;
 
-  // Keep dev role behavior
   const devRole = getDevRole();
   const isDevCreator = devRole === "creator";
   const isDevWorker = devRole === "worker";
@@ -86,7 +89,6 @@ export default async function JobDetailPage({
 
   const canReview = isDevCreator || (!devRole && isCreator);
 
-  // 🔒 Submissions — HARD scoped to experience + job
   const { data: submissions, error: subError } = await supabaseAdmin
     .from("submissions")
     .select("*")
@@ -98,12 +100,13 @@ export default async function JobDetailPage({
     console.error("[JOB DETAIL] submissions query error", subError);
   }
 
-  // Back link (experience-aware)
   const h = await headers();
   const referer = h.get("referer");
-  const backHref = referer?.includes("/my-jobs")
-    ? `/experience/${experienceId}/my-jobs`
-    : `/experience/${experienceId}/jobs`;
+
+  const backHref =
+    referer?.includes("/my-jobs") && validExperience
+      ? `/experience/${experienceId}/my-jobs`
+      : `/experience/${experienceId}/jobs`;
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
@@ -120,7 +123,6 @@ export default async function JobDetailPage({
         </div>
       )}
 
-      {/* Job info */}
       <div className="rounded-lg border p-4 space-y-2">
         <div className="text-lg font-semibold">{job.title}</div>
         <div className="text-sm text-muted-foreground">
@@ -134,8 +136,7 @@ export default async function JobDetailPage({
         </div>
       </div>
 
-      {/* Submit (worker view) */}
-      {canSubmit ? (
+      {canSubmit && (
         <div className="rounded-lg border p-4 space-y-3">
           <div className="font-medium">Submit work</div>
 
@@ -145,110 +146,22 @@ export default async function JobDetailPage({
             encType="multipart/form-data"
             className="space-y-3"
           >
-            <label className="block">
-              <span className="text-sm text-muted-foreground">
-                Upload file
-              </span>
-
-              <input
-                type="file"
-                name="file"
-                required
-                className="mt-2 block w-full text-sm
-                  file:mr-4
-                  file:rounded-md
-                  file:border
-                  file:bg-muted
-                  file:px-4
-                  file:py-2
-                  file:text-sm
-                  file:font-medium
-                  file:cursor-pointer
-                  file:hover:bg-muted/80
-                  cursor-pointer"
-              />
-            </label>
-
-            <textarea
-              name="note"
-              placeholder="Optional note"
-              className="w-full rounded-md border px-3 py-2 bg-background"
-            />
-
-            <button
-              type="submit"
-              className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
-            >
-              Submit
-            </button>
+            <input type="file" name="file" required />
+            <textarea name="note" placeholder="Optional note" />
+            <button type="submit">Submit</button>
           </form>
         </div>
-      ) : job.status !== "open" && !canReview ? (
-        <div className="rounded-lg border px-4 py-3 text-sm text-muted-foreground">
-          This job is closed. Submissions are no longer accepted.
-        </div>
-      ) : null}
+      )}
 
-      {/* Submissions (creator view) */}
       {canReview && (
         <div className="space-y-3">
           <div className="font-medium">Submissions</div>
 
-          {(!submissions || submissions.length === 0) && (
-            <p className="text-sm text-muted-foreground">
-              No submissions yet.
-            </p>
-          )}
-
           {submissions?.map((s: any) => (
-            <div key={s.id} className="rounded-lg border p-4 space-y-2">
-              <div className="text-sm">
-                <span className="text-muted-foreground">Status:</span>{" "}
-                {s.status}
-              </div>
-
-              <a
-                className="text-sm underline break-all"
-                href={s.proof_url}
-                target="_blank"
-                rel="noreferrer"
-              >
+            <div key={s.id} className="rounded-lg border p-4">
+              <a href={s.proof_url} target="_blank" rel="noreferrer">
                 {s.proof_url}
               </a>
-
-              {s.note && (
-                <div className="text-sm text-muted-foreground">
-                  {s.note}
-                </div>
-              )}
-
-              {job.status === "open" && (
-                <div className="flex gap-2 pt-2">
-                  <form
-                    action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
-                    method="post"
-                  >
-                    <button
-                      type="submit"
-                      className="rounded-md border px-3 py-2 text-sm font-medium cursor-pointer hover:bg-muted"
-                    >
-                      Approve
-                    </button>
-                  </form>
-
-                  <form
-                    action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/reject`}
-                    method="post"
-                  >
-                    <button
-                      type="submit"
-                      className="rounded-md border px-3 py-2 text-sm font-medium cursor-pointer hover:bg-muted"
-                    >
-                      Reject
-                    </button>
-                  </form>
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -256,4 +169,5 @@ export default async function JobDetailPage({
     </div>
   );
 }
+
 
