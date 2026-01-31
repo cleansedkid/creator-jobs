@@ -39,6 +39,11 @@ export default async function JobDetailPage({
       <div className="mx-auto max-w-xl px-4 py-6">
         <p className="text-muted-foreground">Restoring experience…</p>
 
+        {/* 🔍 DEBUG — show exactly what the server received */}
+        <pre className="mt-4 text-xs text-muted-foreground whitespace-pre-wrap">
+          {JSON.stringify({ experienceId, jobId }, null, 2)}
+        </pre>
+
         {validExperience && (
           <Link
             href={`/experience/${experienceId}/jobs`}
@@ -169,5 +174,6 @@ export default async function JobDetailPage({
     </div>
   );
 }
+
 
 
