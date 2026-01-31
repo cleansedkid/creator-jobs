@@ -35,10 +35,17 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const validExperience =
     typeof experienceId === "string" && experienceId.startsWith("exp_");
   const validJobId = typeof jobId === "string" && jobId.length > 0;
+
+  // 🔑 get current user (client-safe)
+  useEffect(() => {
+    const raw = document.cookie.match(/whop_user_id=([^;]+)/)?.[1];
+    if (raw) setCurrentUserId(raw);
+  }, []);
 
   useEffect(() => {
     if (!validExperience || !validJobId) return;
@@ -109,12 +116,19 @@ export default function JobDetailPage() {
     );
   }
 
+  // 🔐 OWNERSHIP LOGIC (RESTORED)
+  const isCreator =
+    currentUserId != null &&
+    job.creator_whop_user_id === currentUserId;
+
   const devRole = getDevRole();
   const isDevCreator = devRole === "creator";
   const isDevWorker = devRole === "worker";
 
-  const canSubmit = isDevWorker && job.status === "open";
-  const canReview = isDevCreator;
+  const canSubmit =
+    (isDevWorker || (!devRole && !isCreator)) && job.status === "open";
+
+  const canReview = isDevCreator || (!devRole && isCreator);
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
@@ -134,6 +148,7 @@ export default function JobDetailPage() {
         </div>
       )}
 
+      {/* Job info */}
       <div className="rounded-lg border p-4 space-y-2">
         <div className="text-lg font-semibold">{job.title}</div>
         <div className="text-sm text-muted-foreground">
@@ -147,6 +162,7 @@ export default function JobDetailPage() {
         </div>
       </div>
 
+      {/* Submit (worker) */}
       {canSubmit && (
         <div className="rounded-lg border p-4 space-y-3">
           <div className="font-medium">Submit work</div>
@@ -164,6 +180,7 @@ export default function JobDetailPage() {
         </div>
       )}
 
+      {/* Submissions (creator only) */}
       {canReview && (
         <div className="space-y-3">
           <div className="font-medium">Submissions</div>
@@ -175,11 +192,12 @@ export default function JobDetailPage() {
           )}
 
           {submissions.map((s) => (
-            <div key={s.id} className="rounded-lg border p-4">
-              <div className="text-sm mb-1">
+            <div key={s.id} className="rounded-lg border p-4 space-y-2">
+              <div className="text-sm">
                 <span className="text-muted-foreground">Status:</span>{" "}
                 {s.status}
               </div>
+
               <a
                 href={s.proof_url}
                 target="_blank"
@@ -188,9 +206,28 @@ export default function JobDetailPage() {
               >
                 {s.proof_url}
               </a>
+
               {s.note && (
-                <div className="text-sm text-muted-foreground mt-1">
+                <div className="text-sm text-muted-foreground">
                   {s.note}
+                </div>
+              )}
+
+              {job.status === "open" && (
+                <div className="flex gap-2 pt-2">
+                  <form
+                    action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
+                    method="post"
+                  >
+                    <button type="submit">Approve</button>
+                  </form>
+
+                  <form
+                    action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/reject`}
+                    method="post"
+                  >
+                    <button type="submit">Reject</button>
+                  </form>
                 </div>
               )}
             </div>
