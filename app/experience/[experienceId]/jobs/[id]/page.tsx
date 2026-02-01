@@ -74,12 +74,22 @@ useEffect(() => {
 		 return;
 	  }
  
-	  const { data: submissionData } = await supabaseClient
-		 .from("submissions")
-		 .select("*")
-		 .eq("job_id", jobId)
-		 .eq("experience_id", experienceId)
-		 .order("created_at", { ascending: false });
+	  let submissionData: any[] = [];
+
+if (
+  currentUserId != null &&
+  jobData.creator_whop_user_id === currentUserId
+) {
+  const res = await supabaseClient
+    .from("submissions")
+    .select("*")
+    .eq("job_id", jobId)
+    .eq("experience_id", experienceId)
+    .order("created_at", { ascending: false });
+
+  submissionData = res.data ?? [];
+}
+
  
 	  if (!cancelled) {
 		 setJob(jobData);
