@@ -11,15 +11,46 @@ export default function MyJobsPage() {
 
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!experienceId || experienceId === "undefined") return;
+	let cancelled = false;
+ 
+	async function loadMe() {
+	  try {
+		 const res = await fetch("/api/me");
+		 if (!res.ok) return;
+ 
+		 const data = await res.json();
+		 if (!cancelled) {
+			setCurrentUserId(data.userId ?? null);
+		 }
+	  } catch {
+		 // fail silently
+	  }
+	}
+ 
+	loadMe();
+	return () => {
+	  cancelled = true;
+	};
+ }, []);
+ 
+
+  useEffect(() => {
+	if (
+		!experienceId ||
+		experienceId === "undefined" ||
+		!currentUserId
+	 ) return;
+	 
 
     supabaseClient
   .from("jobs")
   .select("*")
   .eq("status", "open")
   .eq("experience_id", experienceId)
+  .eq("creator_whop_user_id", currentUserId)
   .order("created_at", { ascending: false })
   .then(({ data }) => {
     setJobs(data ?? []);
