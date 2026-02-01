@@ -58,7 +58,6 @@ export default async function MySubmissionsPage({
   `
   )
   .eq("worker_whop_user_id", worker_whop_user_id)
-  .eq("experience_id", experienceId)
   .order("created_at", { ascending: false });
 
 
