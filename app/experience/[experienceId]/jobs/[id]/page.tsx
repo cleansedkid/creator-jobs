@@ -1,38 +1,108 @@
+"use client";
+
+
 import Link from "next/link";
-import { headers } from "next/headers";
-import { supabaseServer } from "@/lib/supabase/server";
-import { whopsdk } from "@/lib/whop-sdk";
 import { getDevRole } from "@/lib/auth/role";
+import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabaseClient } from "@/lib/supabase/client";
+
 
 export const dynamic = "force-dynamic";
 
-async function safeGetUserId() {
-  try {
-    const h = await headers();
-    const { userId } = await whopsdk.verifyUserToken(h);
-    return userId ?? null;
-  } catch {
-    return null;
-  }
-}
 
-export default async function JobDetailPage({
-  params,
-  searchParams,
-}: {
-  params: { experienceId: string; id: string };
-  searchParams?: { submitted?: string };
-}) {
-  const { experienceId, id: jobId } = params;
-  const showSubmitted = searchParams?.submitted === "1";
 
-  // 🔒 Load job — HARD scoped to experience
-  const { data: job } = await supabaseServer
-    .from("jobs")
-    .select("*")
-    .eq("id", jobId)
-    .eq("experience_id", experienceId)
-    .single();
+export default function JobDetailPage() {
+	const params = useParams();
+	const searchParams = useSearchParams();
+ 
+	const experienceId = params?.experienceId as string | undefined;
+	const jobId = params?.id as string | undefined;
+	const showSubmitted = searchParams?.get("submitted") === "1";
+
+	const [job, setJob] = useState<any | null>(null);
+const [submissions, setSubmissions] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+useEffect(() => {
+	let cancelled = false;
+ 
+	async function loadMe() {
+	  try {
+		 const res = await fetch("/api/me");
+		 if (!res.ok) return;
+ 
+		 const data = await res.json();
+		 if (!cancelled) {
+			setCurrentUserId(data.userId ?? null);
+		 }
+	  } catch {
+		 // fail silently — user just won't be treated as creator
+	  }
+	}
+ 
+	loadMe();
+	return () => {
+	  cancelled = true;
+	};
+ }, []);
+ 
+
+useEffect(() => {
+	if (
+	  !experienceId ||
+	  !jobId ||
+	  experienceId === "undefined" ||
+	  jobId === "undefined"
+	) {
+	  return;
+	}
+ 
+	let cancelled = false;
+ 
+	async function load() {
+	  const { data: jobData } = await supabaseClient
+		 .from("jobs")
+		 .select("*")
+		 .eq("id", jobId)
+		 .eq("experience_id", experienceId)
+		 .single();
+ 
+	  if (!jobData) {
+		 if (!cancelled) setLoading(false);
+		 return;
+	  }
+ 
+	  const { data: submissionData } = await supabaseClient
+		 .from("submissions")
+		 .select("*")
+		 .eq("job_id", jobId)
+		 .eq("experience_id", experienceId)
+		 .order("created_at", { ascending: false });
+ 
+	  if (!cancelled) {
+		 setJob(jobData);
+		 setSubmissions(submissionData ?? []);
+		 setLoading(false);
+	  }
+	}
+ 
+	load();
+	return () => {
+	  cancelled = true;
+	};
+ }, [experienceId, jobId]);
+ 
+
+ if (loading) {
+	return (
+	  <div className="mx-auto max-w-xl px-4 py-6 text-muted-foreground">
+		 Loading job…
+	  </div>
+	);
+ }
+ 
 
   if (!job) {
     return (
@@ -48,35 +118,27 @@ export default async function JobDetailPage({
     );
   }
 
-  // Identity (safe: never throws)
-  const currentUserId = await safeGetUserId();
-  const isCreator =
-    currentUserId != null && job.creator_whop_user_id === currentUserId;
+  
 
   // Keep dev role behavior
   const devRole = getDevRole();
   const isDevCreator = devRole === "creator";
   const isDevWorker = devRole === "worker";
 
-  const canSubmit =
-    (isDevWorker || (!devRole && !isCreator)) && job.status === "open";
+  const isCreator =
+  currentUserId != null &&
+  job.creator_whop_user_id === currentUserId;
 
-  const canReview = isDevCreator || (!devRole && isCreator);
+const canSubmit =
+  !isCreator && job.status === "open";
 
-  // 🔒 Submissions — HARD scoped to experience + job
-  const { data: submissions } = await supabaseServer
-    .from("submissions")
-    .select("*")
-    .eq("job_id", jobId)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
+const canReview = isCreator;
 
-  // Back link (experience-aware)
-  const h = await headers();
-  const referer = h.get("referer");
-  const backHref = referer?.includes("/my-jobs")
-    ? `/experience/${experienceId}/my-jobs`
-    : `/experience/${experienceId}/jobs`;
+
+  
+
+  const backHref = `/experience/${experienceId}/jobs`;
+
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
