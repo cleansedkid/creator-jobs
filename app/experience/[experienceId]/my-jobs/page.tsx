@@ -12,13 +12,14 @@ export default function MyJobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [meLoading, setMeLoading] = useState(true);
 
   useEffect(() => {
 	let cancelled = false;
  
 	async function loadMe() {
 	  try {
-		 const res = await fetch("/api/me");
+		 const res = await fetch("/api/me", { cache: "no-store" });
 		 if (!res.ok) return;
  
 		 const data = await res.json();
@@ -27,6 +28,10 @@ export default function MyJobsPage() {
 		 }
 	  } catch {
 		 // fail silently
+	  } finally {
+		 if (!cancelled) {
+			setMeLoading(false);
+		 }
 	  }
 	}
  
@@ -57,16 +62,18 @@ export default function MyJobsPage() {
     setLoading(false);
   });
 
-  }, [experienceId]);
+}, [experienceId, currentUserId, meLoading]);
+
 
   // 🛡️ Guard
-  if (!experienceId || loading) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
-        Loading experience…
-      </div>
-    );
-  }
+  if (!experienceId || meLoading || loading) {
+	return (
+	  <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
+		 Loading experience…
+	  </div>
+	);
+ }
+ 
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-4">
