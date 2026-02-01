@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
@@ -41,7 +41,7 @@ export default async function MySubmissionsPage({
     );
   }
 
-  const { data: submissions, error } = await supabaseServer
+  const { data: submissions, error } = await supabaseAdmin
   .from("submissions")
   .select(
     `
