@@ -16,7 +16,7 @@ export async function POST(
  
 
   /* 1️⃣ Verify user */
-  const h = headers();
+  const h = await headers();
   let requesterId: string;
 
   try {
