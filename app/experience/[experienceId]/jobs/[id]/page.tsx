@@ -47,6 +47,46 @@ useEffect(() => {
 	  cancelled = true;
 	};
  }, []);
+
+ useEffect(() => {
+	if (
+	  !experienceId ||
+	  !jobId ||
+	  experienceId === "undefined" ||
+	  jobId === "undefined" ||
+	  !currentUserId
+	) {
+	  return;
+	}
+ 
+	let cancelled = false;
+ 
+	async function loadSubmissions() {
+	  try {
+		 const res = await fetch(
+			`/api/experience/${experienceId}/jobs/${jobId}/submissions`,
+			{ cache: "no-store" }
+		 );
+ 
+		 if (!res.ok) return;
+ 
+		 const data = await res.json();
+ 
+		 if (!cancelled) {
+			setSubmissions(data.submissions ?? []);
+		 }
+	  } catch {
+		 // fail silently
+	  }
+	}
+ 
+	loadSubmissions();
+ 
+	return () => {
+	  cancelled = true;
+	};
+ }, [experienceId, jobId, currentUserId]);
+ 
  
 
 useEffect(() => {
@@ -74,26 +114,11 @@ useEffect(() => {
 		 return;
 	  }
  
-	  let submissionData: any[] = [];
-
-if (
-  currentUserId != null &&
-  jobData.creator_whop_user_id === currentUserId
-) {
-  const res = await supabaseClient
-    .from("submissions")
-    .select("*")
-    .eq("job_id", jobId)
-    .eq("experience_id", experienceId)
-    .order("created_at", { ascending: false });
-
-  submissionData = res.data ?? [];
-}
+	  
 
  
 	  if (!cancelled) {
-		 setJob(jobData);
-		 setSubmissions(submissionData ?? []);
+		 setJob(jobData)
 		 setLoading(false);
 	  }
 	}
@@ -102,7 +127,8 @@ if (
 	return () => {
 	  cancelled = true;
 	};
- }, [experienceId, jobId]);
+}, [experienceId, jobId, currentUserId]);
+
  
 
  if (loading) {
