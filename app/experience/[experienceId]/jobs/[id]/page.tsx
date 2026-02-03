@@ -63,10 +63,14 @@ useEffect(() => {
  
 	async function loadSubmissions() {
 	  try {
-		 const res = await fetch(
+		const res = await fetch(
 			`/api/experience/${experienceId}/jobs/${jobId}/submissions`,
-			{ cache: "no-store" }
+			{
+			  cache: "no-store",
+			  credentials: "include", // 👈 REQUIRED
+			}
 		 );
+		 
  
 		 if (!res.ok) return;
  
