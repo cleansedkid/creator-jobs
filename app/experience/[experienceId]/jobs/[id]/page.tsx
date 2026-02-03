@@ -362,7 +362,7 @@ const canResumePayment =
 
               <button
                 onClick={handleResumePayment}
-                className="w-full rounded-md border px-4 py-2 font-medium hover:bg-muted transition"
+                 className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
               >
                 Resume Payment
               </button>
