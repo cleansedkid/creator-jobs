@@ -25,6 +25,24 @@ const [submissions, setSubmissions] = useState<any[]>([]);
 const [loading, setLoading] = useState(true);
 const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+const handleResumePayment = async () => {
+	if (!experienceId || !jobId) return;
+ 
+	const res = await fetch(
+	  `/api/experience/${experienceId}/jobs/${jobId}/resume-payment`,
+	  { method: "POST" }
+	);
+ 
+	if (!res.ok) {
+	  alert("Unable to resume payment.");
+	  return;
+	}
+ 
+	const data = await res.json();
+	window.location.href = data.purchase_url;
+ };
+ 
+
 useEffect(() => {
 	let cancelled = false;
  
@@ -174,6 +192,21 @@ const canSubmit =
 
 const canReview = isCreator;
 
+const paymentStarted =
+  job.payment_status === "requires_payment" &&
+  !!job.whop_checkout_id;
+
+const canApprove =
+  isCreator &&
+  job.status === "open" &&
+  !job.approved_submission_id &&
+  !paymentStarted;
+
+const canResumePayment =
+  isCreator &&
+  paymentStarted;
+
+
 
   
 
@@ -289,7 +322,7 @@ const canReview = isCreator;
                 <div className="text-sm text-muted-foreground">{s.note}</div>
               )}
 
-              {job.status === "open" && (
+{canApprove && (
                 <div className="flex gap-2 pt-2">
                   <form
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
@@ -317,7 +350,25 @@ const canReview = isCreator;
                 </div>
               )}
             </div>
+			
           ))}
+			           {canResumePayment && (
+            <div className="rounded-lg border p-4 space-y-2">
+              <div className="font-medium">Payment not completed</div>
+
+              <p className="text-sm text-muted-foreground">
+                You already approved a submission. Finish payment to close this job.
+              </p>
+
+              <button
+                onClick={handleResumePayment}
+                className="w-full rounded-md border px-4 py-2 font-medium hover:bg-muted transition"
+              >
+                Resume Payment
+              </button>
+            </div>
+          )}
+
         </div>
       )}
     </div>
