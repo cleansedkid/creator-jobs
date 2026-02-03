@@ -19,16 +19,17 @@ export async function POST(request: NextRequest): Promise<Response> {
     return new Response("Invalid webhook", { status: 400 });
   }
 
-  console.log("[WEBHOOK] type =", webhookData.type);
+  const eventType = webhookData.type as string;
 
-const isPaymentSucceeded =
-  webhookData.type === "payment_succeeded" ||
-  webhookData.type === "payment.succeeded";
+console.log("[WEBHOOK] type =", eventType);
 
-if (isPaymentSucceeded) {
+if (
+  eventType === "payment_succeeded" ||
+  eventType === "payment.succeeded"
+) {
   waitUntil(handlePaymentSucceeded(webhookData.data as Payment));
 } else {
-  console.log("[WEBHOOK] ignored event", webhookData.type);
+  console.log("[WEBHOOK] ignored event", eventType);
 }
 
 
