@@ -88,10 +88,14 @@ const { data: job } = await supabaseServer
   .single();
 
 
-if (!job) {
-console.error("[PAYMENT] ❌ Job not found", { jobId, experienceId });
-return;
-}
+  if (!job) {
+	console.error("[PAYMENT] ❌ Job not found", {
+	  checkoutId: checkout?.id,
+	  metadata,
+	});
+	return;
+ }
+ 
 
     
     // Idempotency guard
