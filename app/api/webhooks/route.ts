@@ -90,8 +90,7 @@ const { data: job } = await supabaseServer
 
   if (!job) {
 	console.error("[PAYMENT] ❌ Job not found", {
-	  checkoutId: checkout?.id,
-	  metadata,
+	  checkoutId,
 	});
 	return;
  }
