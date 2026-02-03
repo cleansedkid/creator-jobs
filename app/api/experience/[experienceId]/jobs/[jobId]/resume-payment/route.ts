@@ -4,14 +4,16 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export async function POST(
-  req: NextRequest,
-  {
-    params,
-  }: {
-    params: { experienceId: string; jobId: string };
-  }
-) {
-  const { experienceId, jobId } = params;
+	req: NextRequest,
+	context: {
+	  params: Promise<{
+		 experienceId: string;
+		 jobId: string;
+	  }>;
+	}
+ ) {
+	const { experienceId, jobId } = await context.params;
+ 
 
   /* 1️⃣ Verify user */
   const h = headers();
