@@ -101,12 +101,22 @@ export async function POST(
   const totalChargeUsd = Number((totalChargeCents / 100).toFixed(2));
 
   /* -------------------------------------------------------
-   * 5. IMPORTANT: Return to EXPERIENCE route
-   * ----------------------------------------------------- */
-  const returnUrl =
-    process.env.NODE_ENV === "production"
-      ? `https://${experienceId}.apps.whop.com/experience/${experienceId}/my-jobs?payment=success`
-      : `http://localhost:3000/experience/${experienceId}/my-jobs?payment=success`;
+ * 5. IMPORTANT: Return to SAME iframe origin
+ * ----------------------------------------------------- */
+const origin =
+h.get("origin") ??
+h.get("x-forwarded-origin") ??
+h.get("referer")?.split("/").slice(0, 3).join("/");
+
+if (!origin) {
+return NextResponse.json(
+  { error: "Unable to determine iframe origin" },
+  { status: 500 }
+);
+}
+
+const returnUrl = `${origin}/experience/${experienceId}/my-jobs?payment=success`;
+
 
   /* -------------------------------------------------------
    * 6. Create Whop checkout

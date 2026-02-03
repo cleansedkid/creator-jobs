@@ -5,6 +5,9 @@ import { whopsdk } from "@/lib/whop-sdk";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest): Promise<Response> {
+	console.log("🔥 WEBHOOK HIT");
+
+
   const body = await request.text();
   const headers = Object.fromEntries(request.headers);
 
@@ -16,8 +19,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     return new Response("Invalid webhook", { status: 400 });
   }
 
-  if (webhookData.type === "payment.succeeded") {
-    waitUntil(handlePaymentSucceeded(webhookData.data));
+  if (webhookData.type === "payment_succeeded" as any) {
+   waitUntil(handlePaymentSucceeded(webhookData.data as Payment));
   }
 
   return new Response("OK", { status: 200 });
