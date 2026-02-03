@@ -25,6 +25,24 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 async function handlePaymentSucceeded(payment: Payment) {
   try {
+	// 🔐 Webhook-level idempotency (REQUIRED)
+const { data: processed } = await supabaseServer
+.from("processed_webhooks")
+.select("id")
+.eq("id", payment.id)
+.maybeSingle();
+
+if (processed) {
+console.log("[WEBHOOK] ⏭ Already processed", payment.id);
+return;
+}
+
+// lock immediately
+await supabaseServer.from("processed_webhooks").insert({
+id: payment.id,
+type: "payment.succeeded",
+});
+
 	const p = payment as unknown as Record<string, any>;
 
 	// Whop sends a checkout identifier, but the SDK typings may not expose it.
