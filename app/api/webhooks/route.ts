@@ -19,9 +19,18 @@ export async function POST(request: NextRequest): Promise<Response> {
     return new Response("Invalid webhook", { status: 400 });
   }
 
-  if (webhookData.type === "payment_succeeded" as any) {
-   waitUntil(handlePaymentSucceeded(webhookData.data as Payment));
-  }
+  console.log("[WEBHOOK] type =", webhookData.type);
+
+const isPaymentSucceeded =
+  webhookData.type === "payment_succeeded" ||
+  webhookData.type === "payment.succeeded";
+
+if (isPaymentSucceeded) {
+  waitUntil(handlePaymentSucceeded(webhookData.data as Payment));
+} else {
+  console.log("[WEBHOOK] ignored event", webhookData.type);
+}
+
 
   return new Response("OK", { status: 200 });
 }
@@ -46,37 +55,37 @@ id: payment.id,
 type: "payment.succeeded",
 });
 
-const checkout = (payment as any).checkout;
-const metadata = checkout?.metadata;
+const p = payment as any;
 
-const jobId = metadata?.jobId;
-const experienceId = metadata?.experienceId;
+const checkoutId =
+  p.checkout_id ||
+  p.checkoutId ||
+  p.checkout_configuration_id ||
+  p.checkoutConfigurationId ||
+  p.checkout?.id;
 
-if (!jobId || !experienceId) {
-  console.error(
-    "[PAYMENT] ❌ Missing jobId or experienceId in checkout metadata",
-    payment.id,
-    metadata
-  );
+if (!checkoutId) {
+  console.error("[PAYMENT] ❌ Missing checkout_id on payment", payment.id, p);
   return;
 }
 
 
+
 const { data: job } = await supabaseServer
-.from("jobs")
-.select(
-  `
-  id,
-  payment_status,
-  whop_payment_id,
-  approved_submission_id,
-  payout_cents,
-  experience_id
-  `
-)
-.eq("id", jobId)
-.eq("experience_id", experienceId)
-.single();
+  .from("jobs")
+  .select(
+    `
+    id,
+    payment_status,
+    whop_payment_id,
+    approved_submission_id,
+    payout_cents,
+    experience_id
+    `
+  )
+  .eq("whop_checkout_id", checkoutId)
+  .single();
+
 
 if (!job) {
 console.error("[PAYMENT] ❌ Job not found", { jobId, experienceId });
