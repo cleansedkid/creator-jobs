@@ -55,19 +55,22 @@ async function handlePaymentSucceeded(payment: Payment) {
  
 	
 
-const p = payment as any;
 
-const checkoutId =
-  p.checkout_id ||
-  p.checkoutId ||
-  p.checkout_configuration_id ||
-  p.checkoutConfigurationId ||
-  p.checkout?.id;
 
-if (!checkoutId) {
-  console.error("[PAYMENT] ❌ Missing checkout_id on payment", payment.id, p);
+const metadata = payment.metadata as any;
+
+const jobId = metadata?.jobId;
+const experienceId = metadata?.experienceId;
+
+if (!jobId || !experienceId) {
+  console.error(
+    "[PAYMENT] ❌ Missing jobId or experienceId in payment metadata",
+    payment.id,
+    metadata
+  );
   return;
 }
+
 
 
 
@@ -83,16 +86,19 @@ const { data: job } = await supabaseServer
     experience_id
     `
   )
-  .eq("whop_checkout_id", checkoutId)
+  .eq("id", jobId)
+.eq("experience_id", experienceId)
   .single();
 
 
   if (!job) {
 	console.error("[PAYMENT] ❌ Job not found", {
-	  checkoutId,
+	  jobId,
+	  experienceId,
 	});
 	return;
  }
+ 
  
 
     
