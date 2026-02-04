@@ -5,104 +5,76 @@ import { whopsdk } from "@/lib/whop-sdk";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest): Promise<Response> {
-	console.error("🟣 WEBHOOK POST HIT (RAW)");
-
-
-
+	console.error("🟣 WEBHOOK HIT TOP", {
+		vercelEnv: process.env.VERCEL_ENV,
+		vercelUrl: process.env.VERCEL_URL,
+		commit: process.env.VERCEL_GIT_COMMIT_SHA,
+	 });
+	 
   const body = await request.text();
   const headers = Object.fromEntries(request.headers);
 
   let webhookData;
   try {
     webhookData = whopsdk.webhooks.unwrap(body, { headers });
-	 console.error("🟢 WEBHOOK UNWRAP OK", webhookData?.type);
   } catch (err) {
     console.error("[WEBHOOK] ❌ Invalid signature", err);
     return new Response("Invalid webhook", { status: 400 });
   }
 
-  const eventType = webhookData.type as string;
-
-  console.error("🔥🔥🔥 WEBHOOK EVENT RECEIVED:", eventType);
-
-  // TEMP DEBUG: run handler for ALL events so we can see what Whop actually sends
-  waitUntil(handlePaymentSucceeded(webhookData.data as any));
-  
-
+  if (webhookData.type === "payment.succeeded") {
+    waitUntil(handlePaymentSucceeded(webhookData.data));
+  }
 
   return new Response("OK", { status: 200 });
 }
 
 async function handlePaymentSucceeded(payment: Payment) {
   try {
-	console.error(
-      "🔬 REAL PAYMENT PAYLOAD",
-      JSON.stringify(payment, null, 2)
-    );
+	const p = payment as unknown as Record<string, any>;
 
-	    // ✅ Webhook idempotency (only skip if we already COMPLETED the full workflow)
-		 const { data: processed } = await supabaseServer
-		 .from("processed_webhooks")
-		 .select("id")
-		 .eq("id", payment.id)
-		 .maybeSingle();
- 
-	  if (processed) {
-		 console.log("[WEBHOOK] ⏭ Already completed", payment.id);
-		 return;
-	  }
- 
+	console.error("🔍 PAYMENT KEYS", Object.keys(p));
+console.error("🔍 PAYMENT RAW", p);
+
+
+	// Whop sends a checkout identifier, but the SDK typings may not expose it.
+	// Try the common possibilities.
+	const checkoutId =
+	  p.checkout_id ||
+	  p.checkoutId ||
+	  p.checkout_configuration_id ||
+	  p.checkoutConfigurationId ||
+	  p.checkout?.id ||
+	  null;
 	
 
+    if (!checkoutId) {
+      console.error("[PAYMENT] ❌ Missing checkout_id", payment.id);
+      return;
+    }
 
+    /* -------------------------------------------------
+     * 1️⃣ Load job by checkout ID (SOURCE OF TRUTH)
+     * ------------------------------------------------- */
+    const { data: job } = await supabaseServer
+      .from("jobs")
+      .select(
+        `
+        id,
+        payment_status,
+        whop_payment_id,
+        approved_submission_id,
+        payout_cents
+        `
+      )
+      .eq("whop_checkout_id", checkoutId)
+      .single();
 
-	  const paymentAny = payment as any;
-	  const metadata = paymentAny.metadata;
-	  
+    if (!job) {
+      console.error("[PAYMENT] ❌ No job found for checkout", checkoutId);
+      return;
+    }
 
-const jobId = metadata?.jobId;
-const experienceId = metadata?.experienceId;
-
-if (!jobId || !experienceId) {
-  console.error(
-    "[PAYMENT] ❌ Missing jobId or experienceId in payment metadata",
-    payment.id,
-    metadata
-  );
-  return;
-}
-
-
-
-
-const { data: job } = await supabaseServer
-  .from("jobs")
-  .select(
-    `
-    id,
-    payment_status,
-    whop_payment_id,
-    approved_submission_id,
-    payout_cents,
-    experience_id
-    `
-  )
-  .eq("id", jobId)
-.eq("experience_id", experienceId)
-  .single();
-
-
-  if (!job) {
-	console.error("[PAYMENT] ❌ Job not found", {
-	  jobId,
-	  experienceId,
-	});
-	return;
- }
- 
- 
-
-    
     // Idempotency guard
     if (
       job.payment_status === "paid" ||
@@ -200,23 +172,7 @@ const { data: job } = await supabaseServer
         transferErr
       );
     }
-	     // ✅ Mark webhook as COMPLETED only after we've finished the workflow
-		  const { error: processedErr } = await supabaseServer
-		  .from("processed_webhooks")
-		  .insert({
-			 id: payment.id,
-			 type: "payment.succeeded",
-		  });
-  
-		if (processedErr) {
-		  console.error("[WEBHOOK] ❌ Failed to record processed webhook", processedErr);
-		  // NOTE: Don't return/error here — job is already updated, this is just bookkeeping.
-		}
-  
   } catch (err) {
     console.error("[PAYMENT SUCCEEDED] ❌ Handler crashed", err);
   }
 }
-
-
-
