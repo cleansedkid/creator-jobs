@@ -23,16 +23,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const eventType = webhookData.type as string;
 
-console.log("[WEBHOOK] type =", eventType);
+  console.error("🔥🔥🔥 WEBHOOK EVENT RECEIVED:", eventType);
 
-if (
-  eventType === "payment_succeeded" ||
-  eventType === "payment.succeeded"
-) {
-  waitUntil(handlePaymentSucceeded(webhookData.data as Payment));
-} else {
-  console.log("[WEBHOOK] ignored event", eventType);
-}
+  // TEMP DEBUG: run handler for ALL events so we can see what Whop actually sends
+  waitUntil(handlePaymentSucceeded(webhookData.data as any));
+  
 
 
   return new Response("OK", { status: 200 });
