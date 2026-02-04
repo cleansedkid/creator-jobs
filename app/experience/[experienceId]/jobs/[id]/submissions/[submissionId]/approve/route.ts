@@ -140,6 +140,13 @@ const returnUrl = `${origin}/experience/${experienceId}/my-jobs?payment=success`
 	  initial_price: totalChargeUsd,
 	},
  } as any);
+
+ console.error("🧾 CHECKOUT CREATED", {
+	checkoutId: checkout?.id,
+	planId: (checkout as any)?.plan?.id,
+	purchaseUrl: checkout?.purchase_url,
+ });
+ 
  
  
   /* -------------------------------------------------------

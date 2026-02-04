@@ -35,6 +35,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 async function handlePaymentSucceeded(payment: Payment) {
   try {
+	console.error(
+      "🔬 REAL PAYMENT PAYLOAD",
+      JSON.stringify(payment, null, 2)
+    );
 
 	    // ✅ Webhook idempotency (only skip if we already COMPLETED the full workflow)
 		 const { data: processed } = await supabaseServer
