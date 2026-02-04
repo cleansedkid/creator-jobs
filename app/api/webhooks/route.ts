@@ -57,7 +57,9 @@ async function handlePaymentSucceeded(payment: Payment) {
 
 
 
-const metadata = payment.metadata as any;
+	  const paymentAny = payment as any;
+	  const metadata = paymentAny.metadata;
+	  
 
 const jobId = metadata?.jobId;
 const experienceId = metadata?.experienceId;
