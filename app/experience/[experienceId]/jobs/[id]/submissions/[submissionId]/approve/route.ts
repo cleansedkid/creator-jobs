@@ -122,23 +122,25 @@ const returnUrl = `${origin}/experience/${experienceId}/my-jobs?payment=success`
    * 6. Create Whop checkout
    * ----------------------------------------------------- */
   const checkout = await whopsdk.checkoutConfigurations.create({
-	mode: "payment",
 	redirect_url: returnUrl,
- 
-	// 👇 THIS is what reaches the payment webhook
-	payment_metadata: {
+	metadata: {
 	  jobId,
-	  experienceId,
 	  submissionId,
+	  workerWhopUserId: submission.worker_whop_user_id,
+	  payoutCents,
+	  platformFeeBps,
+	  platformFeeCents,
+	  totalChargeCents,
+	  experienceId,
 	},
- 
 	plan: {
 	  company_id: process.env.WHOP_COMPANY_ID!,
 	  currency: "usd",
 	  plan_type: "one_time",
 	  initial_price: totalChargeUsd,
 	},
- });
+ } as any);
+ 
  
   /* -------------------------------------------------------
    * 7. Store pending payment state
