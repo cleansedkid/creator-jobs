@@ -40,23 +40,20 @@ if (
 
 async function handlePaymentSucceeded(payment: Payment) {
   try {
-	// 🔐 Webhook-level idempotency (REQUIRED)
-const { data: processed } = await supabaseServer
-.from("processed_webhooks")
-.select("id")
-.eq("id", payment.id)
-.maybeSingle();
 
-if (processed) {
-console.log("[WEBHOOK] ⏭ Already processed", payment.id);
-return;
-}
-
-// lock immediately
-await supabaseServer.from("processed_webhooks").insert({
-id: payment.id,
-type: "payment.succeeded",
-});
+	    // ✅ Webhook idempotency (only skip if we already COMPLETED the full workflow)
+		 const { data: processed } = await supabaseServer
+		 .from("processed_webhooks")
+		 .select("id")
+		 .eq("id", payment.id)
+		 .maybeSingle();
+ 
+	  if (processed) {
+		 console.log("[WEBHOOK] ⏭ Already completed", payment.id);
+		 return;
+	  }
+ 
+	
 
 const p = payment as any;
 
@@ -196,6 +193,19 @@ const { data: job } = await supabaseServer
         transferErr
       );
     }
+	     // ✅ Mark webhook as COMPLETED only after we've finished the workflow
+		  const { error: processedErr } = await supabaseServer
+		  .from("processed_webhooks")
+		  .insert({
+			 id: payment.id,
+			 type: "payment.succeeded",
+		  });
+  
+		if (processedErr) {
+		  console.error("[WEBHOOK] ❌ Failed to record processed webhook", processedErr);
+		  // NOTE: Don't return/error here — job is already updated, this is just bookkeeping.
+		}
+  
   } catch (err) {
     console.error("[PAYMENT SUCCEEDED] ❌ Handler crashed", err);
   }
