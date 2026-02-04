@@ -5,7 +5,8 @@ import { whopsdk } from "@/lib/whop-sdk";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest): Promise<Response> {
-	console.log("🔥 WEBHOOK HIT");
+	console.error("🟣 WEBHOOK POST HIT (RAW)");
+
 
 
   const body = await request.text();
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   let webhookData;
   try {
     webhookData = whopsdk.webhooks.unwrap(body, { headers });
+	 console.error("🟢 WEBHOOK UNWRAP OK", webhookData?.type);
   } catch (err) {
     console.error("[WEBHOOK] ❌ Invalid signature", err);
     return new Response("Invalid webhook", { status: 400 });
