@@ -37,43 +37,48 @@ async function handlePaymentSucceeded(payment: Payment) {
 console.error("🔍 PAYMENT RAW", p);
 
 
-	// Whop sends a checkout identifier, but the SDK typings may not expose it.
-	// Try the common possibilities.
-	const checkoutId =
-	  p.checkout_id ||
-	  p.checkoutId ||
-	  p.checkout_configuration_id ||
-	  p.checkoutConfigurationId ||
-	  p.checkout?.id ||
-	  null;
 	
-
-    if (!checkoutId) {
-      console.error("[PAYMENT] ❌ Missing checkout_id", payment.id);
-      return;
-    }
-
     /* -------------------------------------------------
-     * 1️⃣ Load job by checkout ID (SOURCE OF TRUTH)
-     * ------------------------------------------------- */
-    const { data: job } = await supabaseServer
-      .from("jobs")
-      .select(
-        `
-        id,
-        payment_status,
-        whop_payment_id,
-        approved_submission_id,
-        payout_cents
-        `
-      )
-      .eq("whop_checkout_id", checkoutId)
-      .single();
+ * 1️⃣ Load job by metadata (SOURCE OF TRUTH)
+ * ------------------------------------------------- */
+const meta = (p.metadata ?? {}) as any;
 
-    if (!job) {
-      console.error("[PAYMENT] ❌ No job found for checkout", checkoutId);
-      return;
-    }
+const jobId = meta.jobId;
+const experienceId = meta.experienceId;
+
+if (!jobId || !experienceId) {
+  console.error(
+    "[PAYMENT] ❌ Missing jobId or experienceId in metadata",
+    payment.id,
+    meta
+  );
+  return;
+}
+
+const { data: job } = await supabaseServer
+  .from("jobs")
+  .select(
+    `
+    id,
+    experience_id,
+    payment_status,
+    whop_payment_id,
+    approved_submission_id,
+    payout_cents
+    `
+  )
+  .eq("id", jobId)
+  .eq("experience_id", experienceId)
+  .single();
+
+if (!job) {
+  console.error("[PAYMENT] ❌ No job found for metadata", {
+    jobId,
+    experienceId,
+  });
+  return;
+}
+
 
     // Idempotency guard
     if (
