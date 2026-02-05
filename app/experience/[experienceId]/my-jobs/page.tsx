@@ -51,12 +51,11 @@ export default function MyJobsPage() {
 	 
 
     supabaseClient
-  .from("jobs")
-  .select("*")
-  .eq("status", "open")
-  .eq("experience_id", experienceId)
-  .eq("creator_whop_user_id", currentUserId)
-  .order("created_at", { ascending: false })
+	 .from("jobs")
+	 .select("*")
+	 .eq("experience_id", experienceId)
+	 .eq("creator_whop_user_id", currentUserId)
+	 .order("created_at", { ascending: false })	 
   .then(({ data }) => {
     setJobs(data ?? []);
     setLoading(false);
@@ -102,9 +101,16 @@ export default function MyJobsPage() {
         >
           <div className="font-medium">{job.title}</div>
 
-          <div className="text-sm text-muted-foreground">
-            Status: {job.status}
-          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+  <span>Status: {job.status}</span>
+
+  {job.status === "closed" && job.payment_status === "paid" && (
+    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+      Paid
+    </span>
+  )}
+</div>
+
 
           <div className="text-sm">
             💰 ${(job.payout_cents / 100).toFixed(2)}
