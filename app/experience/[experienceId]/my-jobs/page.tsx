@@ -76,6 +76,13 @@ export default function MyJobsPage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-4">
+		<Link
+  href={`/experience/${experienceId}/onboarding`}
+  className="text-sm text-muted-foreground hover:underline"
+>
+  ← Back to home
+</Link>
+
       <div className="flex items-start justify-between gap-4">
   <div>
     <h1 className="text-lg font-semibold">My Jobs</h1>
