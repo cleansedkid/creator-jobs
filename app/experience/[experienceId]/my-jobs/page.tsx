@@ -76,21 +76,28 @@ export default function MyJobsPage() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">My Jobs</h1>
+      <div className="flex items-start justify-between gap-4">
+  <div>
+    <h1 className="text-lg font-semibold">My Jobs</h1>
+    <p className="text-sm text-muted-foreground">
+      Jobs you’ve posted in this community.
+    </p>
+  </div>
 
-        <Link
-          href={`/experience/${experienceId}/my-jobs/new`}
-          className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted transition cursor-pointer"
-        >
-          + New Job
-        </Link>
-      </div>
+  <Link
+    href={`/experience/${experienceId}/my-jobs/new`}
+    className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted transition cursor-pointer whitespace-nowrap"
+  >
+    + New Job
+  </Link>
+</div>
+
 
       {jobs.length === 0 && (
         <div className="text-sm text-muted-foreground">
-          You haven’t posted any jobs yet.
-        </div>
+		  You haven’t posted any jobs yet. Jobs you post will appear here for tracking and payment history.
+		</div>
+		
       )}
 
       {jobs.map((job) => (
@@ -101,15 +108,24 @@ export default function MyJobsPage() {
         >
           <div className="font-medium">{job.title}</div>
 
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-  <span>Status: {job.status}</span>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+  <span className="rounded-full border px-2 py-0.5">
+    {job.status === "open" ? "Open" : "Closed"}
+  </span>
 
-  {job.status === "closed" && job.payment_status === "paid" && (
-    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+  {job.payment_status === "paid" && (
+    <span className="rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-700">
       Paid
     </span>
   )}
+
+  {job.payment_status === "requires_payment" && (
+    <span className="rounded-full bg-yellow-100 px-2 py-0.5 font-medium text-yellow-700">
+      Awaiting payment
+    </span>
+  )}
 </div>
+
 
 
           <div className="text-sm">
