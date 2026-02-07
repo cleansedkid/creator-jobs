@@ -33,7 +33,7 @@ export default function Page({
         </Link>
       </div>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="mt-2 text-sm text-muted-foreground">
   <span className="font-medium text-foreground">Note:</span> You’re not locked into one role.
   Anyone in this community can post jobs and submit work.
 </p>
