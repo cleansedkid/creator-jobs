@@ -333,10 +333,8 @@ const canResumePayment =
       {/* Submissions (creator view) */}
       {canReview && (
         <div className="space-y-3">
-          <div className="font-medium">Submissions received</div>
-<p className="text-sm text-muted-foreground">
-  Review submitted work from community members below.
-</p>
+          <div className="font-medium">Submissions</div>
+
 
 
           {(!submissions || submissions.length === 0) && (
