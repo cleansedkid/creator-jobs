@@ -219,6 +219,20 @@ const canResumePayment =
         ← Back
       </Link>
 
+		{/* Job context */}
+<div className="rounded-lg border px-4 py-3 space-y-1 bg-muted/30">
+  <div className="text-sm">
+    <span className="font-medium">Job posted by:</span>{" "}
+    {isCreator ? "You" : "A community member"}
+  </div>
+
+  <div className="text-sm">
+    <span className="font-medium">Your role:</span>{" "}
+    {isCreator ? "Job poster" : "Applicant"}
+  </div>
+</div>
+
+
       {showSubmitted && (
         <div className="rounded-lg border px-4 py-3 text-sm">
           <div className="font-medium">✅ Submission sent.</div>
@@ -235,15 +249,35 @@ const canResumePayment =
         <div className="text-sm">
           💰 ${(job.payout_cents / 100).toFixed(2)} • {job.job_type}
         </div>
-        <div className="text-xs text-muted-foreground">
-          Status: {job.status}
-        </div>
+        <div className="flex gap-2 text-xs">
+  <span className="rounded-full border px-2 py-0.5">
+    Status: {job.status}
+  </span>
+
+  {job.payment_status === "paid" && (
+    <span className="rounded-full border px-2 py-0.5 bg-green-50 text-green-700">
+      Paid
+    </span>
+  )}
+
+  {job.payment_status === "requires_payment" && (
+    <span className="rounded-full border px-2 py-0.5 bg-yellow-50 text-yellow-700">
+      Awaiting payment
+    </span>
+  )}
+</div>
+
       </div>
 
       {/* Submit (worker view) */}
       {canSubmit ? (
         <div className="rounded-lg border p-4 space-y-3">
-          <div className="font-medium">Submit work</div>
+          <div className="font-medium">Submit your work</div>
+<p className="text-sm text-muted-foreground">
+  Upload your completed work, portfolio, or a document explaining your submission.
+  You may upload a file and/or include a short note describing what you did.
+</p>
+
 
           <form
             action={`/experience/${experienceId}/jobs/${jobId}/submit`}
@@ -252,7 +286,10 @@ const canResumePayment =
             className="space-y-3"
           >
             <label className="block">
-              <span className="text-sm text-muted-foreground">Upload file</span>
+				<span className="text-sm text-muted-foreground">
+  Upload file (image or PDF)
+</span>
+
 
               <input
                 type="file"
@@ -275,7 +312,7 @@ const canResumePayment =
 
             <textarea
               name="note"
-              placeholder="Optional note"
+              placeholder="Optional note explaining your work or linking to a portfolio"
               className="w-full rounded-md border px-3 py-2 bg-background"
             />
 
@@ -296,10 +333,17 @@ const canResumePayment =
       {/* Submissions (creator view) */}
       {canReview && (
         <div className="space-y-3">
-          <div className="font-medium">Submissions</div>
+          <div className="font-medium">Submissions received</div>
+<p className="text-sm text-muted-foreground">
+  Review submitted work from community members below.
+</p>
+
 
           {(!submissions || submissions.length === 0) && (
-            <p className="text-sm text-muted-foreground">No submissions yet.</p>
+            <p className="text-sm text-muted-foreground">
+				No submissions yet. Community members submitted work will appear here.
+			 </p>
+			 
           )}
 
           {submissions?.map((s: any) => (
