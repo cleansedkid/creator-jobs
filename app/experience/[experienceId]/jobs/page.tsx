@@ -54,17 +54,24 @@ export default function JobsPage() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Jobs</h1>
+		  <p className="text-sm text-muted-foreground">
+  Paid jobs posted by members of this community.
+</p>
+
 
         <Link
           href={`/experience/${experienceId}/my-submissions`}
           className="text-sm underline"
         >
-          My Submissions
+          My Submissions →
         </Link>
       </div>
 
       {jobs?.length === 0 && (
-        <p className="text-muted-foreground">No jobs yet.</p>
+        <p className="text-muted-foreground">
+		  No jobs yet. Community members can post paid jobs here.
+		</p>
+		
       )}
 
       {jobs?.map((job) => (
@@ -77,10 +84,19 @@ export default function JobsPage() {
               {job.title}
             </Link>
           </h2>
+			 <p className="text-sm text-muted-foreground">
+  {job.description}
+</p>
+          <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
+  <span className="rounded-full border px-2 py-0.5">
+    Open
+  </span>
 
-          <p className="text-sm text-muted-foreground">
-            {job.description}
-          </p>
+  <span className="rounded-full border px-2 py-0.5">
+    Paid task
+  </span>
+</div>
+
 
           <p className="mt-2 text-sm">
             💰 ${(job.payout_cents / 100).toFixed(2)}
