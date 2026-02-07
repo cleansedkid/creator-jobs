@@ -67,7 +67,8 @@ export default function JobsPage() {
         </Link>
       </div>
 
-      {jobs?.length === 0 && (
+      
+		{jobs?.length === 0 && (
         <p className="text-muted-foreground">
 		  No jobs yet. Community members can post paid jobs here.
 		</p>
