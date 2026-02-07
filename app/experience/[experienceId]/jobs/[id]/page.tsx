@@ -228,7 +228,7 @@ const canResumePayment =
 
   <div className="text-sm">
     <span className="font-medium">Your role:</span>{" "}
-    {isCreator ? "Job poster" : "Applicant"}
+    {isCreator ? "Job poster" : "Worker"}
   </div>
 </div>
 
