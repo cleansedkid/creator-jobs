@@ -33,10 +33,11 @@ export default function Page({
         </Link>
       </div>
 
-      <div className="rounded-lg border px-4 py-3 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">Note:</span> You’re not locked into one role.
-        Anyone in this community can post jobs and submit work.
-      </div>
+      <p className="text-sm text-muted-foreground">
+  <span className="font-medium text-foreground">Note:</span> You’re not locked into one role.
+  Anyone in this community can post jobs and submit work.
+</p>
+
     </div>
   );
 }
