@@ -12,10 +12,11 @@ export default function Page({
       <h1 className="text-2xl font-semibold">What are you here to do?</h1>
 
       <div className="space-y-3">
-        <Link
-          href={`/experience/${experienceId}/jobs`}
-          className="block rounded-md border px-4 py-3 font-medium hover:bg-muted transition"
-        >
+		<Link
+  href={`/experience/${experienceId}/jobs`}
+  className="block rounded-lg border border-white/30 bg-white/10 px-4 py-3 font-medium transition hover:bg-white/15"
+>
+
           <div>Find work</div>
           <div className="mt-1 text-sm text-muted-foreground font-normal">
             Browse paid jobs and submit your work.
@@ -23,9 +24,10 @@ export default function Page({
         </Link>
 
         <Link
-          href={`/experience/${experienceId}/my-jobs`}
-          className="block rounded-md border px-4 py-3 font-medium hover:bg-muted transition"
-        >
+  href={`/experience/${experienceId}/my-jobs`}
+  className="block rounded-lg border border-white/20 bg-white/5 px-4 py-3 font-medium transition hover:bg-white/10"
+>
+
           <div>Post a job</div>
           <div className="mt-1 text-sm text-muted-foreground font-normal">
             Post a paid task and review submissions.
