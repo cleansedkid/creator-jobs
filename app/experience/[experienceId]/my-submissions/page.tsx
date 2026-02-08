@@ -113,7 +113,7 @@ export default async function MySubmissionsPage({
           </div>
 			 <p className="text-xs text-muted-foreground">
   {sub.status === "pending"
-    ? "The job poster will review your submission."
+    ? "The job poster will review your submission soon."
     : sub.status === "approved"
     ? "Approved — Awaiting payment from the job poster."
     : sub.status === "paid"

@@ -87,7 +87,7 @@ export default function JobsPage() {
       {jobs?.map((job) => (
         <div
 		  key={job.id}
-		   className="border rounded-lg p-4 bg-muted/30"
+		  className="rounded-lg border border-white/15 bg-white/3 p-4 transition hover:bg-white/7"
 		>
 		
           <h2 className="font-medium">

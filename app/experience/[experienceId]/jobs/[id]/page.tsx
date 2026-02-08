@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { getDevRole } from "@/lib/auth/role";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabase/client";
 
@@ -15,6 +15,8 @@ export const dynamic = "force-dynamic";
 export default function JobDetailPage() {
 	const params = useParams();
 	const searchParams = useSearchParams();
+	const router = useRouter();
+
  
 	const experienceId = params?.experienceId as string | undefined;
 	const jobId = params?.id as string | undefined;
@@ -210,14 +212,24 @@ const canResumePayment =
 
   
 
-  const backHref = `/experience/${experienceId}/jobs`;
+  
 
 
   return (
 	<div className="mx-auto max-w-xl px-4 py-6 space-y-6">
-	  <Link href={backHref} className="text-sm underline">
-		 ← Back
-	  </Link>
+	  <button
+  onClick={() => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(`/experience/${experienceId}/jobs`);
+    }
+  }}
+  className="text-sm underline text-left"
+>
+  ← Back
+</button>
+
  
 	  {/* Job info (MOVE UP: this should be first) */}
 	  <div className="rounded-lg border border-white/15 bg-white/5 p-4 space-y-2">
