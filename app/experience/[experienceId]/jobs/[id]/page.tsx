@@ -225,7 +225,7 @@ const canResumePayment =
       router.push(`/experience/${experienceId}/jobs`);
     }
   }}
-  className="text-sm underline text-left"
+  className="text-sm underline text-left cursor-pointer hover:opacity-80"
 >
   ← Back
 </button>
