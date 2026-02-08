@@ -111,12 +111,12 @@ export default function MyJobsPage() {
         <Link
           key={job.id}
           href={`/experience/${experienceId}/jobs/${job.id}`}
-          className="block rounded-lg border p-4 space-y-1 hover:bg-muted transition cursor-pointer"
+          className="block rounded-lg border border-white/15 bg-white/3 p-4 space-y-1 transition hover:bg-white/7 cursor-pointer"
         >
           <div className="font-medium">{job.title}</div>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-  <span className="rounded-full border px-2 py-0.5">
+			 <span className="rounded-full border border-white/20 px-2 py-0.5">
     {job.status === "open" ? "Open" : "Closed"}
   </span>
 
@@ -128,7 +128,7 @@ export default function MyJobsPage() {
 
   {job.payment_status === "requires_payment" && (
     <span className="rounded-full bg-yellow-100 px-2 py-0.5 font-medium text-yellow-700">
-      Awaiting payment
+     Awaiting payment (approval completed)
     </span>
   )}
 </div>
