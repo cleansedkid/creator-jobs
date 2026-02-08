@@ -220,7 +220,7 @@ const canResumePayment =
 	  </Link>
  
 	  {/* Job info (MOVE UP: this should be first) */}
-	  <div className="rounded-lg border border-muted-foreground/30 bg-muted/40 p-4 space-y-2">
+	  <div className="rounded-lg border border-white/15 bg-white/5 p-4 space-y-2">
 		 <div className="text-lg font-semibold">{job.title}</div>
 		 <div className="text-sm text-muted-foreground">{job.description}</div>
  
