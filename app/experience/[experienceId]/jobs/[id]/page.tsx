@@ -214,65 +214,76 @@ const canResumePayment =
 
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
-      <Link href={backHref} className="text-sm underline">
-        ← Back
-      </Link>
-
-		{/* Job context */}
-<div className="rounded-lg border px-4 py-3 space-y-1 bg-muted/30">
-  <div className="text-sm">
-    <span className="font-medium">Job posted by:</span>{" "}
-    {isCreator ? "You" : "A community member"}
-  </div>
-
-  <div className="text-sm">
-    <span className="font-medium">Your role:</span>{" "}
-    {isCreator ? "Job poster" : "Worker"}
-  </div>
-</div>
-
-
-      {showSubmitted && (
-        <div className="rounded-lg border px-4 py-3 text-sm">
-          <div className="font-medium">✅ Submission sent.</div>
-          <div className="text-muted-foreground">
-            The creator will review it soon.
-          </div>
-        </div>
-      )}
-
-      {/* Job info */}
-      <div className="rounded-lg border p-4 space-y-2">
-        <div className="text-lg font-semibold">{job.title}</div>
-        <div className="text-sm text-muted-foreground">{job.description}</div>
-        <div className="text-sm">
-          💰 ${(job.payout_cents / 100).toFixed(2)} • {job.job_type}
-        </div>
-        <div className="flex gap-2 text-xs">
-  <span className="rounded-full border px-2 py-0.5">
-    Status: {job.status}
-  </span>
-
-  {job.payment_status === "paid" && (
-    <span className="rounded-full border px-2 py-0.5 bg-green-50 text-green-700">
-      Paid
-    </span>
-  )}
-
-  {job.payment_status === "requires_payment" && (
-    <span className="rounded-full border px-2 py-0.5 bg-yellow-50 text-yellow-700">
-      Awaiting payment
-    </span>
-  )}
-</div>
-
-      </div>
+	<div className="mx-auto max-w-xl px-4 py-6 space-y-6">
+	  <Link href={backHref} className="text-sm underline">
+		 ← Back
+	  </Link>
+ 
+	  {/* Job info (MOVE UP: this should be first) */}
+	  <div className="rounded-lg border p-4 space-y-2">
+		 <div className="text-lg font-semibold">{job.title}</div>
+		 <div className="text-sm text-muted-foreground">{job.description}</div>
+ 
+		 <div className="text-sm">
+			💰 ${(job.payout_cents / 100).toFixed(2)} • {job.job_type}
+		 </div>
+ 
+		 {/* NEW: How it works line */}
+		 <p className="text-xs text-muted-foreground">
+			How it works: Workers submit completed work. Job posters review submissions and release payment when approved.
+		 </p>
+ 
+		 <div className="flex gap-2 text-xs">
+			<span className="rounded-full border px-2 py-0.5">
+			  Status: {job.status}
+			</span>
+ 
+			{job.payment_status === "paid" && (
+			  <span className="rounded-full border px-2 py-0.5 bg-green-50 text-green-700">
+				 Paid
+			  </span>
+			)}
+ 
+			{job.payment_status === "requires_payment" && (
+			  <span className="rounded-full border px-2 py-0.5 bg-yellow-50 text-yellow-700">
+				 Awaiting payment
+			  </span>
+			)}
+		 </div>
+ 
+		 {/* NEW: Payment rule line */}
+		 <p className="text-xs text-muted-foreground">
+			Payment is released only after a submission is approved.
+		 </p>
+	  </div>
+ 
+	  {/* Job context (MOVE DOWN: should be after job info) */}
+	  <div className="rounded-lg border px-4 py-3 space-y-1 bg-muted/30">
+		 <div className="text-sm">
+			<span className="font-medium">Job posted by:</span>{" "}
+			{isCreator ? "You" : "A community member"}
+		 </div>
+ 
+		 <div className="text-sm">
+			<span className="font-medium">Your role:</span>{" "}
+			{isCreator ? "Job poster" : "Worker"}
+		 </div>
+	  </div>
+ 
+	  {showSubmitted && (
+		 <div className="rounded-lg border px-4 py-3 text-sm">
+			<div className="font-medium">✅ Submission sent.</div>
+			<div className="text-muted-foreground">
+			  The Job poster will review it soon.
+			</div>
+		 </div>
+	  )}
+ 
 
       {/* Submit (worker view) */}
       {canSubmit ? (
         <div className="rounded-lg border p-4 space-y-3">
-          <div className="font-medium">Submit your work</div>
+          <div className="font-medium">Submit completed work</div>
 <p className="text-sm text-muted-foreground">
   Upload your completed work, portfolio, or a document explaining your submission.
   You may upload a file and/or include a short note describing what you did.
@@ -338,11 +349,11 @@ const canResumePayment =
 
 
           {(!submissions || submissions.length === 0) && (
-            <p className="text-sm text-muted-foreground">
-				No submissions yet. Community members submitted work will appear here.
-			 </p>
-			 
-          )}
+  <p className="text-sm text-muted-foreground">
+    No submissions yet. Submitted work from community members will appear here for review.
+  </p>
+)}
+
 
           {submissions?.map((s: any) => (
             <div key={s.id} className="rounded-lg border p-4 space-y-2">
