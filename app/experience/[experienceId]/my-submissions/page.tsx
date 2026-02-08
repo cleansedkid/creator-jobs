@@ -80,19 +80,49 @@ export default async function MySubmissionsPage({
 
       <h1 className="text-2xl font-semibold">My Submissions</h1>
 
-      {(!submissions || submissions.length === 0) && (
-        <p className="text-muted-foreground">
-          You haven’t submitted any work yet.
-        </p>
-      )}
+		<p className="text-sm text-muted-foreground">
+  Track the status of work you’ve submitted to community jobs.
+</p>
 
-      {submissions?.map((sub: any) => (
-        <div key={sub.id} className="rounded-lg border p-4 space-y-2">
+
+{(!submissions || submissions.length === 0) && (
+  <p className="text-sm text-muted-foreground">
+    You haven’t submitted any work yet. Your Submitted Work will appear here.
+  </p>
+)}
+
+
+{submissions?.map((sub: any) => {
+	  const statusLabel =
+	  sub.status === "pending"
+		 ? "Pending review"
+		 : sub.status === "approved"
+		 ? "Approved"
+		 : sub.status === "rejected"
+		 ? "Rejected"
+		 : sub.status === "paid"
+		 ? "Paid"
+		 : sub.status;
+ 
+		 return (
+			<div key={sub.id} className="rounded-lg border border-white/15 bg-white/3 p-4 space-y-2">	 
           <div className="font-medium">{sub.jobs?.title ?? "Job"}</div>
 
           <div className="text-sm text-muted-foreground">
-            Status: <span className="font-medium">{sub.status}</span>
+			 Status: <span className="font-medium">{statusLabel}</span>
           </div>
+			 <p className="text-xs text-muted-foreground">
+  {sub.status === "pending"
+    ? "The job poster will review your submission."
+    : sub.status === "approved"
+    ? "Approved — Awaiting payment from the job poster."
+    : sub.status === "paid"
+    ? "Payment has been released."
+    : sub.status === "rejected"
+    ? "Not accepted — check the job details for next steps."
+    : ""}
+</p>
+
 
           <div className="text-sm">
             💰 {(((sub.jobs?.payout_cents ?? 0) as number) / 100).toFixed(2)}
