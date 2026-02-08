@@ -136,7 +136,9 @@ export default async function MySubmissionsPage({
             View submission
           </Link>
         </div>
-      ))}
+            );
+			})}
+	  
     </div>
   );
 }
