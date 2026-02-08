@@ -204,7 +204,8 @@ const canApprove =
   !job.approved_submission_id &&
   !paymentStarted;
 
-const canResumePayment =
+
+  const canResumePayment =
   isCreator &&
   paymentStarted;
 
