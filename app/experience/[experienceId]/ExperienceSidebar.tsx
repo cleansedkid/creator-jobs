@@ -22,22 +22,25 @@ export default function ExperienceSidebar({
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <aside className="hidden md:block w-64 shrink-0">
-      <div className="sticky top-6 rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] p-5 space-y-1">
-        <div className="mb-3">
-          <div className="text-base font-semibold">Creator Jobs</div>
-          
-        </div>
+	<aside className="hidden md:flex w-64 shrink-0 bg-white border-r border-border">
+		<div className="flex flex-col justify-between h-full p-6">
+		<div className="mb-10">
+  <div className="text-2xl font-bold text-foreground">
+    Creator Jobs
+  </div>
+</div>
+
 
         {nav.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={[
-              "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
+              "flex items-center px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer"
               isActive(item.href)
-  ? "bg-white/15 border border-white/20 shadow-sm"
-  : "hover:bg-white/5 border border-transparent"
+  ? "border-l-4 border-primary bg-muted text-primary"
+  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+
 
             ].join(" ")}
           >
@@ -46,7 +49,7 @@ export default function ExperienceSidebar({
         ))}
 
         
-      </div>
+      
     </aside>
   );
 }

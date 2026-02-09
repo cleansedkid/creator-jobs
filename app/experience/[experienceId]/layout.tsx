@@ -68,17 +68,16 @@ export default async function ExperienceLayout({
         </div>
 
         {/* Page content */}
-<div className="pt-6 px-6">
-  <div className="mx-auto max-w-6xl">
-    <div className="flex gap-6">
-      {/* Sidebar */}
-      <ExperienceSidebar experienceId={experienceId} />
+<div className="flex h-screen bg-muted">
+  {/* Sidebar */}
+  <ExperienceSidebar experienceId={experienceId} />
 
-      {/* Main content */}
-      <main className="flex-1 min-w-0">{children}</main>
-    </div>
-  </div>
+  {/* Main content */}
+  <main className="flex-1 min-w-0 overflow-y-auto p-8 bg-background">
+    {children}
+  </main>
 </div>
+
 
       </>
     </ExperienceGuard>
