@@ -82,6 +82,7 @@ export default function ExperienceSidebar({
 			))}
 		 </nav>
  
+		 
 		 {/* Spacer to push anything to bottom later if we want */}
 		 <div className="flex-1" />
 	  </div>
