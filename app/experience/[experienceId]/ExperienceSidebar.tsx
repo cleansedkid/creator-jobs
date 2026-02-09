@@ -22,33 +22,27 @@ export default function ExperienceSidebar({
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-	<aside className="hidden md:flex w-64 shrink-0 bg-white border-r border-border">
-		<div className="flex flex-col justify-between h-full p-6">
-		<div className="mb-10">
-  <div className="text-2xl font-bold text-foreground">
-    Creator Jobs
-  </div>
-</div>
-
+    <aside className="hidden md:block w-64 shrink-0">
+      <div className="sticky top-6 rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] p-5 space-y-1">
+        <div className="mb-4">
+          <div className="text-lg font-semibold">Creator Jobs</div>
+        </div>
 
         {nav.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={[
-					"flex items-center px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer",
-					isActive(item.href)
-					  ? "border-l-4 border-white/40 bg-white/10 text-foreground"
-					  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
-				 ].join(" ")}
-				 
+              "block rounded-md px-3 py-2 text-sm font-medium transition cursor-pointer",
+              isActive(item.href)
+                ? "bg-white/15 border border-white/20 text-foreground"
+                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+            ].join(" ")}
           >
             {item.label}
           </Link>
         ))}
-
-        
-      
+      </div>
     </aside>
   );
 }
