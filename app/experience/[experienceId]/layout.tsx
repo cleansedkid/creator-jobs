@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import ExperienceGuard from "./ExperienceGuard";
+import ExperienceSidebar from "./ExperienceSidebar";
+
 
 export default async function ExperienceLayout({
   children,
@@ -66,7 +68,18 @@ export default async function ExperienceLayout({
         </div>
 
         {/* Page content */}
-        <main className="pt-6">{children}</main>
+<div className="pt-6 px-6">
+  <div className="mx-auto max-w-6xl">
+    <div className="flex gap-6">
+      {/* Sidebar */}
+      <ExperienceSidebar experienceId={experienceId} />
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0">{children}</main>
+    </div>
+  </div>
+</div>
+
       </>
     </ExperienceGuard>
   );
