@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+
 
 export default function ExperienceSidebar({
-  experienceId,
-}: {
-  experienceId: string;
-}) {
+	experienceId,
+	isValidExperience,
+ }: {
+	experienceId: string;
+	isValidExperience: boolean;
+ }) {
+ 
   const pathname = usePathname();
 
   const nav = [
@@ -22,27 +27,65 @@ export default function ExperienceSidebar({
     pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <aside className="hidden md:block w-64 shrink-0">
-      <div className="sticky top-6 rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] p-5 space-y-1">
-        <div className="mb-4">
-          <div className="text-lg font-semibold">Creator Jobs</div>
-        </div>
-
-        {nav.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={[
-              "block rounded-md px-3 py-2 text-sm font-medium transition cursor-pointer",
-              isActive(item.href)
-                ? "bg-white/15 border border-white/20 text-foreground"
-                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
-            ].join(" ")}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </div>
-    </aside>
-  );
+	<aside className="hidden md:flex w-64 shrink-0 border-r border-white/10 bg-black/20">
+	  <div className="flex h-screen w-full flex-col px-5 py-5">
+		 {/* Logo / Brand (now inside sidebar) */}
+		 <div className="mb-6">
+			{isValidExperience ? (
+			  <Link
+				 href={`/experience/${experienceId}/onboarding`}
+				 className="inline-flex items-center gap-2 group cursor-pointer"
+			  >
+				 <Image
+					src="/logo.png"
+					alt="Creator Jobs"
+					width={40}
+					height={40}
+					priority
+					className="transition-all group-hover:scale-105"
+				 />
+				 <span className="text-sm font-semibold text-foreground group-hover:opacity-90">
+					Creator Jobs
+				 </span>
+			  </Link>
+			) : (
+			  <div className="inline-flex items-center gap-2 opacity-70">
+				 <Image
+					src="/logo.png"
+					alt="Creator Jobs"
+					width={40}
+					height={40}
+					priority
+				 />
+				 <span className="text-sm font-semibold text-muted-foreground">
+					Creator Jobs
+				 </span>
+			  </div>
+			)}
+		 </div>
+ 
+		 {/* Nav */}
+		 <nav className="space-y-2">
+			{nav.map((item) => (
+			  <Link
+				 key={item.href}
+				 href={item.href}
+				 className={[
+					"block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
+					isActive(item.href)
+					  ? "border-l-4 border-white/60 bg-white/10 text-foreground"
+					  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+				 ].join(" ")}
+			  >
+				 {item.label}
+			  </Link>
+			))}
+		 </nav>
+ 
+		 {/* Spacer to push anything to bottom later if we want */}
+		 <div className="flex-1" />
+	  </div>
+	</aside>
+ );
+ 
 }
