@@ -36,13 +36,12 @@ export default function ExperienceSidebar({
             key={item.href}
             href={item.href}
             className={[
-              "flex items-center px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer"
-              isActive(item.href)
-  ? "border-l-4 border-primary bg-muted text-primary"
-  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-
-
-            ].join(" ")}
+					"flex items-center px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer",
+					isActive(item.href)
+					  ? "border-l-4 border-white/40 bg-white/10 text-foreground"
+					  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+				 ].join(" ")}
+				 
           >
             {item.label}
           </Link>
