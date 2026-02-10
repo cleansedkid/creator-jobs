@@ -122,7 +122,7 @@ export default function ExperienceSidebar({
           DESKTOP SIDEBAR (UNCHANGED LOOK)
       ========================== */}
       <aside className="hidden md:flex w-64 shrink-0 border-r border-white/10 bg-black/20">
-        <div className="flex h-screen w-full flex-col px-5 py-5">
+		<div className="flex min-h-screen w-full flex-col px-5 py-5">
           {/* Logo / Brand */}
           <div className="mb-6">
             {isValidExperience ? (
