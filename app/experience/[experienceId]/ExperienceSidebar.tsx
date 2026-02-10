@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
+import { useEffect } from "react";
+
 
 export default function ExperienceSidebar({
   experienceId,
@@ -14,6 +16,12 @@ export default function ExperienceSidebar({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+	// Force-close mobile menu on route changes (Whop mobile WebView fix)
+	setMobileOpen(false);
+ }, [pathname]);
+ 
 
   const nav = [
     { label: "Home", href: `/experience/${experienceId}/onboarding` },
