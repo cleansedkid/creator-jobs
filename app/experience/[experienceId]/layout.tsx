@@ -26,9 +26,12 @@ export default async function ExperienceLayout({
   <ExperienceSidebar experienceId={experienceId} isValidExperience={isValidExperience} />
 
   {/* Main content */}
-  <main className="flex-1 min-w-0 px-6 py-6">
-    <div className="mx-auto max-w-6xl">{children}</div>
-  </main>
+  <main className="flex-1 min-w-0 px-4 py-4 md:px-6 md:py-6">
+  <div className="w-full md:mx-auto md:max-w-6xl">
+    {children}
+  </div>
+</main>
+
 </div>
 
 
