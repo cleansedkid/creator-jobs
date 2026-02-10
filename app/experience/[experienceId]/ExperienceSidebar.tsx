@@ -64,6 +64,7 @@ export default function ExperienceSidebar({
 			)}
 		 </div>
  
+		 
 		 {/* Nav */}
 		 <nav className="space-y-2">
 			{nav.map((item) => (
