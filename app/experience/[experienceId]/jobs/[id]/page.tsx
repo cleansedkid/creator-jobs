@@ -217,7 +217,7 @@ const canApprove =
 
 
   return (
-	<div className="mx-auto max-w-xl px-4 py-6 space-y-6">
+	<div className="space-y-6">
 	  <button
   onClick={() => {
     if (window.history.length > 1) {
@@ -233,34 +233,52 @@ const canApprove =
 
  
 	  {/* Job info (MOVE UP: this should be first) */}
-	  <div className="rounded-lg border border-white/15 bg-white/5 p-4 space-y-2">
-		 <div className="text-lg font-semibold">{job.title}</div>
-		 <div className="text-sm text-muted-foreground">{job.description}</div>
+	  <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+	  <h1 className="text-2xl font-semibold tracking-tight">
+  {job.title}
+</h1>
+<p className="mt-1 text-sm text-muted-foreground">
+  {job.description}
+</p>
+
  
-		 <div className="text-sm">
-			💰 ${(job.payout_cents / 100).toFixed(2)} • {job.job_type}
-		 </div>
+<div className="mt-4 flex items-center justify-between">
+  <div className="text-sm text-muted-foreground">
+    {job.job_type}
+  </div>
+
+  <div className="text-right">
+    <div className="text-sm text-muted-foreground">Payout</div>
+    <div className="text-xl font-semibold tracking-tight">
+      ${(job.payout_cents / 100).toFixed(2)}
+    </div>
+  </div>
+</div>
+
  
 		 {/* NEW: How it works line */}
 		 <p className="text-xs text-muted-foreground">
 			How it works: Workers submit completed work. Job posters review submissions and release payment when approved.
 		 </p>
  
-		 <div className="flex gap-2 text-xs">
-			<span className="rounded-full border px-2 py-0.5">
-			  Status: {job.status}
-			</span>
+		 <div className="mt-4 flex gap-2">
+		 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+  {job.status}
+</span>
+
  
 			{job.payment_status === "paid" && (
-			  <span className="rounded-full border px-2 py-0.5 bg-green-50 text-green-700">
-				 Paid
-			  </span>
+			  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+			  Paid
+			</span>
+			
 			)}
  
 			{job.payment_status === "requires_payment" && (
-			  <span className="rounded-full border px-2 py-0.5 bg-yellow-50 text-yellow-700">
-				 Awaiting payment
-			  </span>
+			  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+			  Awaiting payment
+			</span>
+			
 			)}
 		 </div>
  
@@ -271,7 +289,7 @@ const canApprove =
 	  </div>
  
 	  {/* Job context (MOVE DOWN: should be after job info) */}
-	  <div className="rounded-lg border px-4 py-3 space-y-1 bg-muted/30">
+	  <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-1">
 		 <div className="text-sm">
 			<span className="font-medium">Job posted by:</span>{" "}
 			{isCreator ? "You" : "A community member"}
@@ -284,7 +302,7 @@ const canApprove =
 	  </div>
  
 	  {showSubmitted && (
-		 <div className="rounded-lg border px-4 py-3 text-sm">
+		 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
 			<div className="font-medium">✅ Submission sent.</div>
 			<div className="text-muted-foreground">
 			  The Job poster will review it soon.
@@ -295,7 +313,7 @@ const canApprove =
 
       {/* Submit (worker view) */}
       {canSubmit ? (
-        <div className="rounded-lg border p-4 space-y-3">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3">
           <div className="font-medium">Submit completed work</div>
 <p className="text-sm text-muted-foreground">
   Upload your completed work, portfolio, or a document explaining your submission.
@@ -369,11 +387,16 @@ const canApprove =
 
 
           {submissions?.map((s: any) => (
-            <div key={s.id} className="rounded-lg border p-4 space-y-2">
-              <div className="text-sm">
-                <span className="text-muted-foreground">Status:</span>{" "}
-                {s.status}
-              </div>
+            <div
+				key={s.id}
+				className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-2"
+			 >			 
+              <div className="flex items-center gap-2">
+  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+    {s.status}
+  </span>
+</div>
+
 
               <a
                 className="text-sm underline break-all"
@@ -419,7 +442,7 @@ const canApprove =
 			
           ))}
 			           {canResumePayment && (
-            <div className="rounded-lg border p-4 space-y-2">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-2">
               <div className="font-medium">Payment not completed</div>
 
               <p className="text-sm text-muted-foreground">
