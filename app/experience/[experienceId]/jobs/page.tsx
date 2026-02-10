@@ -53,17 +53,11 @@ export default function JobsPage() {
   return (
 	<div className="space-y-6">
  
- <Link
-  href={`/experience/${experienceId}/onboarding`}
-  className="text-sm text-muted-foreground hover:underline cursor-pointer"
->
-  ← Back to home
-</Link>
 
-<div className="rounded-xl border border-white/10 bg-white/5 p-5">
+ <div className="pb-2">
   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
-      <h1 className="text-3xl font-semibold tracking-tight">Jobs</h1>
+	 <h1 className="text-4xl font-bold tracking-tight">Jobs</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Browse paid jobs posted by members of this community.
       </p>
@@ -71,7 +65,7 @@ export default function JobsPage() {
 
     <Link
       href={`/experience/${experienceId}/my-submissions`}
-      className="rounded-md border border-white/10 px-3 py-2 text-sm font-semibold hover:bg-white/5 transition cursor-pointer whitespace-nowrap self-start"
+      className="rounded-md border border-white/10 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer whitespace-nowrap self-start"
     >
       My Submissions →
     </Link>
@@ -86,6 +80,7 @@ export default function JobsPage() {
 		</p>
 		
       )}
+<div className="h-px bg-white/10 my-2" />
 
 {jobs?.map((job) => {
   const payout = (job.payout_cents / 100).toFixed(2);
