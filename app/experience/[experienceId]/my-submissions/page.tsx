@@ -70,75 +70,111 @@ export default async function MySubmissionsPage({
   }
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-6 space-y-6">
-      <Link
-        href={`/experience/${experienceId}/jobs`}
-        className="text-sm underline"
-      >
-        ← Back
-      </Link>
-
-      <h1 className="text-2xl font-semibold">My Submissions</h1>
-
-		<p className="text-sm text-muted-foreground">
-  Track the status of work you’ve submitted to community jobs.
-</p>
-
-
-{(!submissions || submissions.length === 0) && (
-  <p className="text-sm text-muted-foreground">
-    You haven’t submitted any work yet. Your Submitted Work will appear here.
-  </p>
-)}
-
-
-{submissions?.map((sub: any) => {
-	  const statusLabel =
-	  sub.status === "pending"
-		 ? "Pending review"
-		 : sub.status === "approved"
-		 ? "Approved"
-		 : sub.status === "rejected"
-		 ? "Rejected"
-		 : sub.status === "paid"
-		 ? "Paid"
-		 : sub.status;
+	<div className="space-y-6">
+	  {/* Header */}
+	  <div className="pb-2">
+		 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+			<div>
+			  <h1 className="text-4xl font-bold tracking-tight">
+				 My Submissions
+			  </h1>
+			  <p className="mt-1 text-sm text-muted-foreground">
+				 Track the status of work you’ve submitted to community jobs.
+			  </p>
+			</div>
+		 </div>
+	  </div>
+ 
+	  {(!submissions || submissions.length === 0) && (
+		 <p className="text-muted-foreground">
+			You haven’t submitted any work yet. Submitted work will appear here.
+		 </p>
+	  )}
+ 
+	  <div className="h-px bg-white/10 my-2" />
+ 
+	  {submissions?.map((sub: any) => {
+		 const payout = (
+			((sub.jobs?.payout_cents ?? 0) as number) / 100
+		 ).toFixed(2);
+ 
+		 const statusLabel =
+			sub.status === "pending"
+			  ? "Pending review"
+			  : sub.status === "approved"
+			  ? "Approved"
+			  : sub.status === "paid"
+			  ? "Paid"
+			  : sub.status === "rejected"
+			  ? "Rejected"
+			  : sub.status;
+ 
+		 const statusHint =
+			sub.status === "pending"
+			  ? "The job poster will review your submission soon."
+			  : sub.status === "approved"
+			  ? "Approved — awaiting payment from the job poster."
+			  : sub.status === "paid"
+			  ? "Payment has been released."
+			  : sub.status === "rejected"
+			  ? "Not accepted — check the job details for next steps."
+			  : null;
  
 		 return (
-			<div key={sub.id} className="rounded-lg border border-white/15 bg-white/3 p-4 space-y-2">	 
-          <div className="font-medium">{sub.jobs?.title ?? "Job"}</div>
-
-          <div className="text-sm text-muted-foreground">
-			 Status: <span className="font-medium">{statusLabel}</span>
-          </div>
-			 <p className="text-xs text-muted-foreground">
-  {sub.status === "pending"
-    ? "The job poster will review your submission soon."
-    : sub.status === "approved"
-    ? "Approved — Awaiting payment from the job poster."
-    : sub.status === "paid"
-    ? "Payment has been released."
-    : sub.status === "rejected"
-    ? "Not accepted — check the job details for next steps."
-    : ""}
-</p>
-
-
-          <div className="text-sm">
-            💰 {(((sub.jobs?.payout_cents ?? 0) as number) / 100).toFixed(2)}
-          </div>
-
-          <Link
-            href={sub.proof_url}
-            target="_blank"
-            className="text-sm underline"
-          >
-            View submission
-          </Link>
-        </div>
-            );
-			})}
-	  
-    </div>
-  );
+			<div
+			  key={sub.id}
+			  className="rounded-xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/10"
+			>
+			  <div className="flex items-start justify-between gap-4">
+				 <div className="min-w-0">
+					<div className="flex items-center gap-2">
+					  <h2 className="text-base font-semibold truncate">
+						 {sub.jobs?.title ?? "Job"}
+					  </h2>
+ 
+					  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+						 {statusLabel}
+					  </span>
+					</div>
+ 
+					{statusHint && (
+					  <p className="mt-1 text-sm text-muted-foreground">
+						 {statusHint}
+					  </p>
+					)}
+				 </div>
+ 
+				 <div className="shrink-0 text-right">
+					<div className="text-sm text-muted-foreground">
+					  Payout
+					</div>
+					<div className="text-xl font-semibold tracking-tight">
+					  ${payout}
+					</div>
+				 </div>
+			  </div>
+ 
+			  <div className="mt-4 flex items-center justify-between">
+				 <div className="flex gap-2">
+					<span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+					  Submitted work
+					</span>
+				 </div>
+ 
+				 {sub.proof_url && (
+					<Link
+					  href={sub.proof_url}
+					  target="_blank"
+					  className="text-sm text-muted-foreground hover:underline"
+					>
+					  View submission →
+					</Link>
+				 )}
+			  </div>
+			</div>
+		 );
+	  })}
+	</div>
+ );
+ 
 }
