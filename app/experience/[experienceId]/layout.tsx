@@ -21,7 +21,7 @@ export default async function ExperienceLayout({
         
 
         {/* Shell */}
-		  <div className="flex min-h-screen w-full overflow-x-hidden">
+		  <div className="flex min-h-screen w-full overflow-x-hidden flex-col md:flex-row">
   {/* Sidebar (full height) */}
   <ExperienceSidebar experienceId={experienceId} isValidExperience={isValidExperience} />
 
