@@ -175,7 +175,7 @@ export default function ExperienceSidebar({
         className={[
           "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
           active
-  ? "border-l-4 border-l-blue-500 text-blue-400 bg-blue-500/15 pl-4"
+  ? "border-l-4 border-l-green-400 bg-green-400/20 text-green-300"
   : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
 
         ].join(" ")}
