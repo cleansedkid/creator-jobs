@@ -110,20 +110,15 @@ export default async function NewJobPage({
 
         <button
   type="submit"
-  className="w-full rounded-md px-4 py-2 font-medium transition cursor-pointer"
+  className="w-full rounded-md px-4 py-2 font-medium cursor-pointer"
   style={{
     backgroundColor: "#2563eb",
     color: "#ffffff",
   }}
-  onMouseEnter={(e) => {
-    e.currentTarget.style.backgroundColor = "#1d4ed8";
-  }}
-  onMouseLeave={(e) => {
-    e.currentTarget.style.backgroundColor = "#2563eb";
-  }}
 >
   Create Job
 </button>
+
 
       </form>
     </div>
