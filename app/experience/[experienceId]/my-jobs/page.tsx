@@ -76,6 +76,28 @@ export default function MyJobsPage() {
 
  return (
 	<div className="space-y-6">
+		<style>
+  {`
+    .primary-cta {
+      background-color: #2563eb;
+      color: #ffffff;
+      transition: background-color 150ms ease, transform 120ms ease, box-shadow 150ms ease;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .primary-cta:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    .primary-cta:active {
+      transform: translateY(0px);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+  `}
+</style>
+
 	  {/* Header */}
 	  <div className="pb-2">
 		 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -87,11 +109,12 @@ export default function MyJobsPage() {
 			</div>
  
 			<Link
-			  href={`/experience/${experienceId}/my-jobs/new`}
-			  className="rounded-md border border-white/10 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer whitespace-nowrap self-start"
-			>
-			  + New Job
-			</Link>
+  href={`/experience/${experienceId}/my-jobs/new`}
+  className="primary-cta inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold cursor-pointer whitespace-nowrap self-start"
+>
+  + New Job
+</Link>
+
 		 </div>
 	  </div>
  

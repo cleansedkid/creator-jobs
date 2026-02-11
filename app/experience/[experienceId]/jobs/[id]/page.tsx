@@ -218,6 +218,28 @@ const canApprove =
 
   return (
 	<div className="space-y-6">
+		<style>
+  {`
+    .primary-cta {
+      background-color: #2563eb;
+      color: #ffffff;
+      transition: background-color 150ms ease, transform 120ms ease, box-shadow 150ms ease;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .primary-cta:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    .primary-cta:active {
+      transform: translateY(0px);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+  `}
+</style>
+
 	  <button
   onClick={() => {
     if (window.history.length > 1) {
@@ -358,12 +380,13 @@ const canApprove =
               className="w-full rounded-md border px-3 py-2 bg-background"
             />
 
-            <button
-              type="submit"
-              className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
-            >
-              Submit
-            </button>
+<button
+  type="submit"
+  className="primary-cta w-full rounded-md px-4 py-2 font-medium cursor-pointer"
+>
+  Submit
+</button>
+
           </form>
         </div>
       ) : job.status !== "open" && !canReview ? (
@@ -465,11 +488,12 @@ const canApprove =
               </p>
 
               <button
-                onClick={handleResumePayment}
-                 className="w-full rounded-md border px-4 py-2 font-medium cursor-pointer hover:bg-muted transition"
-              >
-                Resume Payment
-              </button>
+  onClick={handleResumePayment}
+  className="primary-cta w-full rounded-md px-4 py-2 font-medium cursor-pointer"
+>
+  Resume Payment
+</button>
+
             </div>
           )}
 
