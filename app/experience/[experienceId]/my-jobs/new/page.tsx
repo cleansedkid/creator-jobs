@@ -110,7 +110,7 @@ export default async function NewJobPage({
 
         <button
           type="submit"
-          className="w-full rounded-md border border-white/10 px-4 py-2 font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer"
+          className="w-full rounded-md px-4 py-2 font-medium transition cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
         >
           Create Job
         </button>
