@@ -120,9 +120,18 @@ export default function JobsPage() {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-semibold truncate">{job.title}</h2>
-            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-              Open
-            </span>
+            <span
+  style={{
+    backgroundColor: "#1e3a8a",
+    color: "#dbeafe",
+    border: "1px solid rgba(59,130,246,0.4)",
+    boxShadow: "0 0 8px rgba(59,130,246,0.25)",
+  }}
+  className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+>
+  Open
+</span>
+
           </div>
 
           <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
