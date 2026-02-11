@@ -102,23 +102,39 @@ export default function ExperienceSidebar({
 
             {/* Nav */}
             <nav className="space-y-2">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={[
-                    "block rounded-md px-3 py-2 text-sm font-semibold transition",
-                    isActive(item.href)
-						  ? "border-l-4 border-blue-500 text-blue-400 font-semibold"
-  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+  {nav.map((item) => {
+    const active = isActive(item.href);
 
-                  ].join(" ")}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+    return (
+      <div
+        key={item.href}
+        style={
+          active
+            ? {
+                borderLeft: "4px solid #3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.15)",
+              }
+            : undefined
+        }
+        className="rounded-md transition"
+      >
+        <Link
+          href={item.href}
+          onClick={() => setMobileOpen(false)}
+          className={[
+            "block px-3 py-2 text-sm font-semibold transition",
+            active
+              ? "text-blue-300"
+              : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+          ].join(" ")}
+        >
+          {item.label}
+        </Link>
+      </div>
+    );
+  })}
+</nav>
+
           </div>
         </div>
       )}
