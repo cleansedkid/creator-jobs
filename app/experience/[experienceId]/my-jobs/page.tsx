@@ -97,6 +97,44 @@ export default function MyJobsPage() {
     }
   `}
 </style>
+<style>
+  {`
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 9999px;
+      letter-spacing: 0.2px;
+    }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
+    }
+
+    .badge-green {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25);
+    }
+
+    .badge-yellow {
+      background: rgba(234, 179, 8, 0.15);
+      color: #fde047;
+      box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.25);
+    }
+
+    .badge-red {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
+    }
+  `}
+</style>
+
 
 	  {/* Header */}
 	  <div className="pb-2">
@@ -143,14 +181,20 @@ export default function MyJobsPage() {
 						 {job.title}
 					  </h2>
  
-					  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-						 {job.status === "open" ? "Open" : "Closed"}
-					  </span>
+					  <span
+  className={`badge ${
+    job.status === "open" ? "badge-blue" : "badge-red"
+  }`}
+>
+  {job.status === "open" ? "Open" : "Closed"}
+</span>
+
  
 					  {job.payment_status === "paid" && (
-						 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-							Paid
-						 </span>
+						 <span className="badge badge-green">
+						 Paid
+					  </span>
+					  
 					  )}
 					</div>
  
@@ -178,9 +222,10 @@ export default function MyJobsPage() {
 					</span>
  
 					{job.payment_status === "requires_payment" && (
-					  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-						 Awaiting payment
-					  </span>
+					  <span className="badge badge-yellow">
+					  Awaiting payment
+					</span>
+					
 					)}
 				 </div>
  
