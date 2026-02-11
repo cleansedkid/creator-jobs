@@ -1,19 +1,18 @@
-@layer theme, base, components, utilities, frosted_ui;
+@layer theme, base, frosted_ui, components, utilities;
 
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
-@import "@whop/react/styles.css" layer(frosted_ui);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import "@whop/react/styles.css" layer(frosted_ui);
 
-/* biome-ignore lint/suspicious/noUnknownAtRules */
+/* biome-ignore lint/suspicious/noUnknownAtRules: this rule is imported from whop */
 @config '../tailwind.config.ts';
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+	background: var(--background);
+	color: var(--foreground);
+	font-family: Arial, Helvetica, sans-serif;
 }
-
 html,
 body {
   overflow-x: hidden;

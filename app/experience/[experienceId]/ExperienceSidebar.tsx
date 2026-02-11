@@ -165,23 +165,31 @@ export default function ExperienceSidebar({
 
           {/* Nav */}
           <nav className="space-y-2">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={[
-                  "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
-                  isActive(item.href)
-						? "border-l-4 border-blue-500 text-blue-400 bg-white/5"
-  : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+  {nav.map((item) => {
+    const active = isActive(item.href);
 
-
-                ].join(" ")}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        style={
+          active
+            ? { borderLeft: "4px solid red", paddingLeft: "12px" }
+            : undefined
+        }
+        className={[
+          "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
+          active
+            ? ""
+            : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+        ].join(" ")}
+      >
+        {active ? "✅ " : ""}
+        {item.label}
+      </Link>
+    );
+  })}
+</nav>
 
           <div className="flex-1" />
         </div>
