@@ -375,51 +375,66 @@ const canApprove =
       {/* Submissions (creator view) */}
       {canReview && (
         <div className="space-y-3">
-          <div className="font-medium">Submissions</div>
+          <div className="pb-2">
+  <div className="flex items-center justify-between">
+    <h2 className="text-base font-semibold">Submissions</h2>
+  </div>
+</div>
+
 
 
 
           {(!submissions || submissions.length === 0) && (
-  <p className="text-sm text-muted-foreground">
-    No submissions yet. Submitted work from community members will appear here for review.
-  </p>
+  <p className="text-muted-foreground">
+  No submissions yet. Submitted work from community members will appear here for review.
+</p>
+
 )}
 
 
           {submissions?.map((s: any) => (
             <div
 				key={s.id}
-				className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-2"
-			 >			 
-              <div className="flex items-center gap-2">
-  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-    {s.status}
-  </span>
+				className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3 transition hover:bg-white/10"
+			 >
+			 
+			 			 
+			 <div className="flex items-center justify-between gap-4">
+  <div className="flex items-center gap-2 min-w-0">
+    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
+      {s.status}
+    </span>
+  </div>
 </div>
 
 
-              <a
-                className="text-sm underline break-all"
-                href={s.proof_url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {s.proof_url}
-              </a>
 
-              {s.note && (
-                <div className="text-sm text-muted-foreground">{s.note}</div>
-              )}
+<a
+  className="text-sm text-muted-foreground hover:underline break-all"
+  href={s.proof_url}
+  target="_blank"
+  rel="noreferrer"
+>
+  View submission →
+</a>
+
+
+{s.note && (
+  <p className="text-sm text-muted-foreground">
+    {s.note}
+  </p>
+)}
+
 
 {canApprove && (
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2 pt-3">
                   <form
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
                     method="post"
                   >
                     <button
                       type="submit"
-                      className="rounded-md border px-3 py-2 text-sm font-medium cursor-pointer hover:bg-muted"
+                      className="rounded-md border border-white/10 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer"
                     >
                       Approve
                     </button>
@@ -431,7 +446,7 @@ const canApprove =
                   >
                     <button
                       type="submit"
-                      className="rounded-md border px-3 py-2 text-sm font-medium cursor-pointer hover:bg-muted"
+                      className="rounded-md border border-white/10 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer"
                     >
                       Reject
                     </button>
