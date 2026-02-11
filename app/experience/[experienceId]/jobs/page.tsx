@@ -125,7 +125,7 @@ export default function JobsPage() {
     backgroundColor: "#1e3a8a",
     color: "#dbeafe",
     border: "1px solid rgba(59,130,246,0.4)",
-    boxShadow: "0 0 8px rgba(59,130,246,0.25)",
+	 boxShadow: "0 0 0 1px rgba(59,130,246,0.15) inset",
   }}
   className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
 >
