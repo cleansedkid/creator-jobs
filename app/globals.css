@@ -18,3 +18,8 @@ body {
   overflow-x: hidden;
   max-width: 100vw;
 }
+/* Force Creator Jobs sidebar to control its own borders */
+aside nav a {
+	border-color: transparent;
+ }
+ 
