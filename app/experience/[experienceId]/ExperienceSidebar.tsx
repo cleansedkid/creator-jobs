@@ -172,24 +172,19 @@ export default function ExperienceSidebar({
       <Link
         key={item.href}
         href={item.href}
-        style={
-          active
-            ? { borderLeft: "4px solid red", paddingLeft: "12px" }
-            : undefined
-        }
         className={[
           "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
           active
-            ? ""
+            ? "border-l-4 border-l-blue-500 text-blue-400 bg-white/5"
             : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
         ].join(" ")}
       >
-        {active ? "✅ " : ""}
         {item.label}
       </Link>
     );
   })}
 </nav>
+
 
           <div className="flex-1" />
         </div>
