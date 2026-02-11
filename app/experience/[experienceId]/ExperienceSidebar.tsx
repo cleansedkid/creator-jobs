@@ -169,19 +169,27 @@ export default function ExperienceSidebar({
     const active = isActive(item.href);
 
     return (
-      <Link
+      <div
         key={item.href}
-        href={item.href}
         className={[
-          "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
+          "rounded-md transition",
           active
-  ? "border-l-4 border-l-green-400 bg-green-400/20 text-green-300"
-  : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
-
+            ? "border-l-4 border-l-blue-400 bg-blue-400/20"
+            : "",
         ].join(" ")}
       >
-        {item.label}
-      </Link>
+        <Link
+          href={item.href}
+          className={[
+            "block px-3 py-2 text-sm font-semibold cursor-pointer transition",
+            active
+              ? "text-blue-300"
+              : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+          ].join(" ")}
+        >
+          {item.label}
+        </Link>
+      </div>
     );
   })}
 </nav>
