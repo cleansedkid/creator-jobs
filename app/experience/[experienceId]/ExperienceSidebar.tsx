@@ -110,7 +110,7 @@ export default function ExperienceSidebar({
                   className={[
                     "block rounded-md px-3 py-2 text-sm font-semibold transition",
                     isActive(item.href)
-  ? "bg-blue-500/10 text-blue-400 border-l-4 border-blue-500"
+						  ? "bg-blue-500/10 border-l-4 !border-blue-500 !text-blue-400"
   : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
 
                   ].join(" ")}
@@ -172,7 +172,7 @@ export default function ExperienceSidebar({
                 className={[
                   "block rounded-md px-3 py-2 text-sm font-semibold transition cursor-pointer",
                   isActive(item.href)
-  ? "border-l-4 border-red-500 bg-red-500 text-white"
+						? "border-l-4 !border-blue-500 bg-blue-500/10 !text-blue-400"
   : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
 
 
