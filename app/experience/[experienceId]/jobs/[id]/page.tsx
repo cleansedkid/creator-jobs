@@ -283,26 +283,30 @@ const canApprove =
 			How it works: Workers submit completed work. Job posters review submissions and release payment when approved.
 		 </p>
  
-		 <div className="mt-4 flex gap-2">
-		 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-  {job.status}
-</span>
+		 <div className="mt-4 flex flex-wrap gap-2">
+  {/* Job status */}
+  <span
+    className={`cj-pill ${
+      job.status === "open"
+        ? "cj-pill-open"
+        : job.status === "closed"
+        ? "cj-pill-closed"
+        : ""
+    }`}
+  >
+    {job.status === "open" ? "Open" : job.status === "closed" ? "Closed" : job.status}
+  </span>
 
- 
-			{job.payment_status === "paid" && (
-			  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-			  Paid
-			</span>
-			
-			)}
- 
-			{job.payment_status === "requires_payment" && (
-			  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-			  Awaiting payment
-			</span>
-			
-			)}
-		 </div>
+  {/* Payment status pills */}
+  {job.payment_status === "paid" && (
+    <span className="cj-pill cj-pill-paid">Paid</span>
+  )}
+
+  {job.payment_status === "requires_payment" && (
+    <span className="cj-pill cj-pill-pending">Awaiting payment</span>
+  )}
+</div>
+
  
 		 {/* NEW: Payment rule line */}
 		 <p className="text-xs text-muted-foreground">
@@ -425,9 +429,30 @@ const canApprove =
 			 			 
 			 <div className="flex items-center justify-between gap-4">
   <div className="flex items-center gap-2 min-w-0">
-    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-      {s.status}
-    </span>
+  <span
+  className={`cj-pill ${
+    s.status === "pending"
+      ? "cj-pill-pending"
+      : s.status === "approved"
+      ? "cj-pill-approved"
+      : s.status === "paid"
+      ? "cj-pill-paid"
+      : s.status === "rejected"
+      ? "cj-pill-rejected"
+      : ""
+  }`}
+>
+  {s.status === "pending"
+    ? "Pending review"
+    : s.status === "approved"
+    ? "Approved"
+    : s.status === "paid"
+    ? "Paid"
+    : s.status === "rejected"
+    ? "Rejected"
+    : s.status}
+</span>
+
   </div>
 </div>
 

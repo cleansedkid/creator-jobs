@@ -188,5 +188,11 @@ body {
 	background: rgba(239, 68, 68, 0.15);
 	color: #fca5a5;
  }
+ /* Closed */
+.cj-pill-closed {
+	border-color: rgba(239, 68, 68, 0.35);
+	background: rgba(239, 68, 68, 0.15);
+	color: #fca5a5;
+ }
  
  
