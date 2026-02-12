@@ -132,9 +132,22 @@ export default async function MySubmissionsPage({
 						 {sub.jobs?.title ?? "Job"}
 					  </h2>
  
-					  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-muted-foreground">
-						 {statusLabel}
-					  </span>
+					  <span
+  className={`cj-pill ${
+    sub.status === "pending"
+      ? "cj-pill-pending"
+      : sub.status === "approved"
+      ? "cj-pill-approved"
+      : sub.status === "paid"
+      ? "cj-pill-paid"
+      : sub.status === "rejected"
+      ? "cj-pill-rejected"
+      : ""
+  }`}
+>
+  {statusLabel}
+</span>
+
 					</div>
  
 					{statusHint && (

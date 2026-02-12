@@ -132,11 +132,12 @@ export default async function NewJobPage({
   </style>
 
   <button
-    type="submit"
-    className="primary-cta w-full rounded-md px-4 py-2 font-medium cursor-pointer"
-  >
-    Create Job
-  </button>
+  type="submit"
+  className="cj-cta w-full"
+>
+  Create Job
+</button>
+
 </div>
 
 

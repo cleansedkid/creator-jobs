@@ -382,10 +382,11 @@ const canApprove =
 
 <button
   type="submit"
-  className="primary-cta w-full rounded-md px-4 py-2 font-medium cursor-pointer"
+  className="cj-cta w-full"
 >
   Submit
 </button>
+
 
           </form>
         </div>
@@ -456,11 +457,12 @@ const canApprove =
                     method="post"
                   >
                     <button
-                      type="submit"
-                      className="rounded-md border border-white/10 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer"
-                    >
-                      Approve
-                    </button>
+  type="submit"
+  className="cj-approve"
+>
+  Approve
+</button>
+
                   </form>
 
                   <form
@@ -468,11 +470,12 @@ const canApprove =
                     method="post"
                   >
                     <button
-                      type="submit"
-                      className="rounded-md border border-white/10 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition cursor-pointer"
-                    >
-                      Reject
-                    </button>
+  type="submit"
+  className="cj-reject"
+>
+  Reject
+</button>
+
                   </form>
                 </div>
               )}
@@ -489,10 +492,11 @@ const canApprove =
 
               <button
   onClick={handleResumePayment}
-  className="primary-cta w-full rounded-md px-4 py-2 font-medium cursor-pointer"
+  className="cj-cta w-full"
 >
   Resume Payment
 </button>
+
 
             </div>
           )}
