@@ -148,7 +148,7 @@ export default function MyJobsPage() {
  
 			<Link
   href={`/experience/${experienceId}/my-jobs/new`}
-  className="primary-cta inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold cursor-pointer whitespace-nowrap self-start"
+  className="cj-cta whitespace-nowrap self-start"
 >
   + New Job
 </Link>

@@ -18,5 +18,110 @@ body {
   overflow-x: hidden;
   max-width: 100vw;
 }
+/* =========================================
+   Creator Jobs “Blue Pass” (no Tailwind)
+   ========================================= */
 
+	:root {
+		/* This is the “darker pill blue” you said you like for CTAs */
+		--cj-blue: #1d4ed8;         /* blue-700-ish */
+		--cj-blue-hover: #1e40af;   /* blue-800-ish */
+		--cj-blue-soft: rgba(29, 78, 216, 0.16);
+	 
+		--cj-border: rgba(255, 255, 255, 0.10);
+		--cj-text-muted: rgba(255, 255, 255, 0.72);
+	 }
+	 
+	 /* Primary CTA (buttons + links) */
+	 .cj-cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		width: auto;
+	 
+		background: var(--cj-blue);
+		color: white;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 10px;
+	 
+		padding: 10px 14px;
+		font-weight: 700;
+		font-size: 14px;
+		line-height: 1;
+	 
+		cursor: pointer;
+		user-select: none;
+		text-decoration: none;
+	 
+		transition: transform 120ms ease, background-color 160ms ease,
+		  box-shadow 160ms ease, opacity 160ms ease;
+		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+	 }
+	 
+	 .cj-cta:hover {
+		background: var(--cj-blue-hover);
+		transform: translateY(-1px);
+	 }
+	 
+	 .cj-cta:active {
+		transform: translateY(0px);
+		opacity: 0.95;
+	 }
+	 
+	 .cj-cta:focus-visible {
+		outline: 2px solid rgba(59, 130, 246, 0.65);
+		outline-offset: 2px;
+	 }
+	 
+	 /* Subtle CTA (secondary buttons) */
+	 .cj-cta-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	 
+		border: 1px solid var(--cj-border);
+		background: rgba(255, 255, 255, 0.04);
+		color: var(--cj-text-muted);
+	 
+		border-radius: 10px;
+		padding: 10px 14px;
+		font-weight: 700;
+		font-size: 14px;
+	 
+		cursor: pointer;
+		text-decoration: none;
+		transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+	 }
+	 
+	 .cj-cta-secondary:hover {
+		background: rgba(255, 255, 255, 0.07);
+		color: rgba(255, 255, 255, 0.92);
+	 }
+	 
+	 /* “Fancy” pills (use these everywhere for status) */
+	 .cj-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	 
+		padding: 4px 10px;
+		border-radius: 999px;
+	 
+		font-size: 12px;
+		font-weight: 700;
+		line-height: 1;
+	 
+		border: 1px solid rgba(255, 255, 255, 0.10);
+		background: rgba(255, 255, 255, 0.04);
+		color: rgba(255, 255, 255, 0.72);
+	 }
+	 
+	 /* “Open” pill = subtle blue (NOT as strong as CTA) */
+	 .cj-pill-open {
+		border-color: rgba(29, 78, 216, 0.35);
+		background: var(--cj-blue-soft);
+		color: rgba(191, 219, 254, 0.95); /* light blue text */
+	 }
+	 
  

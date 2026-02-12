@@ -87,11 +87,12 @@ export default function JobsPage() {
   </style>
 
   <Link
-    href={`/experience/${experienceId}/my-submissions`}
-    className="primary-cta inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold cursor-pointer whitespace-nowrap"
-  >
-    My Submissions →
-  </Link>
+  href={`/experience/${experienceId}/my-submissions`}
+  className="cj-cta whitespace-nowrap self-start"
+>
+  My Submissions →
+</Link>
+
 </div>
 
   </div>
@@ -120,17 +121,8 @@ export default function JobsPage() {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-semibold truncate">{job.title}</h2>
-            <span
-  style={{
-    backgroundColor: "#1e3a8a",
-    color: "#dbeafe",
-    border: "1px solid rgba(59,130,246,0.4)",
-	 boxShadow: "0 0 0 1px rgba(59,130,246,0.15) inset",
-  }}
-  className="rounded-full px-2.5 py-0.5 text-[11px] font-medium"
->
-  Open
-</span>
+            <span className="cj-pill cj-pill-open">Open</span>
+
 
           </div>
 
