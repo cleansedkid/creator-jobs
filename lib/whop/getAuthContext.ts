@@ -3,15 +3,16 @@ import { whopsdk } from "@/lib/whop-sdk";
 
 export async function getAuthContext(experienceId: string) {
   try {
-    if (!experienceId || !experienceId.startsWith("exp_")) {
-      console.log("Invalid experienceId:", experienceId);
-      return null;
-    }
+    // ✅ Next gives ReadonlyHeaders (sometimes wrapped in a Promise)
+    const rh = await headers();
 
-    const h = headers();
+    // ✅ Convert ReadonlyHeaders -> real Headers (what Whop expects)
+    const h = new Headers();
+    rh.forEach((value, key) => h.set(key, value));
 
-    // 1️⃣ Get logged in user
+    // 1) Logged in user
     const { userId } = await whopsdk.verifyUserToken(h);
+
 
     // 2️⃣ Get experience
     const exp = await whopsdk.experiences.retrieve(experienceId);
