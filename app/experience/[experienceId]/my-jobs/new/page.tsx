@@ -1,20 +1,29 @@
 import { createJob } from "./actions";
+import { getAuthContext } from "@/lib/whop/getAuthContext";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewJobPage({
   params,
 }: {
-  params: Promise<{ experienceId: string }>;
+  params: { experienceId: string };
 }) {
-  const { experienceId } = await params;
+  const experienceId = params.experienceId;
 
-  // 🛡️ CRITICAL: Whop sometimes renders with the literal string "undefined"
-  // Never bind a server action with a bad experienceId.
   if (!experienceId || experienceId === "undefined") {
     return (
       <div className="p-6 text-sm text-muted-foreground">
         Loading experience…
+      </div>
+    );
+  }
+
+  const auth = await getAuthContext(experienceId);
+
+  if (!auth || !auth.isAdmin) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6 text-sm">
+        You do not have permission to post jobs.
       </div>
     );
   }
