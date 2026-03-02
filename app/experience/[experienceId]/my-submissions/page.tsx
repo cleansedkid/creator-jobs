@@ -93,6 +93,7 @@ export default async function MySubmissionsPage({
  
 	  <div className="h-px bg-white/10 my-2" />
  
+	  
 	  {submissions?.map((sub: any) => {
 		 const payout = (
 			((sub.jobs?.payout_cents ?? 0) as number) / 100
