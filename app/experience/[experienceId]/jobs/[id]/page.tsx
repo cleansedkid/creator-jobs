@@ -196,8 +196,10 @@ if (loading || isAdmin === null) {
   currentUserId != null &&
   job.creator_whop_user_id === currentUserId;
 
-const canSubmit =
-  !isCreator && job.status === "open";
+  const canSubmit =
+  !isCreator &&
+  !isAdmin &&
+  job.status === "open";
 
   const canReview = isCreator || isAdmin;
 
