@@ -13,33 +13,45 @@ export default function MyJobsPage() {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [meLoading, setMeLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
 	let cancelled = false;
  
 	async function loadMe() {
-	  try {
-		 const res = await fetch("/api/me", { cache: "no-store" });
-		 if (!res.ok) return;
- 
-		 const data = await res.json();
-		 if (!cancelled) {
-			setCurrentUserId(data.userId ?? null);
-		 }
-	  } catch {
-		 // fail silently
-	  } finally {
-		 if (!cancelled) {
-			setMeLoading(false);
-		 }
-	  }
-	}
+		if (!experienceId || experienceId === "undefined") {
+		  setMeLoading(false);
+		  return;
+		}
+	 
+		try {
+		  const res = await fetch(
+			 `/api/me?experienceId=${encodeURIComponent(experienceId)}`,
+			 { cache: "no-store" }
+		  );
+	 
+		  if (!res.ok) return;
+	 
+		  const data = await res.json();
+	 
+		  if (!cancelled) {
+			 setCurrentUserId(data.userId ?? null);
+			 setIsAdmin(data.isAdmin ?? false);
+		  }
+		} catch {
+		  // fail silently
+		} finally {
+		  if (!cancelled) {
+			 setMeLoading(false);
+		  }
+		}
+	 }
  
 	loadMe();
 	return () => {
 	  cancelled = true;
 	};
- }, []);
+}, [experienceId]);
  
 
   useEffect(() => {
@@ -65,14 +77,20 @@ export default function MyJobsPage() {
 
 
   // 🛡️ Guard
-  if (!experienceId || meLoading || loading) {
+  if (!experienceId || meLoading || loading || isAdmin === null) {
 	return (
 	  <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
 		 Loading experience…
 	  </div>
 	);
  }
- 
+ if (!isAdmin) {
+	return (
+	  <div className="mx-auto max-w-xl px-4 py-6 text-sm text-muted-foreground">
+		 You don’t have permission to access this page.
+	  </div>
+	);
+ }
 
  return (
 	<div className="space-y-6">
