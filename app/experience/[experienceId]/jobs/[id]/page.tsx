@@ -26,6 +26,7 @@ export default function JobDetailPage() {
 const [submissions, setSubmissions] = useState<any[]>([]);
 const [loading, setLoading] = useState(true);
 const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
 const handleResumePayment = async () => {
 	if (!experienceId || !jobId) return;
@@ -50,12 +51,18 @@ useEffect(() => {
  
 	async function loadMe() {
 	  try {
-		 const res = await fetch("/api/me");
+		if (!experienceId || experienceId === "undefined") return;
+
+		const res = await fetch(
+		  `/api/me?experienceId=${encodeURIComponent(experienceId)}`,
+		  { cache: "no-store" }
+		);
 		 if (!res.ok) return;
  
 		 const data = await res.json();
 		 if (!cancelled) {
 			setCurrentUserId(data.userId ?? null);
+setIsAdmin(data.isAdmin ?? false);
 		 }
 	  } catch {
 		 // fail silently — user just won't be treated as creator
@@ -66,7 +73,7 @@ useEffect(() => {
 	return () => {
 	  cancelled = true;
 	};
- }, []);
+}, [experienceId]);
 
  useEffect(() => {
 	if (
@@ -155,7 +162,7 @@ useEffect(() => {
 
  
 
- if (loading) {
+if (loading || isAdmin === null) {
 	return (
 	  <div className="mx-auto max-w-xl px-4 py-6 text-muted-foreground">
 		 Loading job…
@@ -192,21 +199,21 @@ useEffect(() => {
 const canSubmit =
   !isCreator && job.status === "open";
 
-const canReview = isCreator;
+  const canReview = isCreator || isAdmin;
 
 const paymentStarted =
   job.payment_status === "requires_payment" &&
   !!job.whop_checkout_id;
 
-const canApprove =
-  isCreator &&
+  const canApprove =
+  (isCreator || isAdmin) &&
   job.status === "open" &&
   !job.approved_submission_id &&
   !paymentStarted;
 
 
   const canResumePayment =
-  isCreator &&
+  (isCreator || isAdmin) &&
   paymentStarted;
 
 
