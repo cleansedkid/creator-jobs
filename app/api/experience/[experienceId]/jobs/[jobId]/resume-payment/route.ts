@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getAuthContext } from "@/lib/whop/getAuthContext";
 import { whopsdk } from "@/lib/whop-sdk";
+
 
 export async function POST(
 	req: NextRequest,
@@ -16,15 +17,13 @@ export async function POST(
  
 
   /* 1️⃣ Verify user */
-  const h = await headers();
-  let requesterId: string;
+  const auth = await getAuthContext(experienceId);
 
-  try {
-    const verified = await whopsdk.verifyUserToken(h);
-    requesterId = verified.userId!;
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+if (!auth?.userId) {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
+
+const requesterId = auth.userId;
 
   /* 2️⃣ Load job */
   const { data: job } = await supabaseServer
@@ -45,9 +44,12 @@ export async function POST(
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
-  if (job.creator_whop_user_id !== requesterId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const isJobCreator =
+  job.creator_whop_user_id === requesterId;
+
+if (!isJobCreator && !auth.isAdmin) {
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+}
 
   if (job.payment_status !== "requires_payment") {
     return NextResponse.json(

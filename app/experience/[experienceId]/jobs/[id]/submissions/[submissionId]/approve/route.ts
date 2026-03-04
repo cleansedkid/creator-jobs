@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
+import { getAuthContext } from "@/lib/whop/getAuthContext";
+import { headers } from "next/headers";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export async function POST(
@@ -17,21 +18,17 @@ export async function POST(
 
  
   /* -------------------------------------------------------
-   * 1. Verify requester (ONLY reliable identity)
-   * ----------------------------------------------------- */
-  const h = await headers();
-  let requester_whop_user_id: string | null = null;
+ * 1. Verify requester (admin only)
+ * ----------------------------------------------------- */
+const auth = await getAuthContext(experienceId);
 
-  try {
-    const verified = await whopsdk.verifyUserToken(h);
-    requester_whop_user_id = verified.userId ?? null;
-  } catch {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
+if (!auth?.userId) {
+  return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+}
 
-  if (!requester_whop_user_id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
+
+
+const requester_whop_user_id = auth.userId;
 
   /* -------------------------------------------------------
    * 2. Load job (ownership + EXPERIENCE check)
@@ -56,9 +53,12 @@ export async function POST(
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
-  if (job.creator_whop_user_id !== requester_whop_user_id) {
-    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
-  }
+  const isJobCreator =
+  job.creator_whop_user_id === requester_whop_user_id;
+
+if (!isJobCreator && !auth.isAdmin) {
+  return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+}
 
   if (job.status !== "open") {
     return NextResponse.json({ error: "Job already closed" }, { status: 400 });
@@ -103,6 +103,7 @@ export async function POST(
   /* -------------------------------------------------------
  * 5. IMPORTANT: Return to SAME iframe origin
  * ----------------------------------------------------- */
+  const h = await headers();
 const origin =
 h.get("origin") ??
 h.get("x-forwarded-origin") ??

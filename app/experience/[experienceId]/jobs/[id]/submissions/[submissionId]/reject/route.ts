@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
-import { whopsdk } from "@/lib/whop-sdk";
+import { getAuthContext } from "@/lib/whop/getAuthContext";
 
 export async function POST(
   request: NextRequest,
@@ -19,16 +18,16 @@ export async function POST(
   /* -------------------------------------------------------
    * 1. Verify requester (ONLY reliable identity)
    * ----------------------------------------------------- */
-  const h = await headers();
-  const { userId: requester_whop_user_id } =
-    await whopsdk.verifyUserToken(h);
+  const auth = await getAuthContext(experienceId);
 
-  if (!requester_whop_user_id) {
-    return NextResponse.json(
-      { error: "Not authenticated" },
-      { status: 401 }
-    );
-  }
+if (!auth?.userId) {
+  return NextResponse.json(
+    { error: "Not authenticated" },
+    { status: 401 }
+  );
+}
+
+const requester_whop_user_id = auth.userId;
 
   /* -------------------------------------------------------
    * 2. Load job (ownership + EXPERIENCE check)
@@ -47,13 +46,15 @@ export async function POST(
     );
   }
 
-  // 🚫 Only job creator can reject
-  if (job.creator_whop_user_id !== requester_whop_user_id) {
-    return NextResponse.json(
-      { error: "Not authorized" },
-      { status: 403 }
-    );
-  }
+  const isJobCreator =
+  job.creator_whop_user_id === requester_whop_user_id;
+
+if (!isJobCreator && !auth.isAdmin) {
+  return NextResponse.json(
+    { error: "Not authorized" },
+    { status: 403 }
+  );
+}
 
   /* -------------------------------------------------------
    * 3. Load submission (must belong to job + EXPERIENCE)

@@ -1,33 +1,25 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
-import { whopsdk } from "@/lib/whop-sdk";
+import { getAuthContext } from "@/lib/whop/getAuthContext";
 
-async function getCreatorWhopUserId() {
-  const h = await headers();
+export async function createJob(experienceId: string, formData: FormData) {
+  if (!experienceId || experienceId === "undefined") {
+    throw new Error("Missing or invalid experience context");
+  }
 
-  // This is the ONLY guaranteed identity in server actions
-  const { userId } = await whopsdk.verifyUserToken(h);
+  const auth = await getAuthContext(experienceId);
 
-  if (!userId) {
+  if (!auth?.userId) {
     throw new Error("Unable to determine Whop user");
   }
 
-  return userId;
-}
+  if (!auth.isAdmin) {
+    throw new Error("You don’t have permission to post jobs.");
+  }
 
-export async function createJob(
-  experienceId: string,
-  formData: FormData
-) {
-	if (!experienceId || experienceId === "undefined") {
-		throw new Error("Missing or invalid experience context");
-	 }
-	 
-
-  const creator_whop_user_id = await getCreatorWhopUserId();
+  const creator_whop_user_id = auth.userId;
 
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();

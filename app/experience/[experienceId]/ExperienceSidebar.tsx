@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 
@@ -16,16 +16,51 @@ export default function ExperienceSidebar({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   
+  useEffect(() => {
+	let cancelled = false;
+ 
+	async function loadAdmin() {
+	  try {
+		 if (!experienceId || experienceId === "undefined") return;
+ 
+		 const res = await fetch(
+			`/api/me?experienceId=${encodeURIComponent(experienceId)}`,
+			{ cache: "no-store" }
+		 );
+ 
+		 if (!res.ok) return;
+ 
+		 const data = await res.json();
+ 
+		 if (!cancelled) {
+			setIsAdmin(data.isAdmin ?? false);
+		 }
+	  } catch {
+		 if (!cancelled) {
+			setIsAdmin(false);
+		 }
+	  }
+	}
+ 
+	loadAdmin();
+ 
+	return () => {
+	  cancelled = true;
+	};
+ }, [experienceId]);
 
-  const nav = [
-    { label: "Home", href: `/experience/${experienceId}/onboarding` },
-    { label: "Jobs", href: `/experience/${experienceId}/jobs` },
-    { label: "My Submissions", href: `/experience/${experienceId}/my-submissions` },
-    { label: "My Jobs", href: `/experience/${experienceId}/my-jobs` },
-    { label: "Post a Job", href: `/experience/${experienceId}/my-jobs/new` },
-  ];
+ const nav = [
+	{ label: "Home", href: `/experience/${experienceId}/onboarding` },
+	{ label: "Jobs", href: `/experience/${experienceId}/jobs` },
+	{ label: "My Submissions", href: `/experience/${experienceId}/my-submissions` },
+	{ label: "My Jobs", href: `/experience/${experienceId}/my-jobs` },
+	{ label: "Post a Job", href: `/experience/${experienceId}/my-jobs/new` },
+	...(isAdmin
+	  ? [{ label: "Admin Tools", href: `/experience/${experienceId}/admin` }]
+	  : []),
+ ];
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
