@@ -57,11 +57,8 @@ export default function ExperienceSidebar({
 	{ label: "My Submissions", href: `/experience/${experienceId}/my-submissions` },
 	{ label: "My Jobs", href: `/experience/${experienceId}/my-jobs` },
 	{ label: "Post a Job", href: `/experience/${experienceId}/my-jobs/new` },
-	...(isAdmin
-	  ? [{ label: "Admin Tools", href: `/experience/${experienceId}/admin` }]
-	  : []),
+	{ label: "Admin Tools", href: `/experience/${experienceId}/admin` },
  ];
-
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
 
