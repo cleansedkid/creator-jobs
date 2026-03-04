@@ -4,11 +4,11 @@ import { getAuthContext } from "@/lib/whop/getAuthContext";
 export const dynamic = "force-dynamic";
 
 export default async function AdminToolsPage({
-  params,
-}: {
-  params: { experienceId: string };
-}) {
-  const experienceId = params.experienceId;
+	params,
+ }: {
+	params: Promise<{ experienceId: string }>;
+ }) {
+	const { experienceId } = await params;
 
   // Whop sometimes renders with literal "undefined"
   if (!experienceId || experienceId === "undefined") {
