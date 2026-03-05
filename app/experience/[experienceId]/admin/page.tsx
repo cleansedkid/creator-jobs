@@ -18,11 +18,11 @@ function fmtDate(iso: string | null | undefined) {
 }
 
 export default async function AdminToolsPage({
-  params,
-}: {
-  params: { experienceId: string };
-}) {
-  const experienceId = params.experienceId;
+	params,
+ }: {
+	params: Promise<{ experienceId: string }>;
+ }) {
+	const { experienceId } = await params;
 
   // Whop sometimes renders with literal "undefined"
   if (!experienceId || experienceId === "undefined") {
