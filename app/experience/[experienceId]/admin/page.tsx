@@ -118,19 +118,16 @@ export default async function AdminToolsPage({
               Payments, audit visibility, and platform settings for this community.
             </p>
           </div>
+			 <Link
+  href={`/experience/${experienceId}/admin/audit`}
+  className="cj-cta whitespace-nowrap self-start"
+>
+  Audit Log →
+</Link>
         </div>
       </div>
 
-      {/* Fee policy (static for now) */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-        <div className="font-medium">Fee Transparency</div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Platform fee is charged to the job poster on payout checkout. Workers do not pay fees.
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          (Current policy in code: <span className="text-foreground font-medium">8%</span>)
-        </p>
-      </div>
+                                                        
 
       {/* Payment History */}
       <div className="rounded-xl border border-white/10 bg-white/5 p-5">
@@ -252,14 +249,7 @@ export default async function AdminToolsPage({
         )}
       </div>
 
-      {/* Audit Log placeholder */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-        <div className="font-medium">Audit Log</div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Track key actions (job posted, submission approved/rejected, payment events).
-        </p>
-        <div className="mt-3 text-sm text-muted-foreground">Coming soon.</div>
-      </div>
+      
     </div>
   );
 }
