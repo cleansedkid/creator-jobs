@@ -183,7 +183,7 @@ export default async function AdminToolsPage({
 
                       <div className="mt-2 grid gap-1 text-sm text-muted-foreground">
                         <div>
-                          <span className="text-foreground/90">Approved submission:</span>{" "}
+                          <span className="text-foreground/90">Approved submission id:</span>{" "}
                           {job.approved_submission_id ?? "—"}
                         </div>
                         <div>
@@ -191,7 +191,7 @@ export default async function AdminToolsPage({
                           {sub?.worker_whop_user_id ?? "—"}
                         </div>
                         <div>
-                          <span className="text-foreground/90">Checkout:</span>{" "}
+                          <span className="text-foreground/90">Checkout id:</span>{" "}
                           {job.whop_checkout_id ?? "—"}
                         </div>
                         <div>

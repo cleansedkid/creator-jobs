@@ -5,11 +5,11 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function AdminAuditPage({
-  params,
+	params,
 }: {
-  params: { experienceId: string };
+  params: Promise<{ experienceId: string }>;
 }) {
-  const experienceId = params.experienceId;
+  const { experienceId } = await params;
 
   if (!experienceId || experienceId === "undefined") {
     return (
