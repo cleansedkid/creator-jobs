@@ -46,38 +46,11 @@ if (!auth || !auth.isAdmin) {
         </div>
       </div>
 
-      {/* Responsibility notice */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-muted-foreground">
-        <div className="font-medium text-foreground mb-1">
-          Posting responsibly
-        </div>
-        <p>
-          Jobs posted here are visible to everyone in this community. Please only
-          post legitimate paid work and follow community guidelines.
-        </p>
-        <p className="mt-1">
-          Abuse or spam may result in restricted access.
-        </p>
-      </div>
-
-		{/* Platform Fee Disclosure */}
-<div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-muted-foreground">
-  <div className="font-medium text-foreground mb-1">
-    Platform fee
-  </div>
-
-  <p>
-    Creator Jobs charges an <span className="text-foreground font-medium">8% platform fee</span>
-    on completed payments.
-  </p>
-
-  <p className="mt-1">
-    Workers receive the full payout amount listed on the job.
-  </p>
-
-  <p className="mt-1">
-    The fee is paid by the job poster during checkout when a submission is approved.
-  </p>
+      
+		<div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-muted-foreground">
+  <span className="font-medium text-foreground">Fee disclosure:</span>{" "}
+  Creator Jobs charges an <span className="text-foreground font-medium">8% platform fee</span>{" "}
+  to the job poster when an approved submission is paid. Workers receive the full listed payout.
 </div>
 
       {/* Form */}
