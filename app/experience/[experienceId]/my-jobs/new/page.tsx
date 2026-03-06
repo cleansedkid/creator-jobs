@@ -60,6 +60,26 @@ if (!auth || !auth.isAdmin) {
         </p>
       </div>
 
+		{/* Platform Fee Disclosure */}
+<div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-muted-foreground">
+  <div className="font-medium text-foreground mb-1">
+    Platform fee
+  </div>
+
+  <p>
+    Creator Jobs charges an <span className="text-foreground font-medium">8% platform fee</span>
+    on completed payments.
+  </p>
+
+  <p className="mt-1">
+    Workers receive the full payout amount listed on the job.
+  </p>
+
+  <p className="mt-1">
+    The fee is paid by the job poster during checkout when a submission is approved.
+  </p>
+</div>
+
       {/* Form */}
       <form
         action={createJob.bind(null, experienceId)}
