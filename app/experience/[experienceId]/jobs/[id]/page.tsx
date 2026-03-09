@@ -475,7 +475,18 @@ const roleLabel = isAdmin
   </div>
 </div>
 
+<div className="space-y-1">
+  <div className="text-sm text-muted-foreground">
+    <span className="font-medium text-foreground">Submitted by:</span>{" "}
+    Community member
+  </div>
 
+  {isAdmin && s.worker_whop_user_id && (
+    <div className="text-xs text-muted-foreground">
+      Worker ID: {s.worker_whop_user_id}
+    </div>
+  )}
+</div>
 
 <a
   className="text-sm text-muted-foreground hover:underline break-all"
