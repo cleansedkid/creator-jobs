@@ -483,7 +483,7 @@ const roleLabel = isAdmin
 
   {isAdmin && s.worker_whop_user_id && (
     <div className="text-xs text-muted-foreground">
-      Worker ID: {s.worker_whop_user_id}
+      User ID: {s.worker_whop_user_id}
     </div>
   )}
 </div>
