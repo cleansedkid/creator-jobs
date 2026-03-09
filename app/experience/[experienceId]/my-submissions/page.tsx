@@ -85,19 +85,22 @@ export default async function MySubmissionsPage({
 				 My Submissions
 			  </h1>
 			  <p className="mt-1 text-sm text-muted-foreground">
-				 Track the status of work you’ve submitted to community jobs.
+			  Track the status of your submitted work and completed earnings.
 			  </p>
 			</div>
 		 </div>
 	  </div>
-	  <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-  <div className="text-sm text-muted-foreground">Total earnings</div>
-  <div className="mt-1 text-3xl font-semibold tracking-tight">
-    ${totalEarned}
+	  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+  <div>
+    <div className="text-sm text-muted-foreground">Total earnings</div>
+    <div className="text-2xl font-semibold tracking-tight">
+      ${totalEarned}
+    </div>
   </div>
-  <p className="mt-1 text-sm text-muted-foreground">
-    Total paid earnings from approved submissions.
-  </p>
+
+  <div className="text-xs text-muted-foreground">
+    From completed submissions
+  </div>
 </div>
  
 	  {(!submissions || submissions.length === 0) && (
