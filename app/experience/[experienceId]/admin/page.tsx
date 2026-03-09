@@ -115,8 +115,8 @@ export default async function AdminToolsPage({
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Admin Tools</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Payments, audit visibility, and platform settings for this community.
-            </p>
+  Payment history and administrative activity related to jobs in this community.
+</p>
           </div>
 			 <Link
   href={`/experience/${experienceId}/admin/audit`}

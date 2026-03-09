@@ -68,6 +68,12 @@ export default async function MySubmissionsPage({
       </div>
     );
   }
+  const totalEarnedCents = (submissions ?? []).reduce((sum: number, sub: any) => {
+	if (sub.status !== "paid") return sum;
+	return sum + Number(sub.jobs?.payout_cents ?? 0);
+ }, 0);
+ 
+ const totalEarned = (totalEarnedCents / 100).toFixed(2);
 
   return (
 	<div className="space-y-6">
@@ -84,6 +90,15 @@ export default async function MySubmissionsPage({
 			</div>
 		 </div>
 	  </div>
+	  <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+  <div className="text-sm text-muted-foreground">Total earnings</div>
+  <div className="mt-1 text-3xl font-semibold tracking-tight">
+    ${totalEarned}
+  </div>
+  <p className="mt-1 text-sm text-muted-foreground">
+    Total paid earnings from approved submissions.
+  </p>
+</div>
  
 	  {(!submissions || submissions.length === 0) && (
 		 <p className="text-muted-foreground">
