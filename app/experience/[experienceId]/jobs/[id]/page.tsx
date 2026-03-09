@@ -218,6 +218,16 @@ const paymentStarted =
   (isCreator || isAdmin) &&
   paymentStarted;
 
+  const postedByLabel = "Community admin";
+
+const roleLabel = isAdmin
+  ? "Admin reviewer"
+  : canSubmit
+  ? "Worker"
+  : isCreator
+  ? "Job poster"
+  : "Community member";
+
 
 
   
@@ -325,16 +335,16 @@ const paymentStarted =
  
 	  {/* Job context (MOVE DOWN: should be after job info) */}
 	  <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-1">
-		 <div className="text-sm">
-			<span className="font-medium">Job posted by:</span>{" "}
-			{isCreator ? "You" : "A community member"}
-		 </div>
- 
-		 <div className="text-sm">
-			<span className="font-medium">Your role:</span>{" "}
-			{isCreator ? "Job poster" : "Worker"}
-		 </div>
-	  </div>
+  <div className="text-sm">
+    <span className="font-medium">Posted by:</span>{" "}
+    {postedByLabel}
+  </div>
+
+  <div className="text-sm">
+    <span className="font-medium">Your role:</span>{" "}
+    {roleLabel}
+  </div>
+</div>
  
 	  {showSubmitted && (
 		 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
