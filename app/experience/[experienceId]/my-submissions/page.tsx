@@ -99,7 +99,7 @@ export default async function MySubmissionsPage({
   </div>
 
   <div className="text-xs text-muted-foreground">
-    From completed submissions
+    From approved submissions
   </div>
 </div>
  
