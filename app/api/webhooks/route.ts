@@ -138,7 +138,7 @@ if (!job) {
      * ------------------------------------------------- */
     await supabaseServer
       .from("submissions")
-      .update({ status: "approved" })
+      .update({ status: "paid" })
       .eq("id", submission.id);
 
     await supabaseServer
@@ -148,35 +148,7 @@ if (!job) {
       .neq("id", submission.id)
       .eq("status", "pending");
 
-    /* -------------------------------------------------
-     * 5️⃣ Transfer payout to worker
-     * ------------------------------------------------- */
-    const payoutUsd = Number(((job.payout_cents ?? 0) / 100).toFixed(2));
-
-    try {
-      const transfer = await whopsdk.transfers.create({
-        amount: payoutUsd,
-        currency: "usd",
-        destination_id: submission.worker_whop_user_id,
-        origin_id: process.env.WHOP_COMPANY_ID!,
-        idempotence_key: payment.id,
-        metadata: {
-          jobId: job.id,
-          submissionId: submission.id,
-          whopPaymentId: payment.id,
-        },
-      } as any);
-
-      console.log("[PAYOUT SENT] ✅", {
-        jobId: job.id,
-        transferId: transfer.id,
-      });
-    } catch (transferErr) {
-      console.error(
-        "[PAYOUT FAILED] ❌ Worker may not be payout-enabled",
-        transferErr
-      );
-    }
+    
   } catch (err) {
     console.error("[PAYMENT SUCCEEDED] ❌ Handler crashed", err);
   }
