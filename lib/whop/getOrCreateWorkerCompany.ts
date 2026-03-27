@@ -1,5 +1,4 @@
 import { supabaseServer } from "@/lib/supabase/server";
-import { whopsdk } from "@/lib/whop-sdk";
 
 type GetOrCreateWorkerCompanyArgs = {
   whopUserId: string;
@@ -13,6 +12,10 @@ type WorkerPayoutAccountRow = {
   worker_display_name: string | null;
   onboarding_status: string;
   payouts_enabled: boolean;
+};
+
+type CreatedWhopCompany = {
+  id: string;
 };
 
 export async function getOrCreateWorkerCompany({
@@ -44,21 +47,54 @@ export async function getOrCreateWorkerCompany({
     return existing as WorkerPayoutAccountRow;
   }
 
-  // TEMP DEV FALLBACKS
-  // This gets the architecture working first.
-  // We will replace these with real worker email/name before shipping.
+  const companyApiKey = process.env.WHOP_COMPANY_API_KEY;
+  const parentCompanyId = process.env.WHOP_COMPANY_ID;
+
+  if (!companyApiKey) {
+    throw new Error("Missing WHOP_COMPANY_API_KEY");
+  }
+
+  if (!parentCompanyId) {
+    throw new Error("Missing WHOP_COMPANY_ID");
+  }
+
+  // TEMP DEV FALLBACKS ONLY
+  // Replace with real worker email/name before shipping.
   const workerEmail = `${whopUserId}@creatorjobs.local`;
   const workerDisplayName = whopUserId;
 
-  const workerCompany = await whopsdk.companies.create({
-    email: workerEmail,
-    parent_company_id: process.env.WHOP_COMPANY_ID!,
-    title: workerDisplayName,
-    metadata: {
-      internal_user_id: whopUserId,
-      worker_type: "approved_worker",
+  const response = await fetch("https://api.whop.com/api/v1/companies", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${companyApiKey}`,
+      "Content-Type": "application/json",
     },
-  } as any);
+    body: JSON.stringify({
+      email: workerEmail,
+      parent_company_id: parentCompanyId,
+      title: workerDisplayName,
+      metadata: {
+        internal_user_id: whopUserId,
+        worker_type: "approved_worker",
+      },
+    }),
+    cache: "no-store",
+  });
+
+  const responseText = await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Whop create company failed (${response.status}): ${responseText}`
+    );
+  }
+
+  let workerCompany: CreatedWhopCompany;
+  try {
+    workerCompany = JSON.parse(responseText) as CreatedWhopCompany;
+  } catch {
+    throw new Error(`Whop create company returned invalid JSON: ${responseText}`);
+  }
 
   if (!workerCompany?.id) {
     throw new Error("Whop company creation failed: missing company id");
