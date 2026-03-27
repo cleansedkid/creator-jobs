@@ -45,6 +45,7 @@ const meta = (p.metadata ?? {}) as any;
 
 const jobId = meta.jobId;
 const experienceId = meta.experienceId;
+const workerCompanyId = meta.workerCompanyId;
 
 if (!jobId || !experienceId) {
   console.error(
@@ -58,15 +59,16 @@ if (!jobId || !experienceId) {
 const { data: job } = await supabaseServer
   .from("jobs")
   .select(
-    `
-    id,
-    experience_id,
-    payment_status,
-    whop_payment_id,
-    approved_submission_id,
-    payout_cents
-    `
-  )
+	`
+	id,
+	experience_id,
+	payment_status,
+	whop_payment_id,
+	approved_submission_id,
+	payout_cents,
+	worker_company_id
+	`
+ )
   .eq("id", jobId)
   .eq("experience_id", experienceId)
   .single();
@@ -78,6 +80,12 @@ if (!job) {
   });
   return;
 }
+console.error("[PAYMENT] 🔎 METADATA CHECK", {
+	jobId,
+	experienceId,
+	workerCompanyId,
+	jobWorkerCompanyId: job.worker_company_id,
+ });
 
 
     // Idempotency guard

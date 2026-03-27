@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { getAuthContext } from "@/lib/whop/getAuthContext";
 import { headers } from "next/headers";
 import { whopsdk } from "@/lib/whop-sdk";
+import { getOrCreateWorkerCompany } from "@/lib/whop/getOrCreateWorkerCompany";
 
 export async function POST(
   request: NextRequest,
@@ -16,19 +17,16 @@ export async function POST(
 ) {
   const { experienceId, id: jobId, submissionId } = await context.params;
 
- 
   /* -------------------------------------------------------
- * 1. Verify requester (admin only)
- * ----------------------------------------------------- */
-const auth = await getAuthContext(experienceId);
+   * 1. Verify requester (admin only)
+   * ----------------------------------------------------- */
+  const auth = await getAuthContext(experienceId);
 
-if (!auth?.userId) {
-  return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-}
+  if (!auth?.userId) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
-
-
-const requester_whop_user_id = auth.userId;
+  const requester_whop_user_id = auth.userId;
 
   /* -------------------------------------------------------
    * 2. Load job (ownership + EXPERIENCE check)
@@ -53,12 +51,11 @@ const requester_whop_user_id = auth.userId;
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
   }
 
-  const isJobCreator =
-  job.creator_whop_user_id === requester_whop_user_id;
+  const isJobCreator = job.creator_whop_user_id === requester_whop_user_id;
 
-if (!isJobCreator && !auth.isAdmin) {
-  return NextResponse.json({ error: "Not authorized" }, { status: 403 });
-}
+  if (!isJobCreator && !auth.isAdmin) {
+    return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+  }
 
   if (job.status !== "open") {
     return NextResponse.json({ error: "Job already closed" }, { status: 400 });
@@ -90,7 +87,25 @@ if (!isJobCreator && !auth.isAdmin) {
   }
 
   /* -------------------------------------------------------
-   * 4. Calculate fees
+   * 4. Get or create worker connected company
+   * ----------------------------------------------------- */
+  let workerAccount;
+  try {
+    workerAccount = await getOrCreateWorkerCompany({
+      whopUserId: submission.worker_whop_user_id,
+    });
+  } catch (error) {
+    console.error("❌ WORKER COMPANY SETUP FAILED", error);
+    return NextResponse.json(
+      { error: "Failed to prepare worker payout account" },
+      { status: 500 }
+    );
+  }
+
+  const workerCompanyId = workerAccount.worker_company_id;
+
+  /* -------------------------------------------------------
+   * 5. Calculate fees
    * ----------------------------------------------------- */
   const platformFeeBps = 800; // 8%
   const payoutCents = job.payout_cents ?? 0;
@@ -98,65 +113,70 @@ if (!isJobCreator && !auth.isAdmin) {
     (payoutCents * platformFeeBps) / 10000
   );
   const totalChargeCents = payoutCents + platformFeeCents;
+
   const totalChargeUsd = Number((totalChargeCents / 100).toFixed(2));
+  const applicationFeeUsd = Number((platformFeeCents / 100).toFixed(2));
 
   /* -------------------------------------------------------
- * 5. IMPORTANT: Return to SAME iframe origin
- * ----------------------------------------------------- */
+   * 6. IMPORTANT: Return to SAME iframe origin
+   * ----------------------------------------------------- */
   const h = await headers();
-const origin =
-h.get("origin") ??
-h.get("x-forwarded-origin") ??
-h.get("referer")?.split("/").slice(0, 3).join("/");
+  const origin =
+    h.get("origin") ??
+    h.get("x-forwarded-origin") ??
+    h.get("referer")?.split("/").slice(0, 3).join("/");
 
-if (!origin) {
-return NextResponse.json(
-  { error: "Unable to determine iframe origin" },
-  { status: 500 }
-);
-}
+  if (!origin) {
+    return NextResponse.json(
+      { error: "Unable to determine iframe origin" },
+      { status: 500 }
+    );
+  }
 
-const returnUrl = `${origin}/experience/${experienceId}/my-jobs?payment=success`;
-
+  const returnUrl = `${origin}/experience/${experienceId}/my-jobs?payment=success`;
 
   /* -------------------------------------------------------
-   * 6. Create Whop checkout
+   * 7. Create Whop checkout on WORKER company
    * ----------------------------------------------------- */
   const checkout = await whopsdk.checkoutConfigurations.create({
-	redirect_url: returnUrl,
-	metadata: {
-	  jobId,
-	  submissionId,
-	  workerWhopUserId: submission.worker_whop_user_id,
-	  payoutCents,
-	  platformFeeBps,
-	  platformFeeCents,
-	  totalChargeCents,
-	  experienceId,
-	},
-	plan: {
-	  company_id: process.env.WHOP_COMPANY_ID!,
-	  currency: "usd",
-	  plan_type: "one_time",
-	  initial_price: totalChargeUsd,
-	},
- } as any);
+    redirect_url: returnUrl,
+    metadata: {
+      jobId,
+      submissionId,
+      workerWhopUserId: submission.worker_whop_user_id,
+      workerCompanyId,
+      payoutCents,
+      platformFeeBps,
+      platformFeeCents,
+      totalChargeCents,
+      experienceId,
+    },
+    plan: {
+      company_id: workerCompanyId,
+      currency: "usd",
+      plan_type: "one_time",
+      initial_price: totalChargeUsd,
+      application_fee_amount: applicationFeeUsd,
+    },
+  } as any);
 
- console.error("🧾 CHECKOUT CREATED", {
-	checkoutId: checkout?.id,
-	planId: (checkout as any)?.plan?.id,
-	purchaseUrl: checkout?.purchase_url,
- });
- 
- 
- 
+  console.error("🧾 CHECKOUT CREATED", {
+    checkoutId: checkout?.id,
+    planId: (checkout as any)?.plan?.id,
+    purchaseUrl: checkout?.purchase_url,
+    workerCompanyId,
+    totalChargeUsd,
+    applicationFeeUsd,
+  });
+
   /* -------------------------------------------------------
-   * 7. Store pending payment state
+   * 8. Store pending payment state
    * ----------------------------------------------------- */
   const { error: jobErr } = await supabaseServer
     .from("jobs")
     .update({
       approved_submission_id: submissionId,
+      worker_company_id: workerCompanyId,
       platform_fee_bps: platformFeeBps,
       platform_fee_cents: platformFeeCents,
       total_charge_cents: totalChargeCents,
@@ -171,103 +191,7 @@ const returnUrl = `${origin}/experience/${experienceId}/my-jobs?payment=success`
   }
 
   /* -------------------------------------------------------
-   * 8. Redirect to checkout
+   * 9. Redirect to checkout
    * ----------------------------------------------------- */
   return NextResponse.redirect(checkout.purchase_url, 303);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
