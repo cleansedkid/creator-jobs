@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getAuthContext } from "@/lib/whop/getAuthContext";
 import { headers } from "next/headers";
-import { whopsdk } from "@/lib/whop-sdk";
 import { getOrCreateWorkerCompany } from "@/lib/whop/getOrCreateWorkerCompany";
+import { createWorkerCheckoutConfiguration } from "@/lib/whop/createWorkerCheckoutConfiguration";
 
 export async function POST(
   request: NextRequest,
@@ -138,27 +138,27 @@ export async function POST(
   /* -------------------------------------------------------
    * 7. Create Whop checkout on WORKER company
    * ----------------------------------------------------- */
-  const checkout = await whopsdk.checkoutConfigurations.create({
-    redirect_url: returnUrl,
-    metadata: {
+  let checkout;
+  try {
+    checkout = await createWorkerCheckoutConfiguration({
+      workerCompanyId,
+      returnUrl,
       jobId,
       submissionId,
       workerWhopUserId: submission.worker_whop_user_id,
-      workerCompanyId,
       payoutCents,
       platformFeeBps,
       platformFeeCents,
       totalChargeCents,
       experienceId,
-    },
-    plan: {
-      company_id: workerCompanyId,
-      currency: "usd",
-      plan_type: "one_time",
-      initial_price: totalChargeUsd,
-      application_fee_amount: applicationFeeUsd,
-    },
-  } as any);
+    });
+  } catch (error) {
+    console.error("❌ CHECKOUT CREATION FAILED", error);
+    return NextResponse.json(
+      { error: "Failed to create checkout" },
+      { status: 500 }
+    );
+  }
 
   console.error("🧾 CHECKOUT CREATED", {
     checkoutId: checkout?.id,
