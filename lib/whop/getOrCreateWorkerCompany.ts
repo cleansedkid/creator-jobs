@@ -58,10 +58,10 @@ export async function getOrCreateWorkerCompany({
     throw new Error("Missing WHOP_COMPANY_ID");
   }
 
-  // TEMP DEV FALLBACKS ONLY
-  // Replace with real worker email/name before shipping.
-  const workerEmail = `${whopUserId}@creatorjobs.local`;
-  const workerDisplayName = whopUserId;
+    // TEMP DEV FALLBACKS ONLY
+  // Use a real email for testing so Whop accepts company creation.
+  const workerEmail = "pratherthagod@gmail.com";
+  const workerDisplayName = `Worker ${whopUserId}`;
 
   const response = await fetch("https://api.whop.com/api/v1/companies", {
     method: "POST",
