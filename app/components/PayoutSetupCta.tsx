@@ -15,6 +15,8 @@ export default function PayoutSetupCta({
       setLoading(true);
       setError(null);
 
+		console.log("PAYOUT CTA experienceId:", experienceId);
+
       const res = await fetch("/api/onboard-payouts", {
         method: "POST",
         headers: {
@@ -52,7 +54,7 @@ export default function PayoutSetupCta({
         <button
           onClick={handleClick}
           disabled={loading}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           style={{ backgroundColor: "#2563eb" }}
         >
           {loading ? "Redirecting..." : "Set up payouts"}

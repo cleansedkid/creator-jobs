@@ -5,7 +5,10 @@ import { getOrCreateWorkerCompany } from "@/lib/whop/getOrCreateWorkerCompany";
 
 export async function POST(request: NextRequest) {
   try {
-    const { experienceId } = await request.json();
+	const body = await request.json();
+	console.error("ONBOARD PAYOUTS BODY", body);
+	
+	const { experienceId } = body;
 
     if (!experienceId) {
       return NextResponse.json(

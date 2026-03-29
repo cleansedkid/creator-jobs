@@ -116,7 +116,7 @@ export default async function MySubmissionsPage({
 
 
   <div className="text-xs text-muted-foreground">
-    From approved submissions
+    From paid submissions
   </div>
 </div>
 {showPayoutSetupCta && (
