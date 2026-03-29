@@ -18,11 +18,11 @@ async function safeGetWorkerWhopUserId(): Promise<string | null> {
 }
 
 export default async function MySubmissionsPage({
-  params,
-}: {
-  params: { experienceId: string };
-}) {
-  const experienceId = params.experienceId;
+	params,
+ }: {
+	params: Promise<{ experienceId: string }>;
+ }) {
+	const { experienceId } = await params;
   const worker_whop_user_id = await safeGetWorkerWhopUserId();
 
   if (!worker_whop_user_id) {
@@ -45,22 +45,23 @@ export default async function MySubmissionsPage({
   const { data: submissions, error } = await supabaseAdmin
   .from("submissions")
   .select(
-    `
-    id,
-    status,
-    proof_url,
-    created_at,
-    jobs:job_id!left (
-      id,
-      title,
-      payout_cents,
-      experience_id
-    )
+	 `
+	 id,
+	 status,
+	 proof_url,
+	 created_at,
+	 experience_id,
+	 jobs:job_id!left (
+		id,
+		title,
+		payout_cents,
+		experience_id
+	 )
   `
   )
   .eq("worker_whop_user_id", worker_whop_user_id)
+  .eq("experience_id", experienceId)
   .order("created_at", { ascending: false });
-
 
   if (error) {
     return (
