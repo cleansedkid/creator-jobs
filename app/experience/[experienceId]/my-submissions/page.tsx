@@ -2,6 +2,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
+import PayoutSetupCta from "@/app/components/PayoutSetupCta";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -68,12 +69,27 @@ export default async function MySubmissionsPage({
       </div>
     );
   }
+
+  const { data: workerPayoutAccount } = await supabaseAdmin
+  .from("worker_payout_accounts")
+  .select("worker_company_id, onboarding_status, payouts_enabled")
+  .eq("whop_user_id", worker_whop_user_id)
+  .maybeSingle();
+
   const totalEarnedCents = (submissions ?? []).reduce((sum: number, sub: any) => {
 	if (sub.status !== "paid") return sum;
 	return sum + Number(sub.jobs?.payout_cents ?? 0);
  }, 0);
  
  const totalEarned = (totalEarnedCents / 100).toFixed(2);
+
+ const hasApprovedOrPaidSubmission = (submissions ?? []).some(
+	(sub: any) => sub.status === "approved" || sub.status === "paid"
+ );
+ 
+ const showPayoutSetupCta =
+	hasApprovedOrPaidSubmission &&
+	(!workerPayoutAccount || !workerPayoutAccount.payouts_enabled);
 
   return (
 	<div className="space-y-6">
@@ -98,10 +114,14 @@ export default async function MySubmissionsPage({
     </div>
   </div>
 
+
   <div className="text-xs text-muted-foreground">
     From approved submissions
   </div>
 </div>
+{showPayoutSetupCta && (
+  <PayoutSetupCta experienceId={experienceId} />
+)}
  
 	  {(!submissions || submissions.length === 0) && (
 		 <p className="text-muted-foreground">
