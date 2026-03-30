@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
 import PayoutSetupCta from "@/app/components/PayoutSetupCta";
+import ManagePayoutsButton from "@/app/components/ManagePayoutsButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -107,18 +108,18 @@ export default async function MySubmissionsPage({
 			</div>
 		 </div>
 	  </div>
-	  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+	  <div className="flex items-start justify-between border-b border-white/10 pb-4">
   <div>
     <div className="text-sm text-muted-foreground">Total earnings</div>
     <div className="text-2xl font-semibold tracking-tight">
       ${totalEarned}
     </div>
+    <div className="mt-1 text-xs text-muted-foreground">
+      From paid submissions
+    </div>
   </div>
 
-
-  <div className="text-xs text-muted-foreground">
-    From paid submissions
-  </div>
+  <ManagePayoutsButton experienceId={experienceId} />
 </div>
 {showPayoutSetupCta && (
   <>
