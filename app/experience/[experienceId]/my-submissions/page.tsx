@@ -121,7 +121,20 @@ export default async function MySubmissionsPage({
   </div>
 </div>
 {showPayoutSetupCta && (
-  <PayoutSetupCta experienceId={experienceId} />
+  <>
+    {/* Payout explainer */}
+    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+      <div className="text-sm font-medium">
+        Payout setup required for approved work
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        To receive earnings, complete payout setup through Whop. This includes identity verification and connecting a payout method.
+      </p>
+    </div>
+
+    {/* CTA */}
+    <PayoutSetupCta experienceId={experienceId} />
+  </>
 )}
  
 	  {(!submissions || submissions.length === 0) && (

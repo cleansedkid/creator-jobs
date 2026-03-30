@@ -44,7 +44,7 @@ export default function PayoutSetupCta({
         <div>
           <div className="text-sm font-medium">Set up payouts</div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Complete payout setup to receive earnings from approved jobs.
+			 Complete payout setup through Whop to verify your identity and unlock your earnings.
           </p>
           {error && (
             <p className="mt-2 text-sm text-red-400">{error}</p>
