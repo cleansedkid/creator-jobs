@@ -107,17 +107,7 @@ export default async function MySubmissionsPage({
 			  </p>
 			</div>
 		 </div>
-	  </div>
-	  <div className="flex items-start justify-between border-b border-white/10 pb-4">
-  <div>
-    <div className="text-sm text-muted-foreground">Total earnings</div>
-    <div className="text-2xl font-semibold tracking-tight">
-      ${totalEarned}
-    </div>
-    <div className="mt-1 text-xs text-muted-foreground">
-      From paid submissions
-    </div>
-  </div>
+	  
 
   <ManagePayoutsButton experienceId={experienceId} />
 </div>
