@@ -70,10 +70,9 @@ export default async function AdminToolsPage({
       payout_cents,
       platform_fee_cents,
       total_charge_cents,
-      whop_checkout_id,
       approved_submission_id,
-      creator_whop_user_id,
-      created_at
+      created_at,
+      paid_at
       `
     )
     .eq("experience_id", experienceId)
@@ -97,6 +96,7 @@ export default async function AdminToolsPage({
   ) as string[];
 
   const submissionsById = new Map<string, any>();
+  const workerIds = new Set<string>();
 
   if (submissionIds.length > 0) {
     const { data: subs } = await supabaseAdmin
@@ -104,8 +104,32 @@ export default async function AdminToolsPage({
       .select("id, worker_whop_user_id, status, created_at, proof_url")
       .in("id", submissionIds);
 
-    (subs ?? []).forEach((s) => submissionsById.set(s.id, s));
+		(subs ?? []).forEach((s) => {
+			submissionsById.set(s.id, s);
+			if (s.worker_whop_user_id) {
+			  workerIds.add(s.worker_whop_user_id);
+			}
+		 });
   }
+  const workerDisplayNamesByUserId = new Map<string, string>();
+
+  if (workerIds.size > 0) {
+    const { data: payoutProfiles } = await supabaseAdmin
+      .from("worker_payout_accounts")
+      .select("whop_user_id, worker_display_name")
+      .in("whop_user_id", Array.from(workerIds));
+
+    (payoutProfiles ?? []).forEach((profile) => {
+      if (profile.whop_user_id && profile.worker_display_name) {
+        workerDisplayNamesByUserId.set(
+          profile.whop_user_id,
+          profile.worker_display_name
+        );
+      }
+    });
+  }
+
+  
 
   return (
     <div className="space-y-6">
@@ -135,8 +159,8 @@ export default async function AdminToolsPage({
           <div>
             <div className="font-medium">Payment History</div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Jobs with an approved submission. Shows payout + fee breakdown.
-            </p>
+  Track payments sent to approved workers, including payout amount, platform fee, total charged, and current payment status.
+</p>
           </div>
         </div>
 
@@ -153,9 +177,9 @@ export default async function AdminToolsPage({
                 ? submissionsById.get(job.approved_submission_id)
                 : null;
 
-              const statusLabel =
+					 const statusLabel =
                 job.payment_status === "paid"
-                  ? "Paid"
+                  ? "Payment completed"
                   : job.payment_status === "requires_payment"
                   ? "Awaiting payment"
                   : job.payment_status ?? "—";
@@ -180,23 +204,26 @@ export default async function AdminToolsPage({
                         </div>
                         <span className={pillClass}>{statusLabel}</span>
                       </div>
+							 <p className="mt-1 text-sm text-muted-foreground">
+                        {job.payment_status === "paid"
+                          ? "Payment has been sent for the approved submission."
+                          : "This approved submission is ready for payment."}
+                      </p>
 
-                      <div className="mt-2 grid gap-1 text-sm text-muted-foreground">
+							 <div className="mt-2 grid gap-1 text-sm text-muted-foreground">
                         <div>
-                          <span className="text-foreground/90">Approved submission id:</span>{" "}
-                          {job.approved_submission_id ?? "—"}
+                          <span className="text-foreground/90">Recipient:</span>{" "}
+                          {sub?.worker_whop_user_id
+                            ? workerDisplayNamesByUserId.get(sub.worker_whop_user_id) ?? "Approved worker"
+                            : "Approved worker"}
                         </div>
                         <div>
-                          <span className="text-foreground/90">Worker:</span>{" "}
-                          {sub?.worker_whop_user_id ?? "—"}
-                        </div>
-                        <div>
-                          <span className="text-foreground/90">Checkout id:</span>{" "}
-                          {job.whop_checkout_id ?? "—"}
-                        </div>
-                        <div>
-                          <span className="text-foreground/90">Approved at:</span>{" "}
+                          <span className="text-foreground/90">Submission approved:</span>{" "}
                           {fmtDate(sub?.created_at)}
+                        </div>
+                        <div>
+                          <span className="text-foreground/90">Payment completed:</span>{" "}
+                          {job.payment_status === "paid" ? fmtDate(job.paid_at) : "Awaiting payment"}
                         </div>
                       </div>
 
@@ -239,8 +266,8 @@ export default async function AdminToolsPage({
                     </div>
                   </div>
 
-                  <div className="mt-3 text-xs text-muted-foreground">
-                    Created: {fmtDate(job.created_at)}
+						<div className="mt-3 text-xs text-muted-foreground">
+                    Job posted: {fmtDate(job.created_at)}
                   </div>
                 </div>
               );
