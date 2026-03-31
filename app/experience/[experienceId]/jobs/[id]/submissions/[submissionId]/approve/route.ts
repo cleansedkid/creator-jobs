@@ -104,6 +104,18 @@ export async function POST(
 
   const workerCompanyId = workerAccount.worker_company_id;
 
+if (!workerCompanyId) {
+  console.error("❌ WORKER COMPANY ID MISSING AFTER SETUP", {
+    workerWhopUserId: submission.worker_whop_user_id,
+    workerAccount,
+  });
+
+  return NextResponse.json(
+    { error: "Worker payout account is not ready yet" },
+    { status: 500 }
+  );
+}
+
   /* -------------------------------------------------------
    * 5. Calculate fees
    * ----------------------------------------------------- */
