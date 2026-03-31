@@ -5,10 +5,8 @@ import { getOrCreateWorkerCompany } from "@/lib/whop/getOrCreateWorkerCompany";
 
 export async function POST(request: NextRequest) {
   try {
-	const body = await request.json();
-	console.error("ONBOARD PAYOUTS BODY", body);
-	
-	const { experienceId } = body;
+    const body = await request.json();
+    const { experienceId } = body;
 
     if (!experienceId) {
       return NextResponse.json(
@@ -36,9 +34,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const workerAccount = await getOrCreateWorkerCompany({
-      whopUserId: auth.userId,
-    });
+    let workerAccount;
+    try {
+      workerAccount = await getOrCreateWorkerCompany({
+        whopUserId: auth.userId,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unknown error";
+
+      if (message === "MISSING_PAYOUT_PROFILE") {
+        return NextResponse.json({
+          needsProfile: true,
+          redirectTo: `/experience/${experienceId}/my-submissions/payout-profile`,
+        });
+      }
+
+      console.error("❌ GET/CREATE WORKER COMPANY FAILED", error);
+      return NextResponse.json(
+        { error: "Failed to prepare payout account" },
+        { status: 500 }
+      );
+    }
 
     const companyApiKey = process.env.WHOP_COMPANY_API_KEY;
 
@@ -74,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let data: { url?: string; expires_at?: string };
+    let data: { url?: string };
     try {
       data = JSON.parse(responseText);
     } catch {

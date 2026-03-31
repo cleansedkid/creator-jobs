@@ -15,8 +15,6 @@ export default function PayoutSetupCta({
       setLoading(true);
       setError(null);
 
-		console.log("PAYOUT CTA experienceId:", experienceId);
-
       const res = await fetch("/api/onboard-payouts", {
         method: "POST",
         headers: {
@@ -29,6 +27,15 @@ export default function PayoutSetupCta({
 
       if (!res.ok) {
         throw new Error(data?.error || "Failed to start payout setup");
+      }
+
+      if (data?.needsProfile && data?.redirectTo) {
+        window.location.href = data.redirectTo;
+        return;
+      }
+
+      if (!data?.url) {
+        throw new Error("Missing payout setup URL");
       }
 
       window.location.href = data.url;
@@ -44,7 +51,7 @@ export default function PayoutSetupCta({
         <div>
           <div className="text-sm font-medium">Set up payouts</div>
           <p className="mt-1 text-sm text-muted-foreground">
-			 Complete payout setup through Whop to verify your identity and unlock your earnings.
+            Complete payout setup through Whop to verify your identity and unlock your earnings.
           </p>
           {error && (
             <p className="mt-2 text-sm text-red-400">{error}</p>
@@ -52,6 +59,7 @@ export default function PayoutSetupCta({
         </div>
 
         <button
+          type="button"
           onClick={handleClick}
           disabled={loading}
           className="cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"

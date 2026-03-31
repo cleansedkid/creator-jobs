@@ -7,7 +7,7 @@ type GetOrCreateWorkerCompanyArgs = {
 type WorkerPayoutAccountRow = {
   id: string;
   whop_user_id: string;
-  worker_company_id: string;
+  worker_company_id: string | null;
   worker_email: string | null;
   worker_display_name: string | null;
   onboarding_status: string;
@@ -43,7 +43,14 @@ export async function getOrCreateWorkerCompany({
     );
   }
 
-  if (existing) {
+  const workerEmail = existing?.worker_email?.trim() || null;
+  const workerDisplayName = existing?.worker_display_name?.trim() || null;
+
+  if (!workerEmail || !workerDisplayName) {
+    throw new Error("MISSING_PAYOUT_PROFILE");
+  }
+
+  if (existing?.worker_company_id) {
     return existing as WorkerPayoutAccountRow;
   }
 
@@ -57,11 +64,6 @@ export async function getOrCreateWorkerCompany({
   if (!parentCompanyId) {
     throw new Error("Missing WHOP_COMPANY_ID");
   }
-
-    // TEMP DEV FALLBACKS ONLY
-  // Use a real email for testing so Whop accepts company creation.
-  const workerEmail = "pratherthagod@gmail.com";
-  const workerDisplayName = `Worker ${whopUserId}`;
 
   const response = await fetch("https://api.whop.com/api/v1/companies", {
     method: "POST",
@@ -100,16 +102,19 @@ export async function getOrCreateWorkerCompany({
     throw new Error("Whop company creation failed: missing company id");
   }
 
-  const { data: inserted, error: insertError } = await supabaseServer
+  const { data: updated, error: updateError } = await supabaseServer
     .from("worker_payout_accounts")
-    .insert({
-      whop_user_id: whopUserId,
-      worker_company_id: workerCompany.id,
-      worker_email: workerEmail,
-      worker_display_name: workerDisplayName,
-      onboarding_status: "created",
-      payouts_enabled: false,
-    })
+    .upsert(
+      {
+        whop_user_id: whopUserId,
+        worker_company_id: workerCompany.id,
+        worker_email: workerEmail,
+        worker_display_name: workerDisplayName,
+        onboarding_status: "created",
+        payouts_enabled: false,
+      },
+      { onConflict: "whop_user_id" }
+    )
     .select(
       `
       id,
@@ -123,11 +128,11 @@ export async function getOrCreateWorkerCompany({
     )
     .single();
 
-  if (insertError) {
+  if (updateError) {
     throw new Error(
-      `Failed to save worker payout account: ${insertError.message}`
+      `Failed to save worker payout account: ${updateError.message}`
     );
   }
 
-  return inserted as WorkerPayoutAccountRow;
+  return updated as WorkerPayoutAccountRow;
 }

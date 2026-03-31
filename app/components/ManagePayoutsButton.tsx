@@ -29,6 +29,11 @@ export default function ManagePayoutsButton({
         throw new Error(data?.error || "Failed to open payouts");
       }
 
+      if (data?.needsProfile && data?.redirectTo) {
+        window.location.href = data.redirectTo;
+        return;
+      }
+
       if (!data?.url) {
         throw new Error("Missing payout URL");
       }
@@ -52,11 +57,7 @@ export default function ManagePayoutsButton({
         {loading ? "Redirecting..." : "Manage payouts"}
       </button>
 
-      {error && (
-        <p className="text-xs text-red-400">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
