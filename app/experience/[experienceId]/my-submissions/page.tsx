@@ -4,6 +4,7 @@ import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
 import PayoutSetupCta from "@/app/components/PayoutSetupCta";
 import ManagePayoutsButton from "@/app/components/ManagePayoutsButton";
+import PaymentNoticeBanner from "@/app/components/PaymentNoticeBanner";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -71,6 +72,10 @@ export default async function MySubmissionsPage({
       </div>
     );
   }
+  const latestPaidSubmission = (submissions ?? []).find(
+	(sub: any) => sub.status === "paid"
+ );
+
 
   const { data: workerPayoutAccount } = await supabaseAdmin
   .from("worker_payout_accounts")
@@ -107,6 +112,13 @@ export default async function MySubmissionsPage({
 			  </p>
 			</div>
 		 </div>
+		 {latestPaidSubmission && (
+  <PaymentNoticeBanner
+    tone="success"
+    title="Payment received"
+    message={`Funds for "${latestPaidSubmission.jobs?.title ?? "your approved job"}" are available in your Whop payout account.`}
+  />
+)}
 	  
 
   <ManagePayoutsButton experienceId={experienceId} />

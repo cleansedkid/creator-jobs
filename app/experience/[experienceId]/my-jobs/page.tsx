@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabase/client";
+import { useParams, useSearchParams } from "next/navigation";
+import PaymentNoticeBanner from "@/app/components/PaymentNoticeBanner";
 
 export default function MyJobsPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+const paymentState = searchParams?.get("payment");
   const experienceId = params?.experienceId as string | undefined;
 
   const [jobs, setJobs] = useState<any[]>([]);
@@ -155,24 +158,49 @@ export default function MyJobsPage() {
 
 
 	  {/* Header */}
-	  <div className="pb-2">
-		 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-			<div>
-			  <h1 className="text-4xl font-bold tracking-tight">My Jobs</h1>
-			  <p className="mt-1 text-sm text-muted-foreground">
-				 Jobs you’ve posted in this community.
-			  </p>
-			</div>
- 
-			<Link
-  href={`/experience/${experienceId}/my-jobs/new`}
-  className="cj-cta whitespace-nowrap self-start"
->
-  + New Job
-</Link>
+<div className="pb-2 space-y-3">
 
-		 </div>
-	  </div>
+{/* 🔔 Payment notifications */}
+{paymentState === "success" && (
+  <PaymentNoticeBanner
+	 tone="success"
+	 title="Payment sent successfully"
+	 message="The approved worker can access funds through their Whop payout account."
+  />
+)}
+
+{paymentState === "failed" && (
+  <PaymentNoticeBanner
+	 tone="warning"
+	 title="Payment was not completed"
+	 message="No funds were sent. Review the job and try again when ready."
+  />
+)}
+
+{paymentState === "cancelled" && (
+  <PaymentNoticeBanner
+	 tone="warning"
+	 title="Checkout was cancelled"
+	 message="Payment was not completed."
+  />
+)}
+
+<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+  <div>
+	 <h1 className="text-4xl font-bold tracking-tight">My Jobs</h1>
+	 <p className="mt-1 text-sm text-muted-foreground">
+		Jobs you’ve posted in this community.
+	 </p>
+  </div>
+
+  <Link
+	 href={`/experience/${experienceId}/my-jobs/new`}
+	 className="cj-cta whitespace-nowrap self-start"
+  >
+	 + New Job
+  </Link>
+</div>
+</div>
  
 	  {jobs.length === 0 && (
 		 <p className="text-muted-foreground">
