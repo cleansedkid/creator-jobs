@@ -98,6 +98,10 @@ export default async function MySubmissionsPage({
 	hasApprovedOrPaidSubmission &&
 	(!workerPayoutAccount || !workerPayoutAccount.payouts_enabled);
 
+	const latestPaidJob = Array.isArray(latestPaidSubmission?.jobs)
+  ? latestPaidSubmission.jobs[0]
+  : latestPaidSubmission?.jobs;
+
   return (
 	<div className="space-y-6">
 	  {/* Header */}
@@ -116,7 +120,7 @@ export default async function MySubmissionsPage({
   <PaymentNoticeBanner
     tone="success"
     title="Payment received"
-    message={`Funds for "${latestPaidSubmission.jobs?.title ?? "your approved job"}" are available in your Whop payout account.`}
+    message={`Funds for "${latestPaidJob?.title ?? "your approved job"}" are available in your Whop payout account.`}
   />
 )}
 	  
