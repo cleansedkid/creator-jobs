@@ -64,17 +64,14 @@ export default async function Page({
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-4">
         <div className="text-sm font-medium">
-          How this works
+          How it works
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           Community admins post jobs. Members submit completed work. Approved submissions are paid through Whop.
         </p>
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">Note:</span>{" "}
-        Job posting is currently managed by community admins. Members can browse jobs and submit completed work.
-      </p>
+      
     </div>
   );
 }
