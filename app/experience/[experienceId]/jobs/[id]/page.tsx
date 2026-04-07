@@ -501,7 +501,7 @@ const roleLabel = isAdmin
                     href={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/confirm-payment`}
                     className="cj-approve inline-flex items-center justify-center"
                   >
-                    Review & pay
+                    Approve & Pay
                   </Link>
 
                   <form
