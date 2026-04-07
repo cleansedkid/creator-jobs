@@ -419,126 +419,108 @@ const roleLabel = isAdmin
         </div>
       ) : null}
 
-      {/* Submissions (creator view) */}
-      {canReview && (
+            {/* Submissions (creator view) */}
+				{canReview && (
         <div className="space-y-3">
           <div className="pb-2">
-  <div className="flex items-center justify-between">
-    <h2 className="text-base font-semibold">Submissions</h2>
-  </div>
-</div>
-
-
-
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold">Submissions</h2>
+            </div>
+          </div>
 
           {(!submissions || submissions.length === 0) && (
-  <p className="text-muted-foreground">
-  No submissions yet. Submitted work from community members will appear here for review.
-</p>
-
-)}
-
+            <p className="text-muted-foreground">
+              No submissions yet. Submitted work from community members will appear here for review.
+            </p>
+          )}
 
           {submissions?.map((s: any) => (
             <div
-				key={s.id}
-				className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3 transition hover:bg-white/10"
-			 >
-			 
-			 			 
-			 <div className="flex items-center justify-between gap-4">
-  <div className="flex items-center gap-2 min-w-0">
-  <span
-  className={`cj-pill ${
-    s.status === "pending"
-      ? "cj-pill-pending"
-      : s.status === "approved"
-      ? "cj-pill-approved"
-      : s.status === "paid"
-      ? "cj-pill-paid"
-      : s.status === "rejected"
-      ? "cj-pill-rejected"
-      : ""
-  }`}
->
-  {s.status === "pending"
-    ? "Pending review"
-    : s.status === "approved"
-    ? "Approved"
-    : s.status === "paid"
-    ? "Paid"
-    : s.status === "rejected"
-    ? "Rejected"
-    : s.status}
-</span>
-
-  </div>
-</div>
-
-<div className="space-y-1">
-  <div className="text-sm text-muted-foreground">
-    <span className="font-medium text-foreground">Submitted by:</span>{" "}
-    Community member
-  </div>
-
-  {isAdmin && s.worker_whop_user_id && (
-    <div className="text-xs text-muted-foreground">
-      User ID: {s.worker_whop_user_id}
-    </div>
-  )}
-</div>
-
-<a
-  className="text-sm text-muted-foreground hover:underline break-all"
-  href={s.proof_url}
-  target="_blank"
-  rel="noreferrer"
->
-  View submission →
-</a>
-
-
-
-{s.note && (
-  <p className="text-sm text-muted-foreground">
-    {s.note}
-  </p>
-)}
-
-
-{canApprove && (
-                <div className="flex gap-2 pt-3">
-                  <form
-                    action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/approve`}
-                    method="post"
+              key={s.id}
+              className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-3 transition hover:bg-white/10"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className={`cj-pill ${
+                      s.status === "pending"
+                        ? "cj-pill-pending"
+                        : s.status === "approved"
+                        ? "cj-pill-approved"
+                        : s.status === "paid"
+                        ? "cj-pill-paid"
+                        : s.status === "rejected"
+                        ? "cj-pill-rejected"
+                        : ""
+                    }`}
                   >
-                    <button
-  type="submit"
-  className="cj-approve"
->
-  Approve
-</button>
+                    {s.status === "pending"
+                      ? "Pending review"
+                      : s.status === "approved"
+                      ? "Approved"
+                      : s.status === "paid"
+                      ? "Paid"
+                      : s.status === "rejected"
+                      ? "Rejected"
+                      : s.status}
+                  </span>
+                </div>
+              </div>
 
-                  </form>
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">Submitted by:</span>{" "}
+                  Community member
+                </div>
+
+                {isAdmin && s.worker_whop_user_id && (
+                  <div className="text-xs text-muted-foreground">
+                    User ID: {s.worker_whop_user_id}
+                  </div>
+                )}
+              </div>
+
+              <a
+                className="text-sm text-muted-foreground hover:underline break-all"
+                href={s.proof_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View submission →
+              </a>
+
+              {s.note && (
+                <p className="text-sm text-muted-foreground">
+                  {s.note}
+                </p>
+              )}
+
+              {canApprove && (
+                <div className="flex gap-2 pt-3">
+                  <Link
+                    href={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/confirm-payment`}
+                    className="cj-approve inline-flex items-center justify-center"
+                  >
+                    Review & pay
+                  </Link>
 
                   <form
                     action={`/experience/${experienceId}/jobs/${jobId}/submissions/${s.id}/reject`}
                     method="post"
                   >
                     <button
-  type="submit"
-  className="cj-reject"
->
-  Reject
-</button>
-
+                      type="submit"
+                      className="cj-reject"
+                    >
+                      Reject
+                    </button>
                   </form>
                 </div>
               )}
             </div>
-			
           ))}
-			           {canResumePayment && (
+
+          {canResumePayment && (
             <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-2">
               <div className="font-medium">Payment not completed</div>
 
@@ -547,16 +529,13 @@ const roleLabel = isAdmin
               </p>
 
               <button
-  onClick={handleResumePayment}
-  className="cj-cta w-full"
->
-  Resume Payment
-</button>
-
-
+                onClick={handleResumePayment}
+                className="cj-cta w-full"
+              >
+                Resume Payment
+              </button>
             </div>
           )}
-
         </div>
       )}
     </div>
