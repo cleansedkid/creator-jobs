@@ -73,7 +73,7 @@ export default async function Page({
 
       <p className="text-sm text-muted-foreground">
         <span className="font-medium text-foreground">Note:</span>{" "}
-        Job posting is currently managed by community admins in this MVP. Members can browse jobs and submit completed work.
+        Job posting is currently managed by community admins. Members can browse jobs and submit completed work.
       </p>
     </div>
   );
