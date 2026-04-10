@@ -104,6 +104,14 @@ export default async function MySubmissionsPage({
 
   return (
 	<div className="space-y-6">
+		
+	{latestPaidSubmission && (
+  <PaymentNoticeBanner
+    tone="success"
+    title="Payment received"
+    message={`Funds for "${latestPaidJob?.title ?? "your approved job"}" are available in your Whop payout account.`}
+  />
+)}
 	  {/* Header */}
 	  <div className="pb-2">
 		 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -116,13 +124,7 @@ export default async function MySubmissionsPage({
 			  </p>
 			</div>
 		 </div>
-		 {latestPaidSubmission && (
-  <PaymentNoticeBanner
-    tone="success"
-    title="Payment received"
-    message={`Funds for "${latestPaidJob?.title ?? "your approved job"}" are available in your Whop payout account.`}
-  />
-)}
+		 
 	  
 
   <ManagePayoutsButton experienceId={experienceId} />

@@ -38,8 +38,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const companyId =
-      auth.bizId || process.env.WHOP_COMPANY_ID || process.env.WHOP_COMPANY_API_COMPANY_ID;
+    const companyId = process.env.WHOP_COMPANY_ID;
 
     if (!companyId) {
       return NextResponse.json(

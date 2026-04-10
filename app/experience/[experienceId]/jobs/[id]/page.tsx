@@ -327,10 +327,7 @@ const roleLabel = isAdmin
 </div>
 
  
-		 {/* NEW: Payment rule line */}
-		 <p className="text-xs text-muted-foreground">
-			Payment is released only after a submission is approved.
-		 </p>
+		 
 	  </div>
  
 	  {/* Job context (MOVE DOWN: should be after job info) */}
