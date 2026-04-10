@@ -24,12 +24,16 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   console.error("[WEBHOOK] TYPE", webhookData.type);
 
-if (
-  webhookData.type === "payment.succeeded" ||
-  webhookData.type === "payment_succeeded"
-) {
-  waitUntil(handlePaymentSucceeded(webhookData.data));
-}
+  const webhookType = String((webhookData as any).type);
+
+  console.error("[WEBHOOK] TYPE", webhookType);
+  
+  if (
+	 webhookType === "payment.succeeded" ||
+	 webhookType === "payment_succeeded"
+  ) {
+	 waitUntil(handlePaymentSucceeded((webhookData as any).data));
+  }
 
   return new Response("OK", { status: 200 });
 }
