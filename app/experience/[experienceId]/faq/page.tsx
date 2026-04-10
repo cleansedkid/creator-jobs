@@ -19,14 +19,14 @@ export default async function FAQPage({
       </Link>
 
       {/* Header */}
-      <div className="rounded-xl border border-white/15 bg-white/10 p-5">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Frequently asked questions
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Common questions about jobs, submissions, payouts, and support.
-        </p>
-      </div>
+      <div>
+  <h1 className="text-2xl font-semibold tracking-tight">
+    Frequently asked questions
+  </h1>
+  <p className="mt-2 text-sm text-muted-foreground">
+    Common questions about jobs, submissions, payouts, and support.
+  </p>
+</div>
 
       {/* FAQ list */}
       <div className="space-y-3">
