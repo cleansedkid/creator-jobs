@@ -11,12 +11,7 @@ export default async function FAQPage({
 
   return (
     <div className="space-y-6">
-      <Link
-        href={`/experience/${experienceId}/onboarding`}
-        className="text-sm underline hover:opacity-80"
-      >
-        ← Back
-      </Link>
+      
 
       {/* Header */}
       <div>
@@ -54,7 +49,7 @@ export default async function FAQPage({
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Creator Jobs payouts are sent to your connected payout account. They
-            may not appear in the main balance shown elsewhere in Whop.
+            may not appear in the main balance shown elsewhere in Whop. Locate Manage Payouts on your My Submissions page to access funds.
           </p>
         </div>
 
