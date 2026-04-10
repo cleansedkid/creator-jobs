@@ -38,54 +38,88 @@ console.error("🔍 PAYMENT RAW", p);
 
 
 	
-    /* -------------------------------------------------
- * 1️⃣ Load job by metadata (SOURCE OF TRUTH)
+ /* -------------------------------------------------
+ * 1️⃣ Resolve job from metadata first, then checkout fallback
  * ------------------------------------------------- */
 const meta = (p.metadata ?? {}) as any;
 
-const jobId = meta.jobId;
-const experienceId = meta.experienceId;
-const workerCompanyId = meta.workerCompanyId;
+const metaJobId = meta.jobId ?? null;
+const metaExperienceId = meta.experienceId ?? null;
+const metaWorkerCompanyId = meta.workerCompanyId ?? null;
 
-if (!jobId || !experienceId) {
-  console.error(
-    "[PAYMENT] ❌ Missing jobId or experienceId in metadata",
-    payment.id,
-    meta
-  );
-  return;
+const paymentCheckoutId =
+  p.checkout_id ??
+  p.checkout?.id ??
+  p.checkoutId ??
+  null;
+
+let job: any = null;
+
+// Try metadata first
+if (metaJobId && metaExperienceId) {
+  const { data } = await supabaseServer
+    .from("jobs")
+    .select(
+      `
+      id,
+      experience_id,
+      payment_status,
+      whop_payment_id,
+      approved_submission_id,
+      payout_cents,
+      worker_company_id,
+      whop_checkout_id
+      `
+    )
+    .eq("id", metaJobId)
+    .eq("experience_id", metaExperienceId)
+    .single();
+
+  job = data ?? null;
 }
 
-const { data: job } = await supabaseServer
-  .from("jobs")
-  .select(
-	`
-	id,
-	experience_id,
-	payment_status,
-	whop_payment_id,
-	approved_submission_id,
-	payout_cents,
-	worker_company_id
-	`
- )
-  .eq("id", jobId)
-  .eq("experience_id", experienceId)
-  .single();
+// Fallback: try checkout id
+if (!job && paymentCheckoutId) {
+  const { data } = await supabaseServer
+    .from("jobs")
+    .select(
+      `
+      id,
+      experience_id,
+      payment_status,
+      whop_payment_id,
+      approved_submission_id,
+      payout_cents,
+      worker_company_id,
+      whop_checkout_id
+      `
+    )
+    .eq("whop_checkout_id", paymentCheckoutId)
+    .single();
+
+  job = data ?? null;
+}
 
 if (!job) {
-  console.error("[PAYMENT] ❌ No job found for metadata", {
-    jobId,
-    experienceId,
+  console.error("[PAYMENT] ❌ Could not resolve job from payment", {
+    paymentId: payment.id,
+    metadata: meta,
+    paymentCheckoutId,
   });
   return;
 }
-console.error("[PAYMENT] 🔎 METADATA CHECK", {
-	jobId,
-	experienceId,
-	workerCompanyId,
-	jobWorkerCompanyId: job.worker_company_id,
- });
+
+console.error("[PAYMENT] ✅ JOB RESOLVED", {
+  paymentId: payment.id,
+  jobId: job.id,
+  experienceId: job.experience_id,
+  metaJobId,
+  metaExperienceId,
+  metaWorkerCompanyId,
+  paymentCheckoutId,
+  storedCheckoutId: job.whop_checkout_id,
+  jobWorkerCompanyId: job.worker_company_id,
+});
 
 
     // Idempotency guard
