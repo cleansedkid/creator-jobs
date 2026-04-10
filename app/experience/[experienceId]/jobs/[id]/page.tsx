@@ -354,6 +354,24 @@ const roleLabel = isAdmin
 			</div>
 		 </div>
 	  )}
+
+<div className="rounded-xl border border-white/10 bg-white/5 p-4">
+  <div className="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <div className="font-medium">Need help?</div>
+      <p className="text-sm text-muted-foreground">
+        Report a problem with this job, a submission, or payment status.
+      </p>
+    </div>
+
+    <Link
+      href={`/experience/${experienceId}/support?jobId=${encodeURIComponent(job.id)}&jobTitle=${encodeURIComponent(job.title)}&paymentStatus=${encodeURIComponent(job.payment_status || "")}`}
+      className="inline-flex items-center justify-center rounded-md border border-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/5 transition"
+    >
+      Report an issue
+    </Link>
+  </div>
+</div>
  
 
       {/* Submit (worker view) */}
