@@ -271,11 +271,11 @@ export default function ExperienceSidebar({
   </div>
 
   <Link
-    href={`/experience/${experienceId}/support`}
-    className="mt-2 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition"
-  >
-    Report an issue
-  </Link>
+  href={`/experience/${experienceId}/support`}
+  className="mt-2 inline-flex rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:translate-x-[2px]"
+>
+  Report an issue
+</Link>
 </div>
 <div className="flex-1" />
         </div>

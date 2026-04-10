@@ -355,12 +355,12 @@ const roleLabel = isAdmin
 		 </div>
 	  )}
 
-<div className="rounded-xl border border-white/10 bg-white/5 p-4">
+<div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
   <div className="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <div className="font-medium">Need help?</div>
+    <div className="min-w-0">
+      <div className="text-sm font-medium">Need help with this job?</div>
       <p className="text-sm text-muted-foreground">
-        Report a problem with this job, a submission, or payment status.
+        Report an issue with the job, a submission, or payment status.
       </p>
     </div>
 
