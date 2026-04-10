@@ -172,17 +172,15 @@ export default function ExperienceSidebar({
   })}
 </nav>
 {/* ✅ SUPPORT BLOCK (MOBILE) */}
-<div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-3">
-  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+<div className="mt-6 border-t border-white/10 pt-4">
+  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
     Support
   </div>
-  <p className="mt-2 text-xs text-muted-foreground">
-    Having a problem with a job, submission, or payment?
-  </p>
+
   <Link
     href={`/experience/${experienceId}/support`}
     onClick={() => setMobileOpen(false)}
-    className="mt-3 inline-flex items-center justify-center rounded-md border border-white/15 px-3 py-2 text-sm font-semibold hover:bg-white/5 transition"
+    className="mt-2 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition"
   >
     Report an issue
   </Link>
@@ -267,21 +265,18 @@ export default function ExperienceSidebar({
 </nav>
 
 {/* ✅ SUPPORT BLOCK */}
-<div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-3">
-  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+<div className="mt-6 border-t border-white/10 pt-4">
+  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
     Support
   </div>
-  <p className="mt-2 text-xs text-muted-foreground">
-    Having a problem with a job, submission, or payment?
-  </p>
+
   <Link
     href={`/experience/${experienceId}/support`}
-    className="mt-3 inline-flex items-center justify-center rounded-md border border-white/15 px-3 py-2 text-sm font-semibold hover:bg-white/5 transition"
+    className="mt-2 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition"
   >
     Report an issue
   </Link>
 </div>
-
 <div className="flex-1" />
         </div>
       </aside>
