@@ -174,16 +174,26 @@ export default function ExperienceSidebar({
 {/* ✅ SUPPORT BLOCK (MOBILE) */}
 <div className="mt-6 border-t border-white/10 pt-4">
   <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-    Support
+    Help
   </div>
 
-  <Link
-    href={`/experience/${experienceId}/support`}
-    onClick={() => setMobileOpen(false)}
-    className="mt-2 inline-flex text-sm font-medium text-muted-foreground hover:text-foreground transition"
-  >
-    Report an issue
-  </Link>
+  <div className="mt-2 flex flex-col items-start gap-1">
+    <Link
+      href={`/experience/${experienceId}/faq`}
+      onClick={() => setMobileOpen(false)}
+      className="inline-flex rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition"
+    >
+      FAQ
+    </Link>
+
+    <Link
+      href={`/experience/${experienceId}/support`}
+      onClick={() => setMobileOpen(false)}
+      className="inline-flex rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition"
+    >
+      Report an issue
+    </Link>
+  </div>
 </div>
 
           </div>
@@ -267,15 +277,24 @@ export default function ExperienceSidebar({
 {/* ✅ SUPPORT BLOCK */}
 <div className="mt-6 border-t border-white/10 pt-4">
   <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-    Support
+    Help
   </div>
 
-  <Link
-  href={`/experience/${experienceId}/support`}
-  className="mt-2 inline-flex rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:translate-x-[2px]"
->
-  Report an issue
-</Link>
+  <div className="mt-2 flex flex-col items-start gap-1">
+    <Link
+      href={`/experience/${experienceId}/faq`}
+      className="inline-flex rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition"
+    >
+      FAQ
+    </Link>
+
+    <Link
+      href={`/experience/${experienceId}/support`}
+      className="inline-flex rounded-md px-2 py-1 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition"
+    >
+      Report an issue
+    </Link>
+  </div>
 </div>
 <div className="flex-1" />
         </div>
