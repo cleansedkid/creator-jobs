@@ -22,9 +22,14 @@ export async function POST(request: NextRequest): Promise<Response> {
     return new Response("Invalid webhook", { status: 400 });
   }
 
-  if (webhookData.type === "payment.succeeded") {
-    waitUntil(handlePaymentSucceeded(webhookData.data));
-  }
+  console.error("[WEBHOOK] TYPE", webhookData.type);
+
+if (
+  webhookData.type === "payment.succeeded" ||
+  webhookData.type === "payment_succeeded"
+) {
+  waitUntil(handlePaymentSucceeded(webhookData.data));
+}
 
   return new Response("OK", { status: 200 });
 }
