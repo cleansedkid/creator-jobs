@@ -205,7 +205,7 @@ const paymentState = searchParams?.get("payment");
 	  {jobs.length === 0 && (
 		 <p className="text-muted-foreground">
 			You haven’t posted any jobs yet. Jobs you post will appear here for
-			tracking and payment history.
+			tracking and management.
 		 </p>
 	  )}
  
