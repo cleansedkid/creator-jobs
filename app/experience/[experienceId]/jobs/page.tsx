@@ -59,7 +59,7 @@ export default function JobsPage() {
     <div>
 	 <h1 className="text-4xl font-bold tracking-tight">Jobs</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Browse paid jobs posted by members of this community.
+        Browse paid jobs posted by community admins.
       </p>
     </div>
 
@@ -102,7 +102,7 @@ export default function JobsPage() {
       
 		{jobs?.length === 0 && (
         <p className="text-muted-foreground">
-		  No jobs yet. Community members can post paid jobs here.
+		  No jobs yet. Jobs will appear here once community admins post opportunities.
 		</p>
 		
       )}
