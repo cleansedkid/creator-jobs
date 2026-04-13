@@ -85,7 +85,11 @@ export async function POST(
       { status: 404 }
     );
   }
-
+  console.log("[PAYOUT] START", {
+	jobId,
+	submissionId,
+	workerWhopUserId: submission.worker_whop_user_id,
+ });
   /* -------------------------------------------------------
    * 4. Get or create worker connected company
    * ----------------------------------------------------- */
@@ -94,15 +98,27 @@ export async function POST(
     workerAccount = await getOrCreateWorkerCompany({
       whopUserId: submission.worker_whop_user_id,
     });
+	 console.log("[PAYOUT] WORKER ACCOUNT RESULT", workerAccount);
+
   } catch (error) {
-    console.error("❌ WORKER COMPANY SETUP FAILED", error);
-    return NextResponse.json(
-      { error: "Failed to prepare worker payout account" },
-      { status: 500 }
-    );
-  }
+	console.error("❌ WORKER COMPANY SETUP FAILED", {
+	  error,
+	  workerWhopUserId: submission.worker_whop_user_id,
+	  jobId,
+	  submissionId,
+	});
+ 
+	return NextResponse.json(
+	  { error: "Failed to prepare worker payout account" },
+	  { status: 500 }
+	);
+ }
 
   const workerCompanyId = workerAccount.worker_company_id;
+
+  console.log("[PAYOUT] WORKER COMPANY ID", {
+	workerCompanyId,
+ });
 
 if (!workerCompanyId) {
   console.error("❌ WORKER COMPANY ID MISSING AFTER SETUP", {
