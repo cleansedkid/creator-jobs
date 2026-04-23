@@ -2,10 +2,13 @@ import PayoutProfileForm from "./PayoutProfileForm";
 
 export default async function PayoutProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ experienceId: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
   const { experienceId } = await params;
+  const { returnTo } = await searchParams;
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -14,13 +17,16 @@ export default async function PayoutProfilePage({
           Set up payouts
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Before opening your Whop payout account, we need your full name and
-          email so your connected payout account can be created correctly.
+          Before submitting work for paid jobs, complete payout setup so
+          payment can be sent correctly if your submission is approved.
         </p>
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-5">
-        <PayoutProfileForm experienceId={experienceId} />
+        <PayoutProfileForm
+          experienceId={experienceId}
+          returnTo={returnTo || `/experience/${experienceId}/jobs`}
+        />
       </div>
     </div>
   );

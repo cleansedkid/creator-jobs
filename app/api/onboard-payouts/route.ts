@@ -6,7 +6,7 @@ import { getOrCreateWorkerCompany } from "@/lib/whop/getOrCreateWorkerCompany";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { experienceId } = body;
+    const { experienceId, returnTo } = body;
 
     if (!experienceId) {
       return NextResponse.json(
@@ -34,6 +34,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const safeReturnPath =
+      typeof returnTo === "string" && returnTo.startsWith("/")
+        ? returnTo
+        : `/experience/${experienceId}/my-submissions`;
+
+    const finalReturnUrl = `${origin}${safeReturnPath}`;
+
     let workerAccount;
     try {
       workerAccount = await getOrCreateWorkerCompany({
@@ -46,7 +53,9 @@ export async function POST(request: NextRequest) {
       if (message === "MISSING_PAYOUT_PROFILE") {
         return NextResponse.json({
           needsProfile: true,
-          redirectTo: `/experience/${experienceId}/my-submissions/payout-profile`,
+          redirectTo: `/experience/${experienceId}/my-submissions/payout-profile?returnTo=${encodeURIComponent(
+            safeReturnPath
+          )}`,
         });
       }
 
@@ -75,8 +84,8 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         company_id: workerAccount.worker_company_id,
         use_case: "payouts_portal",
-        return_url: `${origin}/experience/${experienceId}/my-submissions`,
-        refresh_url: `${origin}/experience/${experienceId}/my-submissions`,
+        return_url: finalReturnUrl,
+        refresh_url: finalReturnUrl,
       }),
       cache: "no-store",
     });

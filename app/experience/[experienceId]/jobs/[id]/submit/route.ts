@@ -53,21 +53,63 @@ export async function POST(
   }
 
   /* -------------------------------------------------------
-   * 3. Read form data
-   * ----------------------------------------------------- */
-  const formData = await request.formData();
-  const file = formData.get("file") as File | null;
-  const note = formData.get("note") as string | null;
+ * 3. Check payout readiness BEFORE processing submission
+ * ----------------------------------------------------- */
+const { data: payoutAccount, error: payoutError } = await supabaseServer
+.from("worker_payout_accounts")
+.select(
+  `
+  worker_company_id,
+  worker_email,
+  worker_display_name
+  `
+)
+.eq("whop_user_id", worker_whop_user_id)
+.maybeSingle();
 
-  if (!file) {
-    return NextResponse.json(
-      { error: "No file uploaded" },
-      { status: 400 }
-    );
-  }
+if (payoutError) {
+return NextResponse.json(
+  { error: `Failed to check payout setup: ${payoutError.message}` },
+  { status: 500 }
+);
+}
+
+const hasPayoutProfile =
+!!payoutAccount?.worker_email?.trim() &&
+!!payoutAccount?.worker_display_name?.trim();
+
+const hasWorkerCompanyId = !!payoutAccount?.worker_company_id;
+
+if (!hasPayoutProfile || !hasWorkerCompanyId) {
+const redirectUrl = new URL(
+  `/experience/${experienceId}/my-submissions/payout-profile`,
+  request.url
+);
+
+redirectUrl.searchParams.set(
+  "returnTo",
+  `/experience/${experienceId}/jobs/${jobId}`
+);
+
+return NextResponse.redirect(redirectUrl, 303);
+}
+
+/* -------------------------------------------------------
+* 4. Read form data
+* ----------------------------------------------------- */
+const formData = await request.formData();
+const file = formData.get("file") as File | null;
+const note = formData.get("note") as string | null;
+
+if (!file) {
+return NextResponse.json(
+  { error: "No file uploaded" },
+  { status: 400 }
+);
+}
 
   /* -------------------------------------------------------
-   * 4. Upload file
+   * 5. Upload file
    * ----------------------------------------------------- */
   const fileExt = file.name.split(".").pop();
   const filePath = `experience-${experienceId}/job-${jobId}/${crypto.randomUUID()}.${fileExt}`;
@@ -88,7 +130,7 @@ export async function POST(
     .getPublicUrl(filePath);
 
   /* -------------------------------------------------------
-   * 5. Insert submission (experience-scoped)
+   * 6. Insert submission (experience-scoped)
    * ----------------------------------------------------- */
   const { error: insertError } = await supabaseServer
     .from("submissions")
@@ -109,7 +151,7 @@ export async function POST(
   }
 
   /* -------------------------------------------------------
-   * 6. Redirect back to job page (experience-safe)
+   * 7. Redirect back to job page (experience-safe)
    * ----------------------------------------------------- */
   return NextResponse.redirect(
     new URL(

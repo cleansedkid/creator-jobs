@@ -4,8 +4,10 @@ import { useState } from "react";
 
 export default function PayoutProfileForm({
   experienceId,
+  returnTo,
 }: {
   experienceId: string;
+  returnTo: string;
 }) {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,7 +44,10 @@ export default function PayoutProfileForm({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ experienceId }),
+        body: JSON.stringify({
+          experienceId,
+          returnTo,
+        }),
       });
 
       const onboardData = await onboardRes.json();
