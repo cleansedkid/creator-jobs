@@ -17,9 +17,8 @@ export default async function PayoutProfilePage({
           Set up payouts
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Before submitting work for paid jobs, complete payout setup so
-          payment can be sent correctly if your submission is approved.
-        </p>
+  Before you can submit work for paid jobs, complete payout setup so payment can be sent correctly if your submission is approved.
+</p>
       </div>
 
       <div className="rounded-xl border border-white/10 bg-white/5 p-5">
