@@ -78,9 +78,19 @@ export async function POST(
     });
 
     const redirectUrl = new URL(safeReturnPath, request.url);
-redirectUrl.searchParams.set("setupToken", token);
+    redirectUrl.searchParams.set("setupToken", token);
 
-return NextResponse.redirect(redirectUrl, 303);
+    const response = NextResponse.redirect(redirectUrl, 303);
+
+    response.cookies.set("cj_payout_setup_token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   } catch (error) {
     console.error("❌ PAYOUT PROFILE SUBMIT FAILED", error);
     return NextResponse.json(

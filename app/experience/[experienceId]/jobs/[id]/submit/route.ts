@@ -19,7 +19,11 @@ export async function POST(
    * 1. Verify Whop user (ONLY reliable identity here)
    * ----------------------------------------------------- */
   const formData = await request.formData();
-const setupToken = String(formData.get("setupToken") || "").trim();
+  const setupTokenFromForm = String(formData.get("setupToken") || "").trim();
+  const setupTokenFromCookie =
+	 request.cookies.get("cj_payout_setup_token")?.value || "";
+  
+  const setupToken = setupTokenFromForm || setupTokenFromCookie;
 
 let worker_whop_user_id: string | null = null;
 
