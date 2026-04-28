@@ -18,16 +18,35 @@ export async function POST(
   /* -------------------------------------------------------
    * 1. Verify Whop user (ONLY reliable identity here)
    * ----------------------------------------------------- */
-  const h = await headers();
-  const { userId: worker_whop_user_id } =
-    await whopsdk.verifyUserToken(h);
+  const formData = await request.formData();
+const setupToken = String(formData.get("setupToken") || "").trim();
 
-  if (!worker_whop_user_id) {
-    return NextResponse.json(
-      { error: "Not authenticated" },
-      { status: 401 }
-    );
+let worker_whop_user_id: string | null = null;
+
+try {
+  const h = await headers();
+  const verified = await whopsdk.verifyUserToken(h);
+  worker_whop_user_id = verified.userId ?? null;
+} catch {
+  if (setupToken) {
+    try {
+      const verifiedToken = verifyPayoutSetupToken(setupToken);
+
+      if (verifiedToken.experienceId === experienceId) {
+        worker_whop_user_id = verifiedToken.userId;
+      }
+    } catch {
+      worker_whop_user_id = null;
+    }
   }
+}
+
+if (!worker_whop_user_id) {
+  return NextResponse.json(
+    { error: "Not authenticated" },
+    { status: 401 }
+  );
+}
 
   /* -------------------------------------------------------
    * 2. Load job + enforce SAME experience + open status
@@ -104,7 +123,6 @@ if (!hasPayoutProfile || !hasWorkerCompanyId) {
 /* -------------------------------------------------------
 * 4. Read form data
 * ----------------------------------------------------- */
-const formData = await request.formData();
 const file = formData.get("file") as File | null;
 const note = formData.get("note") as string | null;
 

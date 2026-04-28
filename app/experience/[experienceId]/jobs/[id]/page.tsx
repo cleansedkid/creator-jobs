@@ -16,6 +16,7 @@ export default function JobDetailPage() {
 	const params = useParams();
 	const searchParams = useSearchParams();
 	const router = useRouter();
+	const setupToken = searchParams?.get("setupToken") || "";
 
  
 	const experienceId = params?.experienceId as string | undefined;
@@ -387,6 +388,7 @@ const roleLabel = isAdmin
             encType="multipart/form-data"
             className="space-y-3"
           >
+				<input type="hidden" name="setupToken" value={setupToken} />
             <label className="block">
 				<span className="text-sm text-muted-foreground">
   Upload file (image or PDF)

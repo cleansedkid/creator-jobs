@@ -77,7 +77,10 @@ export async function POST(
       whopUserId: userId,
     });
 
-    return NextResponse.redirect(new URL(safeReturnPath, request.url), 303);
+    const redirectUrl = new URL(safeReturnPath, request.url);
+redirectUrl.searchParams.set("setupToken", token);
+
+return NextResponse.redirect(redirectUrl, 303);
   } catch (error) {
     console.error("❌ PAYOUT PROFILE SUBMIT FAILED", error);
     return NextResponse.json(
