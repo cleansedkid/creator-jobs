@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
+import { createPayoutSetupToken } from "@/lib/payoutSetupToken";
 
 export async function POST(
 	request: NextRequest,
@@ -81,18 +82,24 @@ const hasPayoutProfile =
 const hasWorkerCompanyId = !!payoutAccount?.worker_company_id;
 
 if (!hasPayoutProfile || !hasWorkerCompanyId) {
-const redirectUrl = new URL(
-  `/experience/${experienceId}/my-submissions/payout-profile`,
-  request.url
-);
-
-redirectUrl.searchParams.set(
-  "returnTo",
-  `/experience/${experienceId}/jobs/${jobId}`
-);
-
-return NextResponse.redirect(redirectUrl, 303);
-}
+	const returnTo = `/experience/${experienceId}/jobs/${jobId}`;
+ 
+	const token = createPayoutSetupToken({
+	  userId: worker_whop_user_id,
+	  experienceId,
+	  returnTo,
+	});
+ 
+	const redirectUrl = new URL(
+	  `/experience/${experienceId}/my-submissions/payout-profile`,
+	  request.url
+	);
+ 
+	redirectUrl.searchParams.set("returnTo", returnTo);
+	redirectUrl.searchParams.set("token", token);
+ 
+	return NextResponse.redirect(redirectUrl, 303);
+ }
 
 /* -------------------------------------------------------
 * 4. Read form data

@@ -1,9 +1,11 @@
 export default function PayoutProfileForm({
 	experienceId,
 	returnTo,
+	token,
  }: {
 	experienceId: string;
 	returnTo: string;
+	token: string;
  }) {
 	return (
 	  <form
@@ -12,6 +14,7 @@ export default function PayoutProfileForm({
 		 className="space-y-4"
 	  >
 		 <input type="hidden" name="returnTo" value={returnTo} />
+		 <input type="hidden" name="token" value={token} />
  
 		 <div>
 			<label
@@ -48,7 +51,8 @@ export default function PayoutProfileForm({
 		 </div>
  
 		 <p className="text-sm text-muted-foreground">
-			After completing payout setup, you’ll return to the job page and need to submit your work again.
+			After saving your payout details, you’ll return to the job page and need
+			to submit your work again.
 		 </p>
  
 		 <button

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthContext } from "@/lib/whop/getAuthContext";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getOrCreateWorkerCompany } from "@/lib/whop/getOrCreateWorkerCompany";
+import { verifyPayoutSetupToken } from "@/lib/payoutSetupToken";
 
 export async function POST(
   request: NextRequest,
@@ -16,7 +16,7 @@ export async function POST(
 
     const displayName = String(formData.get("displayName") || "").trim();
     const email = String(formData.get("email") || "").trim().toLowerCase();
-    const returnToRaw = String(formData.get("returnTo") || "").trim();
+    const token = String(formData.get("token") || "").trim();
 
     if (!displayName || !email) {
       return NextResponse.json(
@@ -25,22 +25,39 @@ export async function POST(
       );
     }
 
-    const auth = await getAuthContext(experienceId);
-
-    if (!auth?.userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!token) {
+      return NextResponse.json(
+        { error: "Missing setup token" },
+        { status: 401 }
+      );
     }
 
-    const safeReturnPath =
-      returnToRaw && returnToRaw.startsWith("/")
-        ? returnToRaw
-        : `/experience/${experienceId}/my-submissions`;
+    let verified;
+
+    try {
+      verified = verifyPayoutSetupToken(token);
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid or expired setup token" },
+        { status: 401 }
+      );
+    }
+
+    if (verified.experienceId !== experienceId) {
+      return NextResponse.json(
+        { error: "Invalid setup token" },
+        { status: 401 }
+      );
+    }
+
+    const userId = verified.userId;
+    const safeReturnPath = verified.returnTo;
 
     const { error: saveError } = await supabaseServer
       .from("worker_payout_accounts")
       .upsert(
         {
-          whop_user_id: auth.userId,
+          whop_user_id: userId,
           worker_email: email,
           worker_display_name: displayName,
           onboarding_status: "profile_collected",
@@ -56,10 +73,8 @@ export async function POST(
       );
     }
 
-    // Create the worker connected company now so future admin payments do not fail.
-    // Full payout onboarding/withdrawal setup can still happen later through Manage payouts.
     await getOrCreateWorkerCompany({
-      whopUserId: auth.userId,
+      whopUserId: userId,
     });
 
     return NextResponse.redirect(new URL(safeReturnPath, request.url), 303);
