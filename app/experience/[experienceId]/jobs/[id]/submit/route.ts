@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { supabaseServer } from "@/lib/supabase/server";
 import { whopsdk } from "@/lib/whop-sdk";
-import { createPayoutSetupToken } from "@/lib/payoutSetupToken";
+import { createPayoutSetupToken, verifyPayoutSetupToken } from "@/lib/payoutSetupToken";
 
 export async function POST(
 	request: NextRequest,
