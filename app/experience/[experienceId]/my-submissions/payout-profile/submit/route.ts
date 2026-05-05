@@ -91,11 +91,28 @@ export async function POST(
     });
 
     return response;
-  } catch (error) {
-    console.error("❌ PAYOUT PROFILE SUBMIT FAILED", error);
-    return NextResponse.json(
-      { error: "Failed to save payout details" },
-      { status: 500 }
-    );
+	} catch (error: unknown) {
+		console.error("❌ PAYOUT PROFILE SUBMIT FAILED", error);
+  
+		const rawMessage =
+		  error instanceof Error ? error.message : String(error || "");
+  
+		let userMessage =
+		  "We couldn’t save your payout details. Please try again.";
+  
+		if (rawMessage.toLowerCase().includes("mailbox is full")) {
+		  userMessage =
+			 "We couldn’t create your payout profile with that email because the mailbox appears to be full. Please try a different email address.";
+		} else if (rawMessage.toLowerCase().includes("invalid email")) {
+		  userMessage = "Please enter a valid email address.";
+		} else if (rawMessage.toLowerCase().includes("different email address")) {
+		  userMessage =
+			 "We couldn’t create your payout profile with that email. Please try a different email address.";
+		}
+  
+		return NextResponse.json(
+		  { error: userMessage },
+		  { status: 400 }
+		);
+	 }
   }
-}
