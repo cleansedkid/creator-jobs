@@ -105,11 +105,11 @@ export default async function MySubmissionsPage({
   return (
 	<div className="space-y-6">
 		
-	{latestPaidSubmission && (
+		{latestPaidSubmission && (
   <PaymentNoticeBanner
     tone="success"
     title="Payment received"
-    message={`Funds for "${latestPaidJob?.title ?? "your approved job"}" are available in your Whop payout account.`}
+    message={`Funds for "${latestPaidJob?.title ?? "your approved job"}" are available in your Whop payout account. Use Manage payouts to access your earnings.`}
   />
 )}
 	  {/* Header */}
