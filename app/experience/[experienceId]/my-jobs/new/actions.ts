@@ -21,12 +21,17 @@ export async function createJob(experienceId: string, formData: FormData) {
 
   const creator_whop_user_id = auth.userId;
 
+  const posted_by_display_name = String(
+	formData.get("posted_by_display_name") || ""
+ ).trim();
+
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const job_type = String(formData.get("job_type") || "editing");
   const payoutUsd = Number(formData.get("payout") || 0);
 
-  if (!title || !description) throw new Error("Missing title/description");
+  if (!posted_by_display_name) throw new Error("Missing display name");
+if (!title || !description) throw new Error("Missing title/description");
   if (!["editing", "thumbnail", "graphics", "other"].includes(job_type)) {
     throw new Error("Invalid job type");
   }
@@ -39,6 +44,7 @@ export async function createJob(experienceId: string, formData: FormData) {
   const { error } = await supabaseServer.from("jobs").insert({
     experience_id: experienceId,
     creator_whop_user_id,
+	 posted_by_display_name,
     title,
     description,
     job_type,

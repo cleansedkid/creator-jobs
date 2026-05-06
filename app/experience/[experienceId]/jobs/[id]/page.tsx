@@ -220,8 +220,10 @@ const paymentStarted =
   (isCreator || isAdmin) &&
   paymentStarted;
 
-  const postedByLabel = "Community admin";
-
+  const postedByLabel = job.posted_by_display_name
+  ? `${job.posted_by_display_name} · Community admin`
+  : "Community admin";
+  
 const roleLabel = isAdmin
   ? "Admin reviewer"
   : canSubmit

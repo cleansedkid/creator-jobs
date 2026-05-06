@@ -58,6 +58,20 @@ if (!auth || !auth.isAdmin) {
         action={createJob.bind(null, experienceId)}
         className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4"
       >
+			<div className="space-y-1">
+  <label className="text-sm text-muted-foreground">
+    Your display name
+  </label>
+  <input
+    name="posted_by_display_name"
+    required
+    className="w-full rounded-md border border-white/10 bg-background px-3 py-2"
+    placeholder="Charles"
+  />
+  <p className="text-xs text-muted-foreground">
+    Workers will see this as the admin who posted the job.
+  </p>
+</div>
         <div className="space-y-1">
           <label className="text-sm text-muted-foreground">
             Title
