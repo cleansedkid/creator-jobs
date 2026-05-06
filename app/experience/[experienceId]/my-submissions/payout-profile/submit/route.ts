@@ -78,7 +78,8 @@ export async function POST(
     });
 
     const redirectUrl = new URL(safeReturnPath, request.url);
-    redirectUrl.searchParams.set("setupToken", token);
+redirectUrl.searchParams.set("setupToken", token);
+redirectUrl.searchParams.set("payoutSetup", "success");
 
     const response = NextResponse.redirect(redirectUrl, 303);
 

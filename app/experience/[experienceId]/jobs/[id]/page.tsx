@@ -22,6 +22,7 @@ export default function JobDetailPage() {
 	const experienceId = params?.experienceId as string | undefined;
 	const jobId = params?.id as string | undefined;
 	const showSubmitted = searchParams?.get("submitted") === "1";
+	const payoutSetupSuccess = searchParams?.get("payoutSetup") === "success";
 
 	const [job, setJob] = useState<any | null>(null);
 const [submissions, setSubmissions] = useState<any[]>([]);
@@ -259,7 +260,23 @@ const roleLabel = isAdmin
     }
   `}
 </style>
+{payoutSetupSuccess && (
+  <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
+    <div className="font-medium">✅ Payout details saved.</div>
+    <div className="text-muted-foreground">
+      Your payout profile is ready. Submit your work again to send it for review.
+    </div>
+  </div>
+)}
 
+{showSubmitted && (
+  <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
+    <div className="font-medium">✅ Submission sent.</div>
+    <div className="text-muted-foreground">
+      The job poster will review it soon.
+    </div>
+  </div>
+)}
 	  <button
   onClick={() => {
     if (window.history.length > 1) {
@@ -344,14 +361,7 @@ const roleLabel = isAdmin
   </div>
 </div>
  
-	  {showSubmitted && (
-		 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm">
-			<div className="font-medium">✅ Submission sent.</div>
-			<div className="text-muted-foreground">
-			  The Job poster will review it soon.
-			</div>
-		 </div>
-	  )}
+	  
 
 <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
   <div className="flex flex-wrap items-center justify-between gap-3">
