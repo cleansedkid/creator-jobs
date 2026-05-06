@@ -147,7 +147,7 @@ export default function SupportPage() {
         <textarea
           value={issueText}
           onChange={(e) => setIssueText(e.target.value)}
-          placeholder="Explain what went wrong. For example: payment completed but the job still shows awaiting payment, or my submission was rejected by mistake."
+          placeholder="Explain the issue. For example: payment completed but the job still shows awaiting payment, payout setup is not working, or a submission/payment status appears incorrect."
           className="min-h-[160px] w-full rounded-md border px-3 py-2 bg-background"
           required
         />
