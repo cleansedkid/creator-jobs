@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase/admin";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { verifyPayoutSetupToken } from "@/lib/payoutSetupToken";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
 import PayoutSetupCta from "@/app/components/PayoutSetupCta";
@@ -9,15 +10,32 @@ import PaymentNoticeBanner from "@/app/components/PaymentNoticeBanner";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-async function safeGetWorkerWhopUserId(): Promise<string | null> {
-  try {
-    const h = await headers();
-    const { userId } = await whopsdk.verifyUserToken(h);
-    return userId ?? null;
-  } catch {
-    return null;
-  }
-}
+async function safeGetWorkerWhopUserId(
+	experienceId: string
+ ): Promise<string | null> {
+	try {
+	  const h = await headers();
+	  const { userId } = await whopsdk.verifyUserToken(h);
+	  if (userId) return userId;
+	} catch {
+	  // Fall through to payout setup cookie fallback.
+	}
+ 
+	try {
+	  const cookieStore = await cookies();
+	  const token = cookieStore.get("cj_payout_setup_token")?.value;
+ 
+	  if (!token) return null;
+ 
+	  const verified = verifyPayoutSetupToken(token);
+ 
+	  if (verified.experienceId !== experienceId) return null;
+ 
+	  return verified.userId ?? null;
+	} catch {
+	  return null;
+	}
+ }
 
 export default async function MySubmissionsPage({
 	params,
@@ -25,7 +43,7 @@ export default async function MySubmissionsPage({
 	params: Promise<{ experienceId: string }>;
  }) {
 	const { experienceId } = await params;
-  const worker_whop_user_id = await safeGetWorkerWhopUserId();
+	const worker_whop_user_id = await safeGetWorkerWhopUserId(experienceId);
 
   if (!worker_whop_user_id) {
     return (
@@ -94,10 +112,15 @@ export default async function MySubmissionsPage({
 	(sub: any) => sub.status === "approved" || sub.status === "paid"
  );
  
+ const hasPaidSubmission = (submissions ?? []).some(
+	(sub: any) => sub.status === "paid"
+ );
+ 
  const showPayoutSetupCta =
 	hasApprovedOrPaidSubmission &&
+	!hasPaidSubmission &&
 	(!workerPayoutAccount || !workerPayoutAccount.payouts_enabled);
-
+	
 	const latestPaidJob = Array.isArray(latestPaidSubmission?.jobs)
   ? latestPaidSubmission.jobs[0]
   : latestPaidSubmission?.jobs;
@@ -131,15 +154,7 @@ export default async function MySubmissionsPage({
 </div>
 {showPayoutSetupCta && (
   <>
-    {/* Payout explainer */}
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-      <div className="text-sm font-medium">
-        Payout setup required for approved work
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        To receive earnings, complete payout setup through Whop. This includes identity verification and connecting a payout method.
-      </p>
-    </div>
+    
 
     {/* CTA */}
     <PayoutSetupCta experienceId={experienceId} />
