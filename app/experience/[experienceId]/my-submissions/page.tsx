@@ -14,25 +14,54 @@ async function safeGetWorkerWhopUserId(
 	experienceId: string
  ): Promise<string | null> {
 	try {
-	  const h = await headers();
+	  const rh = await headers();
+ 
+	  const h = new Headers();
+	  rh.forEach((value, key) => h.set(key, value));
+ 
 	  const { userId } = await whopsdk.verifyUserToken(h);
+ 
+	  console.log("✅ MySubmissions auth from Whop token", {
+		 experienceId,
+		 userId,
+	  });
+ 
 	  if (userId) return userId;
-	} catch {
-	  // Fall through to payout setup cookie fallback.
+	} catch (err) {
+	  console.log("❌ MySubmissions Whop token failed, trying cookie", {
+		 experienceId,
+		 error: err,
+	  });
 	}
  
 	try {
 	  const cookieStore = await cookies();
 	  const token = cookieStore.get("cj_payout_setup_token")?.value;
  
+	  console.log("🍪 MySubmissions fallback cookie check", {
+		 experienceId,
+		 hasToken: !!token,
+	  });
+ 
 	  if (!token) return null;
  
 	  const verified = verifyPayoutSetupToken(token);
  
+	  console.log("🍪 MySubmissions fallback token verified", {
+		 pageExperienceId: experienceId,
+		 tokenExperienceId: verified.experienceId,
+		 userId: verified.userId,
+	  });
+ 
 	  if (verified.experienceId !== experienceId) return null;
  
 	  return verified.userId ?? null;
-	} catch {
+	} catch (err) {
+	  console.log("❌ MySubmissions fallback cookie failed", {
+		 experienceId,
+		 error: err,
+	  });
+ 
 	  return null;
 	}
  }
