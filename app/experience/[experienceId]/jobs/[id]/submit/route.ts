@@ -182,11 +182,28 @@ return NextResponse.json(
   /* -------------------------------------------------------
    * 7. Redirect back to job page (experience-safe)
    * ----------------------------------------------------- */
-  return NextResponse.redirect(
-    new URL(
-      `/experience/${experienceId}/jobs/${jobId}?submitted=1`,
-      request.url
-    ),
-    303
+  const returnTo = `/experience/${experienceId}/jobs/${jobId}`;
+
+  const token = createPayoutSetupToken({
+	 userId: worker_whop_user_id,
+	 experienceId,
+	 returnTo,
+  });
+  
+  const redirectUrl = new URL(
+	 `/experience/${experienceId}/jobs/${jobId}?submitted=1`,
+	 request.url
   );
+  
+  const response = NextResponse.redirect(redirectUrl, 303);
+  
+  response.cookies.set("cj_payout_setup_token", token, {
+	 httpOnly: true,
+	 secure: true,
+	 sameSite: "none",
+	 path: "/",
+	 maxAge: 60 * 60 * 24 * 7,
+  });
+  
+  return response;
 }
