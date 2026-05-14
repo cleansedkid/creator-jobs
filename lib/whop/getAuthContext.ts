@@ -2,27 +2,82 @@ import { headers } from "next/headers";
 import { whopsdk } from "@/lib/whop-sdk";
 
 export async function getAuthContext(experienceId: string) {
+  const rh = await headers();
+
+  const h = new Headers();
+  rh.forEach((value, key) => h.set(key, value));
+
+  let userId: string | null = null;
+
+  // 1) Verify logged-in user
   try {
-    // ✅ Next gives ReadonlyHeaders (sometimes wrapped in a Promise)
-    const rh = await headers();
+    const verified = await whopsdk.verifyUserToken(h);
+    userId = verified.userId ?? null;
 
-    // ✅ Convert ReadonlyHeaders -> real Headers (what Whop expects)
-    const h = new Headers();
-    rh.forEach((value, key) => h.set(key, value));
+    console.log("✅ getAuthContext user verified", {
+      experienceId,
+      userId,
+    });
+  } catch (err) {
+    console.log("❌ getAuthContext verifyUserToken failed", {
+      experienceId,
+      error: err,
+    });
 
-    // 1) Logged in user
-    const { userId } = await whopsdk.verifyUserToken(h);
+    return null;
+  }
 
+  // If we got the user, never lose them after this point.
+  if (!userId) {
+    return {
+      userId: null,
+      bizId: null,
+      role: null,
+      isAdmin: false,
+      authSource: "missing_user",
+    };
+  }
 
-    // 2️⃣ Get experience
+  let bizId: string | null = null;
+
+  // 2) Get experience/company
+  try {
     const exp = await whopsdk.experiences.retrieve(experienceId);
-    const bizId = (exp as any)?.company?.id ?? null;
+    bizId = (exp as any)?.company?.id ?? null;
 
-    if (!bizId) {
-      return { userId, bizId: null, role: null, isAdmin: false };
-    }
+    console.log("✅ getAuthContext experience retrieved", {
+      experienceId,
+      userId,
+      bizId,
+    });
+  } catch (err) {
+    console.log("❌ getAuthContext experience retrieve failed", {
+      experienceId,
+      userId,
+      error: err,
+    });
 
-    // 3️⃣ Get authorized users (team members)
+    return {
+      userId,
+      bizId: null,
+      role: null,
+      isAdmin: false,
+      authSource: "experience_retrieve_failed",
+    };
+  }
+
+  if (!bizId) {
+    return {
+      userId,
+      bizId: null,
+      role: null,
+      isAdmin: false,
+      authSource: "missing_biz_id",
+    };
+  }
+
+  // 3) Get authorized users / admin role
+  try {
     const team = await (whopsdk as any).authorizedUsers.list({
       company_id: bizId,
     });
@@ -41,17 +96,38 @@ export async function getAuthContext(experienceId: string) {
     });
 
     const role = match?.role?.toLowerCase?.() ?? null;
-
     const isAdmin = role === "owner" || role === "admin";
+
+    console.log("✅ getAuthContext role resolved", {
+      experienceId,
+      userId,
+      bizId,
+      role,
+      isAdmin,
+      teamCount: items.length,
+    });
 
     return {
       userId,
       bizId,
       role,
       isAdmin,
+      authSource: "authorized_users",
     };
   } catch (err) {
-    console.log("getAuthContext error:", err);
-    return null;
+    console.log("❌ getAuthContext authorizedUsers failed", {
+      experienceId,
+      userId,
+      bizId,
+      error: err,
+    });
+
+    return {
+      userId,
+      bizId,
+      role: null,
+      isAdmin: false,
+      authSource: "authorized_users_failed",
+    };
   }
 }

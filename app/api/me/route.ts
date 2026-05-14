@@ -16,9 +16,10 @@ export async function GET(req: Request) {
     const auth = await getAuthContext(experienceId);
 
     return NextResponse.json({
-      userId: auth?.userId ?? null,
-      isAdmin: auth?.isAdmin ?? false,
-    });
+		userId: auth?.userId ?? null,
+		isAdmin: auth?.isAdmin ?? false,
+		authSource: auth?.authSource ?? "none",
+	 });
   } catch (err) {
     console.log("api/me error:", err);
     return NextResponse.json({ userId: null, isAdmin: false });
