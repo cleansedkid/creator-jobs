@@ -52,7 +52,12 @@ const setupToken = searchParams.get("setupToken");
 	  cancelled = true;
 	};
  }, [experienceId]);
-
+ const withSetupToken = (href: string) => {
+	if (!setupToken) return href;
+ 
+	const separator = href.includes("?") ? "&" : "?";
+	return `${href}${separator}setupToken=${encodeURIComponent(setupToken)}`;
+ };
  const workerNav = [
 	{ label: "Home", href: `/experience/${experienceId}/onboarding` },
 	{ label: "Jobs", href: `/experience/${experienceId}/jobs` },
@@ -61,12 +66,7 @@ const setupToken = searchParams.get("setupToken");
 	  href: withSetupToken(`/experience/${experienceId}/my-submissions`),
 	},
  ];
- const withSetupToken = (href: string) => {
-	if (!setupToken) return href;
  
-	const separator = href.includes("?") ? "&" : "?";
-	return `${href}${separator}setupToken=${encodeURIComponent(setupToken)}`;
- };
  
  const adminNav = [
 	...workerNav,
