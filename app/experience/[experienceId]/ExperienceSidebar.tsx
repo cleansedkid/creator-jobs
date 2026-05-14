@@ -51,14 +51,20 @@ export default function ExperienceSidebar({
 	};
  }, [experienceId]);
 
- const nav = [
+ const workerNav = [
 	{ label: "Home", href: `/experience/${experienceId}/onboarding` },
 	{ label: "Jobs", href: `/experience/${experienceId}/jobs` },
 	{ label: "My Submissions", href: `/experience/${experienceId}/my-submissions` },
+ ];
+ 
+ const adminNav = [
+	...workerNav,
 	{ label: "My Jobs", href: `/experience/${experienceId}/my-jobs` },
 	{ label: "Post a Job", href: `/experience/${experienceId}/my-jobs/new` },
 	{ label: "Admin Tools", href: `/experience/${experienceId}/admin` },
  ];
+ 
+ const nav = isAdmin ? adminNav : workerNav;
  const isActive = (href: string) => {
 	if (href === `/experience/${experienceId}/my-jobs`) {
 	  return pathname === href;
