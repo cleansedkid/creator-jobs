@@ -204,6 +204,11 @@ return NextResponse.json(
 	 path: "/",
 	 maxAge: 60 * 60 * 24 * 7,
   });
+  console.log("🍪 Submission setting fallback cookie", {
+	experienceId,
+	jobId,
+	worker_whop_user_id,
+ });
   
   return response;
 }
