@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
@@ -15,6 +15,8 @@ export default function ExperienceSidebar({
   isValidExperience: boolean;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+const setupToken = searchParams.get("setupToken");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   
@@ -54,8 +56,17 @@ export default function ExperienceSidebar({
  const workerNav = [
 	{ label: "Home", href: `/experience/${experienceId}/onboarding` },
 	{ label: "Jobs", href: `/experience/${experienceId}/jobs` },
-	{ label: "My Submissions", href: `/experience/${experienceId}/my-submissions` },
+	{
+	  label: "My Submissions",
+	  href: withSetupToken(`/experience/${experienceId}/my-submissions`),
+	},
  ];
+ const withSetupToken = (href: string) => {
+	if (!setupToken) return href;
+ 
+	const separator = href.includes("?") ? "&" : "?";
+	return `${href}${separator}setupToken=${encodeURIComponent(setupToken)}`;
+ };
  
  const adminNav = [
 	...workerNav,

@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 async function safeGetWorkerWhopUserId(
-	experienceId: string
+	experienceId: string,
+	setupTokenFromUrl = ""
  ): Promise<string | null> {
 	try {
 	  const rh = await headers();
@@ -36,7 +37,8 @@ async function safeGetWorkerWhopUserId(
  
 	try {
 	  const cookieStore = await cookies();
-	  const token = cookieStore.get("cj_payout_setup_token")?.value;
+	  const token =
+  setupTokenFromUrl || cookieStore.get("cj_payout_setup_token")?.value;
  
 	  console.log("🍪 MySubmissions fallback cookie check", {
 		 experienceId,
@@ -66,14 +68,21 @@ async function safeGetWorkerWhopUserId(
 	}
  }
 
-export default async function MySubmissionsPage({
+ export default async function MySubmissionsPage({
 	params,
+	searchParams,
  }: {
 	params: Promise<{ experienceId: string }>;
+	searchParams?: Promise<{ setupToken?: string }>;
  }) {
 	const { experienceId } = await params;
-	const worker_whop_user_id = await safeGetWorkerWhopUserId(experienceId);
-
+	const sp = searchParams ? await searchParams : {};
+	const setupTokenFromUrl = String(sp?.setupToken || "").trim();
+ 
+	const worker_whop_user_id = await safeGetWorkerWhopUserId(
+	  experienceId,
+	  setupTokenFromUrl
+	);
   if (!worker_whop_user_id) {
     return (
       <div className="mx-auto max-w-xl px-4 py-6 space-y-4">

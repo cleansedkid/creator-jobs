@@ -191,10 +191,12 @@ return NextResponse.json(
   });
   
   const redirectUrl = new URL(
-	 `/experience/${experienceId}/jobs/${jobId}?submitted=1`,
-	 request.url
-  );
-  
+	`/experience/${experienceId}/jobs/${jobId}?submitted=1`,
+	request.url
+ );
+ 
+ redirectUrl.searchParams.set("setupToken", token);
+ 
   const response = NextResponse.redirect(redirectUrl, 303);
   
   response.cookies.set("cj_payout_setup_token", token, {
